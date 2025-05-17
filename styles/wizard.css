@@ -1,0 +1,264 @@
+/**********************
+ **  General styles  ** 
+ **********************/
+
+body {
+    margin: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    display: flex;
+    flex-direction: column;
+    /* ➊ Logo arriba, wizard debajo */
+    align-items: center;
+    /* ➋ Centra horizontalmente ambos */
+    min-height: 100vh;
+    background: #bbbbbb;
+    /* Claro, sobrio */
+}
+
+/* HEADER + LOGO */
+.header {
+    padding: 2rem 0 1rem 0;
+}
+
+.logo {
+    max-width: 160px;
+    height: auto;
+}
+
+
+#wizard {
+    background: #2b2b2b;
+    border-radius: 8px;
+    padding: 2rem;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+    min-height: 400px;
+}
+
+#wizard-container {
+    position: relative;
+    width: 90%;
+    max-width: 700px;
+}
+
+
+.step {
+    display: none;
+}
+
+.step.active {
+    display: block;
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+h2 {
+    margin-top: 0;
+    font-size: 1.5rem;
+    color: #fff;
+    border-bottom: 1px solid #444;
+    padding-bottom: 0.5rem;
+    margin-bottom: 1rem;
+    text-align: center;
+    /* 🔄 Centrado */
+}
+
+p {
+    color: #ccc;
+
+    text-align: center;
+}
+
+.nav-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 0.5rem;
+}
+
+#prevBtn {
+    left: -50px;
+}
+
+#nextBtn {
+    right: -50px;
+}
+
+.nav-btn img {
+    width: 32px;
+    height: 32px;
+    opacity: 0.7;
+    transition: opacity 0.2s ease;
+}
+
+.nav-btn img:hover {
+    opacity: 1;
+}
+
+@media (max-width: 600px) {
+
+    #prevBtn,
+    #nextBtn {
+        left: 10px;
+        right: 10px;
+    }
+
+    .nav-btn img {
+        width: 24px;
+        height: 24px;
+    }
+}
+
+/*************
+ ** Step #1 **
+ *************/
+
+.shirt-selector {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.shirt-selector img {
+    width: 100px;
+    height: auto;
+    cursor: pointer;
+    transition: filter 0.3s ease, transform 0.2s ease;
+    filter: brightness(40%);
+    /* 🔒 Oscurecido por defecto */
+    border-radius: 6px;
+}
+
+.shirt-selector img:hover,
+.shirt-selector img.selected {
+    filter: brightness(100%);
+    transform: scale(1.2);
+    /* Efecto sutil al pasar el mouse */
+}
+
+
+.form-error {
+    color: #ff6666;
+    font-size: 0.95rem;
+    margin-top: 0.5rem;
+    text-align: center;
+    display: none;
+    /* Oculto por defecto */
+}
+
+
+/*************
+ ** Step #2 **
+ *************/
+
+
+
+/*************
+ ** Step #3 **
+ *************/
+
+#file-chooser-container {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 5rem;
+}
+
+.file-button {
+    background-color: #444;
+    color: #e0e0e0;
+    padding: 0.8rem 1.5rem;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.2s ease;
+    font-size: 1rem;
+    font-weight: 500;
+    border: none;
+}
+
+.file-button:hover {
+    background-color: #555;
+    transform: scale(1.2);
+}
+
+canvas {
+    border-radius: .75rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.preview {
+    margin-top: 1rem;
+    display: flex;
+    justify-content: center;
+}
+
+.palette {
+    margin-top: 1.5rem;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: .5rem;
+}
+
+.swatch {
+    height: 48px;
+    border-radius: .5rem;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    position: relative;
+}
+
+.swatch span {
+    position: absolute;
+    bottom: 4px;
+    left: 4px;
+    font-size: .75rem;
+    color: #fff;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+}
+
+
+/*************
+ ** Step #4 **
+ *************/
+
+
+#confirm-container {
+    text-align: center;
+    visibility: hidden;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    margin-top: 1rem;
+}
+
+#confirm-container.visible {
+    visibility: visible;
+    opacity: 1;
+}
+
+.wizard-btn {
+    background-color: #444;
+    /* Gris medio */
+    color: #e0e0e0;
+    /* Texto claro */
+    border: none;
+    border-radius: 6px;
+    padding: 0.8rem 2rem;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.wizard-btn:hover {
+    background-color: #555;
+    /* Gris un poco más claro */
+    transform: scale(1.02);
+    /* Efecto sutil al pasar el mouse */
+}
+
+.wizard-btn:active {
+    background-color: #333;
+    /* Gris más oscuro al presionar */
+    transform: scale(0.98);
+}
