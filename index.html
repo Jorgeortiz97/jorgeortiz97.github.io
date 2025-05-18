@@ -10,67 +10,91 @@
 </head>
 
 <body>
-    <header class="header">
-        <img src="img/icons/logo.png" class="logo"/>
-    </header>
 
-    <div id="wizard-container">
-        <div id="wizard">
-            <!-- Paso 1 -->
-            <div class="step active" data-step="1">
-                <h2>Escoge tu camiseta</h2>
-                <p>Selecciona el tipo de camiseta que quieres personalizar.</p>
-                <div class="shirt-selector">
-                    <img src="img/shirts/black_experience.png" alt="Camiseta 1" data-id="be" />
-                    <img src="img/shirts/black_sensation.png" alt="Camiseta 2" data-id="bs" />
+    <!-- Splash Screen -->
+    <div id="splash-screen">
+        <img src="img/icons/logo.png" alt="Splash Image" />
+    </div>
+
+
+    <!-- Your website content -->
+    <div id="main-content">
+
+
+        <header class="header">
+            <img src="img/icons/logo.png" class="logo"/>
+        </header>
+
+
+        <div id="wizard-container">
+            <div id="wizard">
+                <!-- Paso 1 -->
+                <div class="step active" data-step="1">
+                    <h2>Escoge tu camiseta</h2>
+                    <p>Selecciona el tipo de camiseta que quieres personalizar.</p>
+
+                    
+                    <div class="shirt-selector">
+                        <div class="shirt-card" data-id="text">
+                          <img src="img/shirts/shirt_with_message.png" alt="Imagen con texto" />
+                          <span class="shirt-label">Imagen con texto</span>
+                        </div>
+                      
+                        <div class="shirt-card" data-id="gradient">
+                            <img src="img/shirts/black_sensation.png" alt="Imagen con degradado" />
+                            <span class="shirt-label">Imagen con degradado</span>
+                        </div>
+                    </div>
+                    
+                    <p id="shirt-error" class="form-error">Debes seleccionar una camiseta antes de continuar.</p>
                 </div>
 
-                <p id="shirt-error" class="form-error">Debes seleccionar una camiseta antes de continuar.</p>
-            </div>
 
-            <!-- Paso 2 -->
-            <div class="step" data-step="2">
-                <h2>Elige color y talla</h2>
-                <p>Dale un toque de color a tu diseño y escoge el tamaño que mejor se adapte a ti.</p>
-            </div>
-
-            <!-- Paso 3 -->
-            <div class="step" data-step="3">
-                <h2>Recuerda ese momento especial</h2>
-                <p>Selecciona un recuerdo para que podamos extraer la gama de colores representativos.</p>
-
-                <div id="file-chooser-container">
-                    <!-- Botón visible -->
-                    <button id="fileButton" class="file-button">Seleccionar archivo</button>
-
-                    <!-- Input oculto que maneja el archivo -->
-                    <input type="file" id="fileInput" style="display: none;" accept="image/*"/>
+                <!-- Paso 2 -->
+                <div class="step" data-step="2">
+                    <h2>Elige color y talla</h2>
+                    <p>Dale un toque de color a tu diseño y escoge el tamaño que mejor se adapte a ti.</p>
                 </div>
 
-                <div class="preview">
-                    <canvas id="canvas" width="64" height="64"></canvas>
+                <!-- Paso 3 -->
+                <div class="step" data-step="3">
+                    <h2>Recuerda ese momento especial</h2>
+                    <p>Selecciona un recuerdo para que podamos extraer la gama de colores representativos.</p>
+
+                    <div id="file-chooser-container">
+                        <!-- Botón visible -->
+                        <button id="fileButton" class="file-button">Seleccionar archivo</button>
+
+                        <!-- Input oculto que maneja el archivo -->
+                        <input type="file" id="fileInput" style="display: none;" accept="image/*"/>
+                    </div>
+
+                    <div class="preview">
+                        <canvas id="canvas" width="64" height="64"></canvas>
+                    </div>
+                    <div class="palette" id="palette"></div>
                 </div>
-                <div class="palette" id="palette"></div>
+
+                <!-- Paso 4 -->
+                <div class="step" data-step="4">
+                    <h2>Vista previa</h2>
+                    <p>¿Te gusta lo que ves?</p>
+                </div>
             </div>
 
-            <!-- Paso 4 -->
-            <div class="step" data-step="4">
-                <h2>Vista previa</h2>
-                <p>¿Te gusta lo que ves?</p>
+            <div id="confirm-container">
+                <button id="confirmBtn" class="wizard-btn">Confirmar pedido</button>
             </div>
+
+            <!-- Navegación con iconos -->
+            <button id="prevBtn" class="nav-btn">
+                <img src="img/icons/arrow_left.png" alt="Anterior" />
+            </button>
+            <button id="nextBtn" class="nav-btn">
+                <img src="img/icons/arrow_right.png" alt="Siguiente" />
+            </button>
         </div>
 
-        <div id="confirm-container">
-            <button id="confirmBtn" class="wizard-btn">Confirmar pedido</button>
-        </div>
-
-        <!-- Navegación con iconos -->
-        <button id="prevBtn" class="nav-btn">
-            <img src="img/icons/arrow_left.png" alt="Anterior" />
-        </button>
-        <button id="nextBtn" class="nav-btn">
-            <img src="img/icons/arrow_right.png" alt="Siguiente" />
-        </button>
     </div>
 
     <script src="js/wizard.js"></script>

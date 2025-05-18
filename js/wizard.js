@@ -8,9 +8,6 @@ const confirmContainer = document.getElementById("confirm-container");
 let currentStep = 0;
 
 
-const shirtImages = document.querySelectorAll(".shirt-selector img");
-let selectedShirt = null;
-
 const shirtErrorMsg = document.getElementById("shirt-error");
 
 
@@ -62,19 +59,32 @@ document.getElementById("confirmBtn").addEventListener("click", () => {
 });
 
 
-shirtImages.forEach(img => {
-    img.addEventListener("click", () => {
-        // Quitar selección anterior
-        shirtImages.forEach(i => i.classList.remove("selected"));
-        // Marcar nueva selección
-        img.classList.add("selected");
-        selectedShirt = img.dataset.id;
-        shirtErrorMsg.style.display = "none"; // Oculta mensaje al seleccionar
-    });
-});
 
+const shirtCards = document.querySelectorAll(".shirt-card");
+let selectedShirt = null;
+
+shirtCards.forEach(card => {
+  card.addEventListener("click", () => {
+    // quitar selección previa
+    shirtCards.forEach(c => c.classList.remove("selected"));
+    // marcar nueva
+    card.classList.add("selected");
+    selectedShirt = card.dataset.id;
+  });
+});
 
 
 // Mostrar paso inicial
 showStep(currentStep);
 
+
+window.addEventListener("load", () => {
+    setTimeout(() => {
+        const splash = document.getElementById("splash-screen");
+        splash.classList.add("hidden");
+        setTimeout(() => {
+            splash.style.display = "none";
+            document.getElementById("main-content").style.display = "flex";
+        }, 500); // wait for fade to finish
+    }, 1000);
+});

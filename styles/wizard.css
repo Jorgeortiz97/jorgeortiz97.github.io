@@ -1,5 +1,30 @@
+/*********************
+ **  Splash screen  **
+ *********************/
+
+#splash-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #cccccc;
+    /* light gray */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    transition: opacity 0.5s ease;
+}
+
+#splash-screen.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+
 /**********************
- **  General styles  ** 
+ **  General styles  **
  **********************/
 
 body {
@@ -13,6 +38,12 @@ body {
     min-height: 100vh;
     background: #bbbbbb;
     /* Claro, sobrio */
+}
+
+#main-content {
+    display: none;
+    flex-direction: column;
+    align-items: center;
 }
 
 /* HEADER + LOGO */
@@ -31,13 +62,13 @@ body {
     border-radius: 8px;
     padding: 2rem;
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
-    min-height: 400px;
+    flex-direction: column;
+    min-height: 60vh;
 }
 
 #wizard-container {
     position: relative;
-    width: 90%;
-    max-width: 700px;
+    width: 60vw; /* 90% of the viewport width */
 }
 
 
@@ -58,7 +89,6 @@ h2 {
     padding-bottom: 0.5rem;
     margin-bottom: 1rem;
     text-align: center;
-    /* 🔄 Centrado */
 }
 
 p {
@@ -96,48 +126,62 @@ p {
     opacity: 1;
 }
 
-@media (max-width: 600px) {
-
-    #prevBtn,
-    #nextBtn {
-        left: 10px;
-        right: 10px;
-    }
-
-    .nav-btn img {
-        width: 24px;
-        height: 24px;
-    }
-}
 
 /*************
  ** Step #1 **
  *************/
 
+/* Contenedor de todas las opciones */
 .shirt-selector {
     display: flex;
     justify-content: center;
-    gap: 1rem;
-    margin-top: 1.5rem;
+    gap: 1.2rem;
     flex-wrap: wrap;
-}
-
-.shirt-selector img {
-    width: 100px;
-    height: auto;
+    margin-top: 1.5rem;
+  }
+  
+  /* Tarjetita de cada camiseta */
+  .shirt-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     cursor: pointer;
-    transition: filter 0.3s ease, transform 0.2s ease;
-    filter: brightness(40%);
-    /* 🔒 Oscurecido por defecto */
+    transition: transform 0.2s ease;
+  }
+  
+  /* Imagen */
+  .shirt-card img {
+    width: 20rem;
+    height: auto;
     border-radius: 6px;
-}
-
-.shirt-selector img:hover,
-.shirt-selector img.selected {
+    filter: brightness(40%);
+    transition: filter 0.3s ease, box-shadow 0.2s ease;
+  }
+  
+  /* Etiqueta */
+  .shirt-label {
+    margin-top: 0.5rem;
+    font-size: 0.95rem;          /* un poco mayor */
+    color: #9a9a9a;              /* gris suave y elegante */
+    font-weight: 500;            /* ligero énfasis */
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    letter-spacing: 0.4px;       /* sutil separación de letras */
+    text-align: center;
+    transition: color 0.3s ease;
+  }
+  
+  .shirt-card:hover .shirt-label,
+  .shirt-card.selected .shirt-label {
+    color: #e0e0e0;              /* texto claro al hover / selección */
+  }
+  
+  /* Hover y seleccionada */
+  .shirt-card:hover img,
+  .shirt-card.selected img {
     filter: brightness(100%);
-    transform: scale(1.2);
-    /* Efecto sutil al pasar el mouse */
-}
+    box-shadow: 0 0 0 3px #fff;
+  }
+
 
 
 .form-error {
