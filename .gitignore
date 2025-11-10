@@ -1,0 +1,77 @@
+# Claude Code instructions
+CLAUDE.md
+.claude/
+
+# Local development scripts
+run.py
+
+# SSL Certificates (sensitive)
+certs/
+*.pem
+*.key
+*.crt
+*.cert
+
+# Debugging files
+debug_*.js
+debug_*.png
+*debug*.png
+screenshot*.png
+layout.png
+verify_*.js
+
+# Node.js dependencies (if puppeteer or testing tools added)
+node_modules/
+package.json
+package-lock.json
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Backup files
+*.backup
+*.bak
+*.old
+*.orig
+
+# Cache files
+.cache/
+*.cache
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+Desktop.ini
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.project
+.settings/
+.classpath
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Git files
+*.orig
+*.rej
