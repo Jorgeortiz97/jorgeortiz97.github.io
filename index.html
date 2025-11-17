@@ -13,10 +13,9 @@
     <meta name="description" content="Juego de cartas estratégico de gremios, expediciones y construcción">
 
     <!-- Icons -->
-    <link rel="icon" href="https://elenport.es/wp-content/uploads/cropped-elenport_favicon-32x32.png" sizes="32x32" />
-    <link rel="icon" href="https://elenport.es/wp-content/uploads/cropped-elenport_favicon-192x192.png" sizes="192x192" />
-    <link rel="apple-touch-icon" href="https://elenport.es/wp-content/uploads/cropped-elenport_favicon-180x180.png" />
-    <link rel="apple-touch-icon" href="resources/other/Badge.png" />
+    <link rel="icon" href="resources/icons/icon-192x192.png" sizes="192x192" />
+    <link rel="icon" href="resources/icons/icon-512x512.png" sizes="512x512" />
+    <link rel="apple-touch-icon" href="resources/icons/icon-192x192.png" />
 
     <!-- PWA Manifest -->
     <link rel="manifest" href="manifest.json">
@@ -267,6 +266,33 @@
                     <div class="event-card-inner">
                         <div class="event-card-back"></div>
                         <div class="event-card-front"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Reshuffle Animation Modal -->
+        <div id="reshuffle-modal" class="modal hidden">
+            <div class="modal-content reshuffle-modal-content">
+                <div class="reshuffle-decks-container">
+                    <!-- Event Deck (Left) - Initially empty/transparent -->
+                    <div class="reshuffle-deck-area">
+                        <div class="reshuffle-deck-label">Mazo de Eventos</div>
+                        <div id="reshuffle-event-deck" class="reshuffle-deck">
+                            <div class="reshuffle-card-stack">
+                                <div class="reshuffle-card event-deck-card"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Discard Pile (Right) - Shows last discarded event -->
+                    <div class="reshuffle-deck-area">
+                        <div class="reshuffle-deck-label">Descartadas</div>
+                        <div id="reshuffle-discard-pile" class="reshuffle-deck">
+                            <div class="reshuffle-card-stack">
+                                <div class="reshuffle-card discard-pile-card"></div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

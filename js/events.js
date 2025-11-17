@@ -125,7 +125,10 @@ class EventHandler {
             return 'Expedición: No hay inversiones';
         }
 
-        return this.game.resolveExpedition();
+        // Set pending flag - expedition will resolve on next dice roll
+        this.game.pendingExpedition = true;
+        this.game.log('La expedición se resolverá en la siguiente tirada de dados', 'event');
+        return 'Expedición pendiente de resolución';
     }
 
     badHarvest() {
@@ -245,6 +248,7 @@ class EventHandler {
         const messages = [];
         let totalCollected = 0;
 
+        // Tax affects ALL players (human and AI) with 4 or more coins
         for (let player of this.game.players) {
             if (player.coins >= 4) {
                 const toLose = Math.ceil(player.coins / 2);
@@ -259,6 +263,10 @@ class EventHandler {
         if (governor && totalCollected > 0) {
             governor.addCoins(totalCollected);
             messages.push(`${governor.name} (Gobernador) recibe ${totalCollected} monedas`);
+        }
+
+        if (messages.length === 0) {
+            return message + 'Ningún jugador tiene 4 o más monedas';
         }
 
         return message + messages.join(', ');

@@ -25,6 +25,7 @@ class GremiosGame {
         // Game state flags
         this.nextRollBankruptcy = false;
         this.nextRollMutiny = false;
+        this.pendingExpedition = false;
         this.currentEvent = null;
         this.lastDiceRoll = null;
         // Removed: this.pendingLandExpropriation (land loss is now automatic)
@@ -182,8 +183,7 @@ class GremiosGame {
             // For AI, auto-select first event. For human, present choice
             if (currentPlayer.isAI) {
                 this.drawAndApplyEvent();
-                this.phase = 'roll';
-                setTimeout(() => this.nextPhase(), 4000); // Wait for event modal animation to complete (3.5s) + buffer
+                // Phase transition happens after event completes in continueDrawAndApplyEvent()
             } else {
                 // UI should handle showing 2 events for selection
                 if (this.ui) {
@@ -192,8 +192,7 @@ class GremiosGame {
             }
         } else {
             this.drawAndApplyEvent();
-            this.phase = 'roll';
-            setTimeout(() => this.nextPhase(), 4000); // Wait for event modal animation to complete (3.5s) + buffer
+            // Phase transition happens after event completes in continueDrawAndApplyEvent()
         }
     }
 
@@ -203,11 +202,46 @@ class GremiosGame {
             this.eventDiscard.push(this.currentEvent);
         }
 
+        // Check if deck needs reshuffling
         if (this.eventDeck.length === 0) {
-            this.reshuffleEventDeck();
+            // Show reshuffle animation first
+            if (this.ui) {
+                this.ui.showReshuffleAnimation(() => {
+                    // After animation completes, reshuffle the deck
+                    this.reshuffleEventDeck();
+
+                    // Update UI to show deck is refilled
+                    if (this.ui) {
+                        this.ui.updateGameState();
+                    }
+
+                    // Wait 1 second before showing the next event
+                    setTimeout(() => {
+                        this.continueDrawAndApplyEvent();
+                    }, 1000);
+                });
+            } else {
+                // No UI available, just reshuffle immediately
+                this.reshuffleEventDeck();
+                this.continueDrawAndApplyEvent();
+            }
+        } else {
+            // Deck has cards, continue normally
+            this.continueDrawAndApplyEvent();
+        }
+    }
+
+    continueDrawAndApplyEvent() {
+        const event = this.eventDeck.pop();
+
+        // Safety check: if deck is empty (shouldn't happen with our fix, but just in case)
+        if (!event) {
+            this.log('⚠️ Error: Mazo de eventos vacío. Se intenta rebarajar...', 'error');
+            // Trigger another reshuffle
+            this.drawAndApplyEvent();
+            return;
         }
 
-        const event = this.eventDeck.pop();
         this.currentEvent = event;
 
         // Show event modal first
@@ -224,6 +258,12 @@ class GremiosGame {
                 this.ui.updateEventDisplay(event);
                 this.ui.updateGameState();
             }
+
+            // After event is fully displayed and effects applied, move to roll phase
+            setTimeout(() => {
+                this.phase = 'roll';
+                this.nextPhase();
+            }, 500); // Small buffer to let players see the event result
         }, 3500); // Apply effects after 3.5 seconds (modal flip + display time)
     }
 
@@ -254,8 +294,12 @@ class GremiosGame {
 
         this.log('Se rebaraja el mazo de eventos (gremios activos excluidos)');
 
-        // Discard 3 random cards again after reshuffle
-        this.discardRandomEvents(3);
+        // Discard 3 random cards again after reshuffle, but ensure at least 3 cards remain
+        // (one for each player in a full round)
+        const cardsToDiscard = Math.min(3, Math.max(0, this.eventDeck.length - 3));
+        if (cardsToDiscard > 0) {
+            this.discardRandomEvents(cardsToDiscard);
+        }
     }
 
     rollPhase() {
@@ -303,6 +347,13 @@ class GremiosGame {
             this.nextRollMutiny = false;
         }
 
+        // Check for pending expedition resolution
+        if (this.pendingExpedition) {
+            this.pendingExpedition = false;
+            // Use the current dice roll to resolve the expedition
+            this.resolveExpedition(true);
+        }
+
         this.phase = 'collection';
         setTimeout(() => this.nextPhase(), 1500);
     }
@@ -320,17 +371,21 @@ class GremiosGame {
             const tradeBlockade = this.activeTemporaryEvents.find(e => e.id === 'trade_blockade');
             const affectedByTradeBlockade = tradeBlockade && tradeBlockade.affectedGuilds.includes(guildNumber);
 
+            let pirateReceivedCoins = false;
             for (let player of this.players) {
                 if (affectedByTradeBlockade && player.character && player.character.immuneToTradeBlockade) {
                     const investments = guild.investments.filter(inv => inv.playerId === player.id).length;
                     if (investments > 0) {
                         player.addCoins(investments);
                         this.log(`${player.name} (Pirata) recibe ${investments} monedas de ${guild.name} (inmune a bloqueo)`, 'action');
+                        pirateReceivedCoins = true;
                     }
                 }
             }
 
-            this.log(`${guild.name} está bloqueado, no genera recursos`);
+            if (!pirateReceivedCoins) {
+                this.log(`${guild.name} está bloqueado, no genera recursos`, 'info');
+            }
             return;
         }
 
@@ -517,6 +572,9 @@ class GremiosGame {
             return;
         }
 
+        // Store current max investor before recalculating
+        const currentMaxInvestor = guild.maxInvestor;
+
         const investmentCounts = {};
         const investmentOrder = {};
 
@@ -538,11 +596,16 @@ class GremiosGame {
         if (tiedPlayers.length === 1) {
             guild.maxInvestor = tiedPlayers[0];
         } else if (tiedPlayers.length > 1) {
-            // Tie - first investor wins
-            const firstInvestor = tiedPlayers.reduce((first, playerId) => {
-                return investmentOrder[playerId] < investmentOrder[first] ? playerId : first;
-            });
-            guild.maxInvestor = firstInvestor;
+            // Tie - current max investor keeps the guild if they're tied
+            if (currentMaxInvestor !== null && tiedPlayers.includes(currentMaxInvestor)) {
+                guild.maxInvestor = currentMaxInvestor;
+            } else {
+                // No current max investor or they're not in the tie - first investor wins
+                const firstInvestor = tiedPlayers.reduce((first, playerId) => {
+                    return investmentOrder[playerId] < investmentOrder[first] ? playerId : first;
+                });
+                guild.maxInvestor = firstInvestor;
+            }
         } else {
             // Shouldn't happen, but safety check
             guild.maxInvestor = null;
@@ -628,12 +691,27 @@ class GremiosGame {
         return true;
     }
 
-    resolveExpedition() {
-        const die1 = Math.floor(Math.random() * 6) + 1;
-        const die2 = Math.floor(Math.random() * 6) + 1;
-        const sum = die1 + die2;
+    resolveExpedition(useExistingRoll = false) {
+        let die1, die2, sum;
 
-        this.log(`🎲 Expedición: ${die1} + ${die2} = ${sum}`, 'event');
+        if (useExistingRoll && this.lastDiceRoll) {
+            // Use the dice roll from the collection phase
+            die1 = this.lastDiceRoll.die1;
+            die2 = this.lastDiceRoll.die2;
+            sum = this.lastDiceRoll.sum;
+            this.log(`🎲 La expedición se resuelve con la tirada: ${die1} + ${die2} = ${sum}`, 'event');
+        } else {
+            // Roll new dice for the expedition
+            die1 = Math.floor(Math.random() * 6) + 1;
+            die2 = Math.floor(Math.random() * 6) + 1;
+            sum = die1 + die2;
+            this.log(`🎲 Expedición: ${die1} + ${die2} = ${sum}`, 'event');
+
+            // Update dice display for separate expedition roll
+            if (this.ui) {
+                this.ui.updateDiceDisplay(die1, die2, sum);
+            }
+        }
 
         const success = sum >= 6 && sum <= 8;
 

@@ -833,6 +833,30 @@ class UIController {
         this.updateExpeditionDisplay();
         this.updatePlayersDisplay();
         this.updateActionButtons();
+        this.updateEventDeckCount();
+    }
+
+    updateEventDeckCount() {
+        // Update event deck count and visibility
+        const currentContent = this.elements.currentEventCard.querySelector('.event-card-content');
+        if (currentContent) {
+            const deckCount = this.game.eventDeck ? this.game.eventDeck.length : 0;
+
+            // Hide deck when empty, show when has cards
+            if (deckCount === 0) {
+                this.elements.currentEventCard.style.opacity = '0';
+                this.elements.currentEventCard.style.pointerEvents = 'none';
+            } else {
+                this.elements.currentEventCard.style.opacity = '1';
+                this.elements.currentEventCard.style.pointerEvents = 'auto';
+            }
+
+            // Update just the count span, not the whole content
+            const countSpan = currentContent.querySelector('.event-deck-count span');
+            if (countSpan) {
+                countSpan.textContent = deckCount;
+            }
+        }
     }
 
 
@@ -1149,17 +1173,35 @@ class UIController {
 
             const mutinyBtn = humanSection.querySelector('[data-action="cause-mutiny"]');
             if (mutinyBtn) {
-                mutinyBtn.style.display = player.character.id === 'mercenary' ? 'block' : 'none';
+                if (player.character.id === 'mercenary') {
+                    mutinyBtn.classList.remove('character-ability-hidden');
+                    mutinyBtn.style.display = 'flex';  // Match button default display
+                } else {
+                    mutinyBtn.classList.add('character-ability-hidden');
+                    mutinyBtn.style.display = 'none';
+                }
             }
 
             const buyTreasureBtn = humanSection.querySelector('[data-action="buy-treasure"]');
             if (buyTreasureBtn) {
-                buyTreasureBtn.style.display = player.character.id === 'artisan' ? 'block' : 'none';
+                if (player.character.id === 'artisan') {
+                    buyTreasureBtn.classList.remove('character-ability-hidden');
+                    buyTreasureBtn.style.display = 'flex';  // Match button default display
+                } else {
+                    buyTreasureBtn.classList.add('character-ability-hidden');
+                    buyTreasureBtn.style.display = 'none';
+                }
             }
 
             const sellTreasureBtn = humanSection.querySelector('[data-action="sell-treasure-artisan"]');
             if (sellTreasureBtn) {
-                sellTreasureBtn.style.display = player.character.id === 'artisan' ? 'block' : 'none';
+                if (player.character.id === 'artisan') {
+                    sellTreasureBtn.classList.remove('character-ability-hidden');
+                    sellTreasureBtn.style.display = 'flex';  // Match button default display
+                } else {
+                    sellTreasureBtn.classList.add('character-ability-hidden');
+                    sellTreasureBtn.style.display = 'none';
+                }
             }
         }
     }
@@ -1314,21 +1356,36 @@ class UIController {
         }
 
         if (treasureCounts['3coins'] > 0) {
-            html += `<div class="resource-item treasure-breakdown-item">
+            // Find first 3-coin treasure index
+            const index3 = player.treasures.findIndex(t => t.type === TREASURE_TYPES.WEALTH && t.coinValue === 3);
+            html += `<div class="resource-item treasure-breakdown-item treasure-item-with-sell">
                 <img src="resources/other/Wealth_3coins.png" class="resource-icon-small" alt="3 Coins" title="Riquezas de 3 monedas">
                 <span class="resource-count-small">×${treasureCounts['3coins']}</span>
+                <button class="sell-treasure-btn" data-treasure-index="${index3}">Vender</button>
             </div>`;
         }
 
         if (treasureCounts['4coins'] > 0) {
-            html += `<div class="resource-item treasure-breakdown-item">
+            // Find first 4-coin treasure index
+            const index4 = player.treasures.findIndex(t => t.type === TREASURE_TYPES.WEALTH && t.coinValue === 4);
+            html += `<div class="resource-item treasure-breakdown-item treasure-item-with-sell">
                 <img src="resources/other/Wealth_4coins.png" class="resource-icon-small" alt="4 Coins" title="Riquezas de 4 monedas">
                 <span class="resource-count-small">×${treasureCounts['4coins']}</span>
+                <button class="sell-treasure-btn" data-treasure-index="${index4}">Vender</button>
             </div>`;
         }
 
         html += '</div>';
         breakdownContainer.innerHTML = html;
+
+        // Bind sell button click handlers
+        const sellButtons = breakdownContainer.querySelectorAll('.sell-treasure-btn');
+        sellButtons.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const index = parseInt(e.target.dataset.treasureIndex);
+                this.handleSellTreasure(player, index);
+            });
+        });
     }
 
     handleSellTreasure(player, treasureIndex) {
@@ -1526,6 +1583,16 @@ class UIController {
         if (currentContent) {
             // Update event deck count
             const deckCount = this.game.eventDeck ? this.game.eventDeck.length : 0;
+
+            // Hide deck when empty, show when has cards
+            if (deckCount === 0) {
+                this.elements.currentEventCard.style.opacity = '0';
+                this.elements.currentEventCard.style.pointerEvents = 'none';
+            } else {
+                this.elements.currentEventCard.style.opacity = '1';
+                this.elements.currentEventCard.style.pointerEvents = 'auto';
+            }
+
             let content = `<div class="event-name">Mazo de Eventos</div>`;
             content += `<div class="event-deck-count">Cartas: <span>${deckCount}</span></div>`;
             currentContent.innerHTML = content;
@@ -1605,6 +1672,70 @@ class UIController {
             // Reset for next time
             card.classList.remove('flipped');
         }, 3500);
+    }
+
+    showReshuffleAnimation(callback) {
+        const modal = document.getElementById('reshuffle-modal');
+        const eventDeckStack = document.querySelector('#reshuffle-event-deck .reshuffle-card-stack');
+        const discardPileStack = document.querySelector('#reshuffle-discard-pile .reshuffle-card-stack');
+        const eventDeckCard = eventDeckStack.querySelector('.event-deck-card');
+        const discardPileCard = discardPileStack.querySelector('.discard-pile-card');
+
+        // Get the last discarded event image
+        let lastDiscardImage = 'resources/other/Event_Back.png'; // Default fallback
+        if (this.game && this.game.eventDiscard && this.game.eventDiscard.length > 0) {
+            const lastEvent = this.game.eventDiscard[this.game.eventDiscard.length - 1];
+            const eventImage = this.getEventBackgroundImage(lastEvent);
+            if (eventImage) {
+                lastDiscardImage = eventImage;
+            }
+        }
+
+        // Set both card images
+        eventDeckCard.style.backgroundImage = `url('resources/other/Event_Back.png')`;
+        discardPileCard.style.backgroundImage = `url('${lastDiscardImage}')`;
+
+        // Reset all animation states
+        eventDeckStack.classList.remove('moving', 'shuffling', 'settling');
+        discardPileStack.classList.remove('moving', 'shuffling', 'settling');
+
+        // Show modal
+        modal.classList.remove('hidden');
+
+        // Animation sequence with proper timing
+        // Phase 1: Move and flip (0-2s)
+        setTimeout(() => {
+            eventDeckStack.classList.add('moving');
+            discardPileStack.classList.add('moving');
+        }, 100);
+
+        // Phase 2: Shuffle blur (2-4s)
+        setTimeout(() => {
+            eventDeckStack.classList.remove('moving');
+            discardPileStack.classList.remove('moving');
+            eventDeckStack.classList.add('shuffling');
+
+            // Clear discard pile image now that cards have "moved" to event deck
+            discardPileCard.style.backgroundImage = '';
+        }, 2100);
+
+        // Phase 3: Hide modal and callback (4.1s - right after shuffle completes)
+        setTimeout(() => {
+            modal.classList.add('hidden');
+
+            // Reset all animation states for next time
+            eventDeckStack.classList.remove('moving', 'shuffling', 'settling');
+            discardPileStack.classList.remove('moving', 'shuffling', 'settling');
+
+            // Clear background images (safety fallback)
+            eventDeckCard.style.backgroundImage = '';
+            discardPileCard.style.backgroundImage = '';
+
+            // Execute callback if provided
+            if (callback && typeof callback === 'function') {
+                callback();
+            }
+        }, 4100);
     }
 
     getGuildImageFromNumber(guildNumber) {

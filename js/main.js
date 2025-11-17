@@ -669,6 +669,9 @@ GAME STATE:
   setVP(n)         → Set human player VP (guilds only, not treasures)
   winGame()        → Set VP to 10 and end turn to trigger win
 
+TESTING:
+  cheatConsumeEvents() → Remove all but 1 event to trigger reshuffle next turn
+
 DISPLAY:
   refresh()        → Refresh UI display
   logState()       → Log current game state
@@ -870,6 +873,25 @@ function skipTurn() {
     if (!game) return console.error('Game not started');
     game.endTurn();
     console.log('✅ Turn ended');
+}
+
+// Consume all events except 1 to trigger reshuffle on next turn
+function cheatConsumeEvents() {
+    const game = g();
+    if (!game) return console.error('Game not started');
+
+    const originalCount = game.eventDeck.length;
+
+    // Remove all but 1 event from the deck
+    while (game.eventDeck.length > 1) {
+        game.eventDeck.pop();
+    }
+
+    const remaining = game.eventDeck.length;
+    console.log(`✅ Consumed ${originalCount - remaining} events from deck`);
+    console.log(`   Remaining in deck: ${remaining}`);
+    console.log(`   Discard pile: ${game.eventDiscard.length}`);
+    console.log(`   Next turn will trigger reshuffle animation!`);
 }
 
 // Win the game immediately

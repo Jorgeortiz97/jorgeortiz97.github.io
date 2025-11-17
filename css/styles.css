@@ -31,7 +31,7 @@
     /* Component Dimensions */
     --player-zone-min-height: clamp(150px, 25vh, 400px);
     --guild-grid-min-height: clamp(200px, 40vh, 450px);
-    --action-button-height: clamp(18px, 3vh, 44px);
+    --action-button-height: clamp(24px, 4vh, 48px);  /* Responsive sizing - shrinks to fit viewport */
 
     /* Board-relative sizing - scales with the board, not the viewport */
     --board-scale-factor: 1; /* Default scale factor */
@@ -108,6 +108,219 @@
    Responsive Font Adjustments - OPTIMIZED
    Consolidated from 24 to 6 essential breakpoints
    =========================== */
+
+/* Near-Square Resolutions ONLY - Specific fix for aspect ratios 0.95-1.05 */
+@media screen and (min-aspect-ratio: 19/20) and (max-aspect-ratio: 21/20) {
+    /* NARROWED RANGE: Only truly near-square viewports (0.95 to 1.05) */
+    /* Affects: 813x794 (1.024), 800x800 (1.0), similar square displays */
+    /* Does NOT affect: 1366x768 (1.779), 1920x1080 (1.778), 1041x815 (1.277) */
+
+    /* === BOARD LAYOUT === */
+    #guilds-grid {
+        /* REMOVED transform: scale() to fix percentage positioning alignment */
+        /* CRITICAL FIX: Force container to match board image aspect ratio */
+        /* Without this, container becomes too tall and cards misalign */
+        width: 100% !important;
+        height: auto !important;
+        aspect-ratio: 1200 / 1311 !important;
+        max-height: 92vh !important;
+    }
+
+    /* Grid columns: Give human column enough space for action buttons */
+    /* 25% | 50% | 25% - at 813px this gives ~203px for human column */
+    #game-board {
+        grid-template-columns: 1fr 2fr 1fr !important;
+        gap: clamp(1px, 0.2vmin, 3px);
+    }
+
+    /* Ensure guild cards stay within bounds */
+    .guild-card {
+        max-width: 16.08% !important;
+        max-height: 20.52% !important;
+    }
+
+    /* === HUMAN COLUMN LAYOUT === */
+    /* CRITICAL: NO scrolling - all content must fit in viewport */
+    #human-column {
+        overflow: hidden !important;
+    }
+
+    /* Adjust grid row allocation - prioritize actions section */
+    body:not(.character-selection-phase) #human-column {
+        /* Changed from auto/auto/1fr to give more guaranteed space to actions */
+        grid-template-rows: auto minmax(0, 35%) minmax(300px, 1fr) !important;
+    }
+
+    /* Ensure player resources section is compact */
+    .player-character-and-resources {
+        overflow: visible !important;
+        min-height: 0;
+        flex-shrink: 1;
+    }
+
+    /* Ensure actions section gets enough space */
+    .player-actions-section {
+        min-height: 250px !important;
+        flex-shrink: 0 !important;
+    }
+
+    /* === ACTION BUTTONS === */
+    /* Reduce button size to fit in narrower column */
+    .action-btn {
+        font-size: clamp(9px, 1.6vmin, 14px) !important;
+        padding: clamp(0.25em, 0.8vmin, 0.6em) !important;
+        min-height: clamp(32px, 5vh, 48px) !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+
+    .actions-grid {
+        grid-template-columns: repeat(auto-fit, minmax(clamp(65px, 11vw, 110px), 1fr)) !important;
+        gap: clamp(2px, 0.3vmin, 4px) !important;
+    }
+
+    #actions-section {
+        gap: clamp(2px, 0.3vmin, 4px) !important;
+        display: flex !important;
+        flex-direction: column !important;
+    }
+
+    .player-actions-section {
+        padding: clamp(4px, 0.6vmin, 8px) !important;
+        overflow: visible !important;
+        display: flex !important;
+        flex-direction: column !important;
+    }
+
+    /* CRITICAL: Ensure End Turn button is always visible */
+    #end-turn-btn,
+    .btn-end-turn {
+        display: flex !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        min-height: 44px !important;
+        font-size: clamp(12px, 2vmin, 18px) !important;
+        margin-top: auto !important;
+        flex-shrink: 0 !important;
+    }
+
+    /* Utility buttons row */
+    #utility-section {
+        display: flex !important;
+        gap: clamp(2px, 0.3vmin, 4px) !important;
+        margin-top: clamp(4px, 0.6vmin, 8px) !important;
+    }
+
+    .btn-utility {
+        display: flex !important;
+        visibility: visible !important;
+        flex: 1 !important;
+    }
+
+    /* === TREASURE DISPLAY === */
+    /* Ensure treasure breakdown is visible */
+    .treasure-breakdown-row {
+        min-height: 0 !important;
+        overflow: visible !important;
+        display: flex !important;
+        flex-direction: column;
+    }
+
+    .treasure-breakdown-row:empty {
+        display: none !important;
+    }
+
+    .treasure-breakdown-inline {
+        font-size: clamp(9px, 1.5vmin, 14px) !important;
+        gap: clamp(3px, 0.5vmin, 6px) !important;
+        padding: clamp(2px, 0.4vmin, 5px) !important;
+    }
+
+    .resource-icon-small {
+        width: clamp(14px, 2vmin, 24px) !important;
+        height: clamp(14px, 2vmin, 24px) !important;
+    }
+
+    .resource-count-small {
+        font-size: clamp(10px, 1.5vmin, 18px) !important;
+    }
+
+    /* === RESOURCE DISPLAY OPTIMIZATION === */
+    .player-resources {
+        gap: clamp(2px, 0.3vmin, 5px) !important;
+        padding: clamp(4px, 0.6vmin, 8px) !important;
+    }
+
+    .resource-row {
+        gap: clamp(3px, 0.4vmin, 5px) !important;
+    }
+
+    .resource-item {
+        gap: clamp(2px, 0.3vmin, 4px) !important;
+    }
+
+    .resource-item img {
+        width: clamp(18px, 2.5vmin, 28px) !important;
+        height: clamp(18px, 2.5vmin, 28px) !important;
+    }
+
+    .resource-item span {
+        font-size: clamp(11px, 1.8vmin, 20px) !important;
+    }
+
+    /* === PLAYER INFO OPTIMIZATION === */
+    .player-name {
+        font-size: clamp(11px, 1.9vmin, 20px) !important;
+    }
+
+    .coin-count,
+    .vp-count {
+        font-size: clamp(18px, 2.8vmin, 32px) !important;
+    }
+
+    .player-info img {
+        width: clamp(20px, 3vmin, 36px) !important;
+        height: clamp(20px, 3vmin, 36px) !important;
+    }
+
+    /* === AI PLAYERS COLUMN === */
+    #ai-players-column {
+        overflow-y: auto !important;
+        overflow-x: hidden !important;
+    }
+
+    #ai-players-column .player-name {
+        font-size: clamp(9px, 1.5vmin, 16px) !important;
+    }
+
+    #ai-players-column .coin-count,
+    #ai-players-column .vp-count {
+        font-size: clamp(14px, 2.2vmin, 24px) !important;
+    }
+
+    #ai-players-column .resource-item img {
+        width: clamp(16px, 2.3vmin, 26px) !important;
+        height: clamp(16px, 2.3vmin, 26px) !important;
+    }
+
+    #ai-players-column .resource-item span {
+        font-size: clamp(10px, 1.6vmin, 18px) !important;
+    }
+}
+
+/* Portrait Orientation - Further adjustments for true portrait mode */
+@media screen and (orientation: portrait) and (min-width: 640px) {
+    #guilds-grid {
+        /* REMOVED transform: scale() to fix percentage positioning alignment */
+        /* Natural sizing without transform */
+        height: min(100%, calc(85vh * 1200 / 1311)) !important;
+    }
+
+    #game-board {
+        grid-template-columns: 0.7fr 2.6fr 0.7fr !important;
+    }
+}
 
 /* Mobile: <768px */
 @media screen and (max-width: 767px) {
@@ -389,10 +602,114 @@
     }
 }
 
-/* Tablet: 768-1366px */
-@media screen and (min-width: 768px) and (max-width: 1366px) {
+/* Tablet: 768-1366px - Optimized for landscape mobile/tablet devices */
+/* Exclude near-square resolutions (aspect ratio between 5:6 and 6:5) */
+@media screen and (min-width: 768px) and (max-width: 1366px) and (min-aspect-ratio: 6/5) {
     :root {
-        --font-medium: clamp(8px, 1.2vw + 0.4vh, 24px);
+        /* Enhanced font sizes for better readability */
+        --font-tiny: clamp(10px, 1.5vmin, 22px);
+        --font-small: clamp(12px, 1.8vmin, 26px);
+        --font-body: clamp(13px, 2vmin, 30px);
+        --font-medium: clamp(14px, 2.2vmin, 32px);
+        --font-large: clamp(16px, 2.6vmin, 40px);
+
+        /* Optimized spacing - slightly reduced to fit more content */
+        --spacing-unit: clamp(1px, 0.3vmin, 5px);
+        --action-button-height: clamp(36px, 6vh, 60px);
+    }
+
+    /* Adjust grid column ratios: give more space to board, slightly less to sides */
+    #game-board {
+        grid-template-columns: 0.85fr 2.3fr 0.85fr !important;  /* ~21% | 58% | 21% */
+        gap: clamp(2px, 0.25vmin, 4px);
+    }
+
+    /* REMOVED transform: scale() to fix percentage positioning alignment */
+    #guilds-grid {
+        /* Natural sizing without transform */
+    }
+
+    /* Increase player name sizes */
+    .player-name {
+        font-size: clamp(12px, 2vmin, 22px) !important;
+    }
+
+    /* Increase character name sizes */
+    .character-name {
+        font-size: clamp(11px, 1.8vmin, 20px) !important;
+    }
+
+    /* Increase coin/VP display sizes */
+    .coin-count,
+    .vp-count {
+        font-size: clamp(20px, 3vmin, 38px) !important;
+    }
+
+    /* Increase coin/VP icon sizes */
+    .player-info img {
+        width: clamp(24px, 3.5vmin, 44px) !important;
+        height: clamp(24px, 3.5vmin, 44px) !important;
+    }
+
+    /* Increase resource icon sizes */
+    #human-column .resource-item img {
+        width: clamp(22px, 3.2vmin, 36px) !important;
+        height: clamp(22px, 3.2vmin, 36px) !important;
+    }
+
+    /* Increase resource text sizes */
+    .resource-item span {
+        font-size: clamp(14px, 2.2vmin, 26px) !important;
+    }
+
+    /* Larger action buttons */
+    .action-button {
+        font-size: clamp(12px, 2.2vmin, 18px) !important;
+        padding: clamp(0.5em, 1.5vmin, 1em) !important;
+        min-height: 38px !important;
+    }
+
+    /* Increase button grid gaps */
+    #actions-section {
+        gap: clamp(3px, 0.5vmin, 6px) !important;
+    }
+
+    /* Reduce section gaps to fit content vertically */
+    #human-column {
+        gap: clamp(2px, 0.4vmin, 5px) !important;
+    }
+
+    /* Optimize player resources section spacing */
+    .player-resources {
+        gap: clamp(1px, 0.3vmin, 4px) !important;
+    }
+
+    .resource-row {
+        gap: clamp(3px, 0.5vmin, 6px) !important;
+    }
+
+    /* Optimize AI player display */
+    .ai-player-info {
+        gap: clamp(2px, 0.4vmin, 5px) !important;
+    }
+
+    /* Increase AI player text for better visibility */
+    #ai-players-column .player-name {
+        font-size: clamp(10px, 1.6vmin, 18px) !important;
+    }
+
+    #ai-players-column .coin-count,
+    #ai-players-column .vp-count {
+        font-size: clamp(16px, 2.4vmin, 28px) !important;
+    }
+
+    #ai-players-column .resource-item img {
+        width: clamp(18px, 2.6vmin, 30px) !important;
+        height: clamp(18px, 2.6vmin, 30px) !important;
+    }
+
+    #ai-players-column .resource-item span {
+        font-size: clamp(11px, 1.8vmin, 20px) !important;
     }
 }
 
@@ -618,11 +935,11 @@ html {
     bottom: 0;
 }
 
-/* Main Game Board - 3 Column Layout (1fr | 2fr | 1fr) */
+/* Main Game Board - 3 Column Layout with explicit ratio (1fr | 2fr | 1fr) */
 #game-board {
     display: grid;
-    /* 3-column layout: Human (1fr) | Board (2fr) | AI Players stacked (1fr) */
-    grid-template-columns: 1fr 2fr 1fr;  /* Simple ratio: 25% | 50% | 25% */
+    /* 3-column layout with exact proportions: Human (25%) | Board (50%) | AI Players (25%) */
+    grid-template-columns: 1fr 2fr 1fr;  /* Explicit ratio: 1/4 | 2/4 | 1/4 */
     gap: clamp(2px, 0.2vmin, 3px);
     flex: 1;
     overflow: hidden;
@@ -636,7 +953,7 @@ html {
     grid-row: 1;
     gap: clamp(2px, 0.2vmin, 3px);
     min-width: 0;
-    overflow-y: auto; /* Allow scrolling while keeping sticky buttons visible */
+    overflow: hidden; /* No scrolling - all buttons must be visible */
     height: 100%;
     max-height: 100vh;
 }
@@ -647,16 +964,20 @@ body.character-selection-phase #human-column {
     flex-direction: column;
 }
 
-/* Grid layout after character selection */
+/* Grid layout after character selection - fit content without scrolling */
 body:not(.character-selection-phase) #human-column {
     display: grid;
-    grid-template-rows: auto auto 1fr 1fr;
+    grid-template-rows: minmax(0, 15vh) auto 1fr;  /* Header (max 15vh), resources (auto-fit content), actions (remaining space) */
     grid-template-columns: 1fr;
+    overflow: hidden;  /* Prevent scrolling */
+    height: 100%;  /* Fill parent height */
 }
 
 /* Grid item placement for human column */
 body:not(.character-selection-phase) #human-column .player-header {
     grid-row: 1;
+    max-height: 15vh;  /* Constrain header to prevent overflow */
+    overflow: hidden;
 }
 
 body:not(.character-selection-phase) #human-column .player-character-and-resources {
@@ -667,12 +988,15 @@ body:not(.character-selection-phase) #human-column .player-character-and-resourc
 }
 
 body:not(.character-selection-phase) #human-column .player-actions-section {
-    grid-row: 3 / 5;
+    grid-row: 3;
     display: flex;
     flex-direction: column;
+    min-height: 250px;  /* Ensure enough space for action buttons */
+    overflow: hidden;  /* NO scrolling - everything must fit in viewport */
+    gap: clamp(1px, 0.3vh, 4px);  /* Shrink gaps to fit more buttons */
 }
 
-/* Column 2: Game Board (Center) */
+/* Column 2: Game Board (Center, 50% width - 2fr) */
 #board-column {
     grid-column: 2;
     grid-row: 1;
@@ -684,7 +1008,7 @@ body:not(.character-selection-phase) #human-column .player-actions-section {
     height: 100%;
 }
 
-/* Column 3: AI Players (Right) */
+/* Column 3: AI Players (Right, 25% width - 1fr) */
 #ai-players-column {
     grid-column: 3;
     grid-row: 1;
@@ -865,16 +1189,16 @@ body:not(.character-selection-phase) .ai-player-info .player-resources {
     padding: clamp(2px, 0.4vmin, 4px);
 }
 
-/* AI player resource icons - smaller for compact layout */
+/* AI player resource icons - standardized with human player */
 .ai-player-info .resource-icon-large {
-    width: clamp(16px, 2.2vmin, 28px);
-    height: clamp(16px, 2.2vmin, 28px);
+    width: clamp(18px, 2.5vmin, 32px);
+    height: clamp(18px, 2.5vmin, 32px);
 }
 
-/* AI player resource counts - smaller for compact layout */
+/* AI player resource counts - standardized with human player */
 .ai-player-info .resource-count {
-    font-size: clamp(10px, 1.6vmin, 20px);
-    min-width: clamp(14px, 2vmin, 24px);
+    font-size: clamp(12px, 1.8vmin, 24px);
+    min-width: clamp(16px, 2.2vmin, 30px);
 }
 
 /* Ensure AI character info auto-sizes to content */
@@ -922,6 +1246,7 @@ body:not(.character-selection-phase) #ai-players-column .character-info {
     backface-visibility: hidden;
     -webkit-backface-visibility: hidden;
     transform: translateZ(0);
+    transition: opacity 0.3s ease-in-out; /* Smooth fade in/out when deck becomes empty */
 }
 
 /* Background images for event cards - Blocking Events (combined with .blocking-event-card) */
@@ -1056,19 +1381,20 @@ body:not(.character-selection-phase) #ai-players-column .character-info {
 
 #guilds-grid {
     position: relative;
-    width: 100%;
-    height: min(100%, calc(94vh * 1200 / 1311));
-    max-width: none;
-    max-height: none;
+    /* Let aspect-ratio control dimensions - use width-based sizing */
+    width: min(100%, calc(94vh * 1200 / 1311));
+    height: auto; /* Let aspect-ratio calculate height */
+    max-width: 100%;
+    max-height: 94vh;
     aspect-ratio: 1200 / 1311; /* Maintain board proportions */
     background-image: url('../resources/Board.png');
     background-size: contain; /* Preserve image proportions without stretching */
     background-repeat: no-repeat;
     background-position: center;
-    margin: 0;
+    margin: 0 auto; /* Center horizontally */
     /* Scale to fit container while maintaining aspect ratio */
     object-fit: contain;
-    transform: scale(1.05);
+    /* REMOVED transform: scale() to fix percentage positioning alignment */
 }
 
 /* Guild positioning on board - base properties are defined below */
@@ -1672,10 +1998,10 @@ body:not(.character-selection-phase) #ai-players-column .character-info {
     filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
 }
 
-/* Human player resource icons - smaller */
+/* Human player resource icons - standardized with AI player */
 #player-info-view .resource-icon-large {
-    width: clamp(20px, 2.8vmin, 36px);
-    height: clamp(20px, 2.8vmin, 36px);
+    width: clamp(18px, 2.5vmin, 32px);
+    height: clamp(18px, 2.5vmin, 32px);
 }
 
 /* Resource Row Layout */
@@ -1713,10 +2039,28 @@ body:not(.character-selection-phase) #ai-players-column .character-info {
     text-align: left;
 }
 
-/* Human player resource counts - smaller */
+/* Human player resource counts - standardized with AI player */
 #player-info-view .resource-count {
-    font-size: clamp(14px, 2vmin, 28px);
-    min-width: clamp(18px, 2.5vmin, 35px);
+    font-size: clamp(12px, 1.8vmin, 24px);
+    min-width: clamp(16px, 2.2vmin, 30px);
+}
+
+/* Ultra-wide screens: Add decorative side bars (>1492px, which is 2x reference 746px) */
+@media screen and (min-width: 1492px) {
+    body {
+        background: linear-gradient(90deg,
+            rgba(26, 21, 16, 0.95) 0%,
+            rgba(45, 79, 107, 0.3) 15%,
+            transparent 20%,
+            transparent 80%,
+            rgba(45, 79, 107, 0.3) 85%,
+            rgba(26, 21, 16, 0.95) 100%);
+    }
+
+    #game-container {
+        max-width: 1920px;  /* Limit game width to prevent excessive stretching */
+        margin: 0 auto;  /* Center the game */
+    }
 }
 
 /* Larger font for high-resolution screens */
@@ -1831,6 +2175,28 @@ body:not(.character-selection-phase) #ai-players-column .character-info {
 /* Old treasure-details-row kept for backward compatibility (now unused) */
 .treasure-details-row {
     display: none;
+}
+
+/* Treasure item with sell button - responsive layout */
+.treasure-item-with-sell {
+    display: flex;
+    align-items: center;
+    gap: clamp(3px, 0.6vmin, 5px);
+}
+
+.treasure-item-with-sell .sell-treasure-btn {
+    margin-left: clamp(2px, 0.4vmin, 5px);
+}
+
+/* At very low resolutions, make gap minimal */
+@media (max-height: 400px) {
+    .treasure-item-with-sell {
+        gap: 2px !important;
+    }
+
+    .treasure-item-with-sell .sell-treasure-btn {
+        margin-left: 2px !important;
+    }
 }
 
 /* Discoverer emblem styling */
@@ -2074,19 +2440,20 @@ body:has(#character-selection-view[style*="display: block"]) .player-actions-sec
 
 .actions-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(clamp(80px, 15vw, 150px), 1fr));
-    gap: var(--spacing-sm);
+    grid-template-columns: repeat(auto-fit, minmax(clamp(70px, 12vw, 120px), 1fr));  /* Smaller buttons */
+    gap: clamp(2px, 0.4vmin, 6px);  /* Smaller gaps */
     height: 100%;
+    align-content: start;  /* Align to top */
 }
 
 .action-btn {
     background: linear-gradient(135deg, var(--color-forest-moss) 0%, var(--color-illuminated-blue) 100%);
     border: var(--border-width) solid var(--color-monastery-stone);
     border-radius: var(--border-radius-sm);
-    padding: clamp(0.4em, 1.2vmin, 1em);
+    padding: clamp(0.3em, 1vmin, 0.8em);  /* Reduced padding for more space */
     color: var(--color-text-light);
     cursor: pointer;
-    font-size: 1em;
+    font-size: clamp(10px, 1.8vmin, 16px);  /* Smaller, responsive font size */
     transition: all 0.2s;
     min-height: var(--action-button-height);
     display: flex;
@@ -2095,6 +2462,8 @@ body:has(#character-selection-view[style*="display: block"]) .player-actions-sec
     white-space: normal; /* Allow text to wrap into multiple lines */
     text-align: center; /* Center multi-line text */
     line-height: 1.2; /* Comfortable line spacing for wrapped text */
+    word-break: break-word;  /* Break long words if needed */
+    overflow: hidden;  /* Prevent overflow */
 }
 
 .action-btn:hover:not(:disabled) {
@@ -2678,6 +3047,220 @@ body:not(.character-selection-phase) .action-text {
     font-size: 1.1em;
     line-height: 1.6;
     margin-top: 20px;
+}
+
+/* Reshuffle Modal Specific Styles */
+#reshuffle-modal {
+    background: rgba(0, 0, 0, 0.9); /* Dark background */
+}
+
+.reshuffle-modal-content {
+    max-width: 700px;
+    width: 90%;
+    text-align: center;
+    padding: 40px 20px;
+    background: rgba(26, 21, 16, 0.95);
+    border: 2px solid var(--color-illuminated-blue);
+    border-radius: 10px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+}
+
+.reshuffle-decks-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+    align-items: center;
+    justify-items: center;
+}
+
+.reshuffle-deck-area {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+}
+
+.reshuffle-deck-label {
+    color: var(--color-antique-gold);
+    font-size: 1.2em;
+    font-weight: bold;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.6);
+}
+
+.reshuffle-deck {
+    position: relative;
+    width: 200px;
+    height: 280px;
+    perspective: 1000px;
+}
+
+.reshuffle-card-stack {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    transform-style: preserve-3d;
+}
+
+.reshuffle-card {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background-size: contain;
+    background-position: center;
+    background-repeat: no-repeat;
+    border-radius: 10px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
+    backface-visibility: hidden;
+}
+
+/* Event deck card - initially transparent, shows card back */
+.event-deck-card {
+    background-image: url('../resources/other/Event_Back.png');
+    background-color: rgba(26, 21, 16, 0.98);
+    opacity: 0;
+}
+
+/* Discard pile card - shows last discarded event */
+.discard-pile-card {
+    background-color: rgba(26, 21, 16, 0.98);
+}
+
+/* Animation state classes */
+.reshuffle-card-stack.moving .discard-pile-card {
+    animation: deckMove 2s ease-in-out forwards, deckFlip 2s ease-in-out forwards;
+}
+
+.reshuffle-card-stack.moving .event-deck-card {
+    animation: deckFadeIn 2s ease-in-out forwards;
+}
+
+.reshuffle-card-stack.shuffling .event-deck-card {
+    animation: shuffleBlur 2s ease-in-out forwards;
+}
+
+.reshuffle-card-stack.settling .event-deck-card {
+    animation: deckSettle 0.4s ease-out forwards;
+}
+
+/* Keyframe Animations */
+
+/* Move cards from discard pile (right) to event deck (left) */
+@keyframes deckMove {
+    0% {
+        transform: translateX(0) translateY(0);
+    }
+    100% {
+        transform: translateX(-240px) translateY(0);
+        opacity: 0;
+    }
+}
+
+/* Flip card from face-up to face-down during movement */
+@keyframes deckFlip {
+    0% {
+        transform: translateX(0) rotateY(0deg);
+    }
+    50% {
+        transform: translateX(-120px) rotateY(90deg);
+    }
+    100% {
+        transform: translateX(-240px) rotateY(180deg);
+        opacity: 0;
+    }
+}
+
+/* Fade in event deck as cards arrive */
+@keyframes deckFadeIn {
+    0% {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* Rapid rotation with blur effect for shuffling */
+@keyframes shuffleBlur {
+    0% {
+        opacity: 1;
+        transform: rotate(0deg) scale(1);
+        filter: blur(0px);
+    }
+    25% {
+        opacity: 1;
+        transform: rotate(180deg) scale(1.1);
+        filter: blur(8px);
+    }
+    50% {
+        opacity: 1;
+        transform: rotate(360deg) scale(1);
+        filter: blur(12px);
+    }
+    75% {
+        opacity: 1;
+        transform: rotate(540deg) scale(1.1);
+        filter: blur(8px);
+    }
+    100% {
+        opacity: 1;
+        transform: rotate(720deg) scale(1);
+        filter: blur(0px);
+    }
+}
+
+/* Settle animation - deck solidifies */
+@keyframes deckSettle {
+    0% {
+        transform: rotate(720deg) scale(1.05);
+        filter: blur(2px);
+    }
+    100% {
+        transform: rotate(720deg) scale(1);
+        filter: blur(0px);
+    }
+}
+
+/* Responsive reshuffle modal for mobile landscape */
+@media screen and (max-height: 768px) and (orientation: landscape) {
+    .reshuffle-modal-content {
+        max-width: 600px;
+        padding: 20px 15px;
+    }
+
+    .reshuffle-decks-container {
+        gap: 30px;
+    }
+
+    .reshuffle-deck {
+        width: 150px;
+        height: 210px;
+    }
+
+    .reshuffle-deck-label {
+        font-size: 1em;
+    }
+}
+
+@media screen and (max-width: 640px) {
+    .reshuffle-modal-content {
+        max-width: 90%;
+        padding: 15px;
+    }
+
+    .reshuffle-decks-container {
+        gap: 20px;
+    }
+
+    .reshuffle-deck {
+        width: 120px;
+        height: 168px;
+    }
+
+    .reshuffle-deck-label {
+        font-size: 0.9em;
+    }
 }
 
 .help-section {
@@ -3711,13 +4294,10 @@ body.low-resolution-blocked #difficulty-modal {
         height: auto !important; /* Allow natural height */
     }
 
-    /* CRITICAL: Adjust grid layout to ensure board is fully visible - 3 COLUMNS */
+    /* CRITICAL: Optimized ratio for landscape devices with limited height */
     #game-board {
-        /* Optimized for low-res: Human | Board | AI Players (stacked) */
-        grid-template-columns:
-            minmax(clamp(95px, 13vw, 185px), 0.85fr)   /* Column 1: Human */
-            minmax(clamp(200px, 50vw, 750px), 2fr)     /* Column 2: Board */
-            minmax(clamp(95px, 13vw, 185px), 0.85fr);  /* Column 3: AI Players (stacked) */
+        /* Optimized proportions: Human (21%) | Board (58%) | AI Players (21%) */
+        grid-template-columns: 0.85fr 2.3fr 0.85fr !important;
         gap: clamp(2px, 0.3vmin, 3px);
         margin-bottom: clamp(2px, 0.3vmin, 4px);
         overflow: visible !important; /* Override base CSS overflow: hidden */
@@ -3735,23 +4315,20 @@ body.low-resolution-blocked #difficulty-modal {
 
     /* CRITICAL: Board must maintain aspect ratio and fit within viewport */
     #guilds-grid {
-        /* Scale board to use maximum available space */
-        /* Use 92vh for better space utilization on low-res screens */
-        /* Increased from 88vh to maximize playable area */
-        /* All board elements scale proportionally since they use % of board */
-        width: min(100%, calc(92vh * 1200 / 1311));
-        max-width: 100%;
-        height: auto;
+        /* Use width-based sizing with aspect-ratio controlling height */
+        width: calc(92vh * 1200 / 1311); /* Width constrained by viewport height */
+        height: auto; /* Let aspect-ratio calculate height */
+        max-width: 100%; /* Don't exceed container width */
         margin: 0 auto;
         box-sizing: border-box;
         /* Aspect ratio 1200:1311 from original Board.png - always maintained */
         aspect-ratio: 1200 / 1311;
         position: relative;
+        /* REMOVED transform: scale() to fix percentage positioning alignment */
     }
 
     /* HIDE actions pane completely during character selection on mobile */
-    body:has(#character-selection-view[style*="display: block"]) .player-actions-section,
-    body:has(#character-selection-view:not([style*="display: none"])) .player-actions-section {
+    body.character-selection-phase .player-actions-section {
         display: none !important;
         height: 0 !important;
         min-height: 0 !important;
@@ -3759,6 +4336,11 @@ body.low-resolution-blocked #difficulty-modal {
         overflow: hidden !important;
         padding: 0 !important;
         margin: 0 !important;
+    }
+
+    /* SHOW actions section during gameplay */
+    body:not(.character-selection-phase) .player-actions-section {
+        display: flex !important;
     }
 
     /* Expand character selection view to use ALL available space */
@@ -3774,16 +4356,14 @@ body.low-resolution-blocked #difficulty-modal {
     }
 
     /* When character selection is shown, expand to use ALL available space */
-    body:has(#character-selection-view[style*="display: block"]) #player-human,
-    body:has(#character-selection-view:not([style*="display: none"])) #player-human {
+    body.character-selection-phase #player-human {
         height: 100vh !important;
         max-height: 100vh !important;
         flex: 1 !important;
         width: 100% !important;
     }
 
-    body:has(#character-selection-view[style*="display: block"]) #human-column,
-    body:has(#character-selection-view:not([style*="display: none"])) #human-column {
+    body.character-selection-phase #human-column {
         height: 100% !important;
         max-height: 100vh !important;
         width: 100% !important;
@@ -3791,7 +4371,7 @@ body.low-resolution-blocked #difficulty-modal {
     }
 
     /* Character selection view uses full available width */
-    body:has(#character-selection-view[style*="display: block"]) #character-selection-view,
+    body.character-selection-phase #character-selection-view,
     body:has(#character-selection-view:not([style*="display: none"])) #character-selection-view {
         width: 100% !important;
         max-width: 100% !important;
@@ -3812,13 +4392,18 @@ body.low-resolution-blocked #difficulty-modal {
         flex: 1 1 auto; /* Allow to grow */
     }
 
+    /* Keep grid layout - don't override to flex */
     #human-column {
         gap: clamp(1px, 0.25vmin, 3px);
         padding: clamp(2px, 0.4vmin, 5px) !important;
         max-height: none; /* Allow section to grow for end turn button */
         overflow: visible; /* Show all content including end turn button */
-        display: flex;
-        flex-direction: column;
+        /* display: flex removed - keep grid layout from base styles */
+    }
+
+    /* Fix grid rows for mobile landscape - prevent resources section from collapsing */
+    body:not(.character-selection-phase) #human-column {
+        grid-template-rows: minmax(0, 12vh) minmax(120px, auto) 1fr !important;  /* Header (max 12vh), resources (min 120px), actions (remaining) */
     }
 
     #ai-players-column {
@@ -4119,10 +4704,8 @@ body.low-resolution-blocked #difficulty-modal {
         overflow: hidden; /* Prevent outer scrolling */
     }
 
-    /* Guild grid sizing */
-    #guilds-grid {
-        width: 100%;
-    }
+    /* Guild grid sizing - removed width override to preserve aspect ratio */
+    /* Width is already set correctly at line 4316 above */
 
     .guild-name {
         font-size: 0.55em;
@@ -5170,11 +5753,9 @@ body.low-resolution-blocked #difficulty-modal {
         margin-top: 3px !important;
     }
 
-    /* Expand game board center area */
+    /* Maintain exact 1:2:1 ratio for small screens */
     #game-board {
-        grid-template-columns: minmax(130px, 1fr)
-                               minmax(320px, 2.2fr)
-                               minmax(130px, 1fr) !important;
+        grid-template-columns: 1fr 2fr 1fr !important;  /* Always maintain 25% | 50% | 25% */
     }
 
     /* ========================================
@@ -5320,4 +5901,194 @@ body.low-resolution-blocked #difficulty-modal {
 .btn-modal-close {
     margin-top: 20px;
     width: 100%;
+}
+
+/* ========================================
+   VERY SHORT SCREENS (≤400px height)
+   Optimized for 767x340 and similar resolutions
+   ======================================== */
+@media screen and (max-height: 400px) {
+    /* Make everything ultra-compact */
+    :root {
+        --spacing-xs: clamp(1px, 0.2vmin, 2px);
+        --spacing-sm: clamp(1px, 0.3vmin, 3px);
+        --spacing-md: clamp(2px, 0.4vmin, 4px);
+        --action-button-height: clamp(18px, 2.8vh, 24px);  /* Reduced from 20-28px */
+    }
+
+    /* CRITICAL: Prioritize resources over actions at very low heights */
+    body:not(.character-selection-phase) #human-column {
+        grid-template-rows: auto minmax(auto, max-content) auto !important;  /* Was: auto auto 1fr */
+    }
+
+    /* Reduce human column padding */
+    #human-column {
+        padding: 2px !important;
+    }
+
+    /* Make player header ultra-compact */
+    .player-header {
+        padding: clamp(2px, 0.3vmin, 4px) !important;
+        gap: clamp(2px, 0.3vmin, 4px) !important;
+    }
+
+    /* Compact player name and coins */
+    .player-name {
+        font-size: clamp(10px, 1.5vmin, 14px) !important;
+    }
+
+    .player-coins {
+        font-size: clamp(10px, 1.5vmin, 14px) !important;
+    }
+
+    /* Compact character and resources section */
+    body:not(.character-selection-phase) #human-column .player-character-and-resources {
+        gap: clamp(1px, 0.2vmin, 2px) !important;
+        padding: 0 !important;
+    }
+
+    .character-info {
+        padding: clamp(2px, 0.3vmin, 3px) !important;
+        margin: 0 !important;
+    }
+
+    .character-name {
+        font-size: clamp(8px, 1.2vmin, 12px) !important;
+        margin: 0 !important;
+    }
+
+    /* Ultra-compact resource icons and counts */
+    .resource-icon-large,
+    #player-info-view .resource-icon-large,
+    .ai-player-info .resource-icon-large {
+        width: clamp(14px, 2vmin, 20px) !important;
+        height: clamp(14px, 2vmin, 20px) !important;
+    }
+
+    .resource-count,
+    #player-info-view .resource-count,
+    .ai-player-info .resource-count {
+        font-size: clamp(9px, 1.4vmin, 14px) !important;
+        min-width: clamp(12px, 1.8vmin, 18px) !important;
+    }
+
+    .resource-row {
+        gap: clamp(2px, 0.5vmin, 4px) !important;  /* Reduced from 4-8px */
+        margin: 0 !important;  /* Removed margin */
+    }
+
+    .resource-item {
+        gap: clamp(2px, 0.3vmin, 3px) !important;  /* Reduced from 2-4px */
+    }
+
+    /* Compact treasure detail row - CRITICAL FOR VISIBILITY */
+    #human-treasures-detail {
+        margin-top: 0 !important;  /* Remove top margin */
+        gap: clamp(2px, 0.3vmin, 3px) !important;  /* Reduced gap */
+    }
+
+    /* ENSURE treasure breakdown is always visible */
+    .treasure-breakdown-row {
+        overflow: visible !important;  /* Override parent clipping */
+        position: relative !important;
+        z-index: 10 !important;  /* Stay on top */
+        min-height: 16px !important;  /* Guarantee visibility */
+        margin: 0 !important;
+    }
+
+    .treasure-breakdown-inline {
+        gap: clamp(2px, 0.4vmin, 4px) !important;  /* Compact spacing */
+        padding: clamp(2px, 0.3vmin, 3px) !important;  /* Reduced padding */
+    }
+
+    .resource-icon-small {
+        width: clamp(16px, 2.2vmin, 20px) !important;  /* Increased for visibility */
+        height: clamp(16px, 2.2vmin, 20px) !important;
+    }
+
+    .resource-count-small {
+        font-size: clamp(11px, 1.6vmin, 14px) !important;  /* Increased for readability */
+        font-weight: bold !important;
+        min-width: clamp(16px, 2vmin, 22px) !important;  /* Ensure count has space */
+    }
+
+    /* CRITICAL: Make sell buttons visible and tappable */
+    .sell-treasure-btn {
+        padding: 2px 5px !important;  /* Increased from 1px 3px */
+        font-size: clamp(9px, 1.4vmin, 12px) !important;  /* Increased from 7-10px */
+        min-width: 25px !important;  /* Ensure tappable width */
+        min-height: 13px !important;  /* Ensure tappable height */
+        line-height: 1 !important;
+        white-space: nowrap !important;
+    }
+
+    /* Compact action buttons section - minimize vertical space */
+    .player-actions-section {
+        padding: 1px !important;  /* Minimal padding */
+        gap: 0 !important;  /* No gap */
+    }
+
+    .player-actions-section h4 {
+        font-size: clamp(9px, 1.4vmin, 13px) !important;
+        margin: 0 !important;  /* Remove all margin */
+        padding-bottom: 1px !important;
+    }
+
+    /* Make action buttons much smaller and more compact */
+    .actions-grid {
+        grid-template-columns: repeat(auto-fit, minmax(clamp(50px, 9vw, 85px), 1fr)) !important;  /* Reduced from 55px */
+        gap: 1px !important;  /* Minimal gap */
+    }
+
+    .action-btn {
+        font-size: clamp(7px, 1.2vmin, 11px) !important;
+        padding: clamp(0.15em, 0.4vmin, 0.4em) !important;  /* Reduced padding */
+        min-height: clamp(18px, 2.8vh, 24px) !important;  /* Reduced from 20-28px */
+        line-height: 1.05 !important;  /* Tighter line height */
+    }
+
+    .btn-end-turn {
+        font-size: clamp(8px, 1.4vmin, 13px) !important;
+    }
+
+    /* Compact utility buttons */
+    .utility-buttons-row {
+        gap: clamp(2px, 0.3vmin, 4px) !important;
+        margin-top: clamp(2px, 0.3vmin, 4px) !important;
+        padding: clamp(1px, 0.2vmin, 2px) 0 !important;
+    }
+
+    .btn-utility {
+        font-size: clamp(7px, 1.2vmin, 11px) !important;
+        padding: clamp(0.2em, 0.5vmin, 0.5em) !important;
+        min-height: clamp(18px, 2.5vh, 24px) !important;
+    }
+
+    .btn-utility .fullscreen-icon,
+    .btn-utility .help-icon {
+        font-size: 1.1em !important;
+        margin-right: 2px !important;
+    }
+
+    /* Ensure actions section is scrollable */
+    body:not(.character-selection-phase) #human-column .player-actions-section {
+        overflow-y: auto !important;
+        overflow-x: hidden !important;
+        max-height: none !important;
+    }
+
+    /* Compact AI players column */
+    #ai-players-column {
+        padding: clamp(2px, 0.3vmin, 4px) !important;
+        gap: clamp(4px, 0.6vmin, 8px) !important;
+    }
+
+    .ai-player-header {
+        padding: clamp(1px, 0.2vmin, 3px) clamp(2px, 0.3vmin, 4px) !important;
+        gap: clamp(1px, 0.2vmin, 2px) !important;
+    }
+
+    .ai-player-info {
+        padding: clamp(2px, 0.3vmin, 4px) !important;
+    }
 }
