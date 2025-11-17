@@ -1878,29 +1878,35 @@ class UIController {
         // Show modal for choice
         const modal = document.createElement('div');
         modal.className = 'modal';
+        modal.style.display = 'flex';
+        modal.style.zIndex = '2000';
+        modal.style.padding = '10px';
         modal.innerHTML = `
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; max-width: 600px; margin: 0 auto;">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: clamp(10px, 2vw, 20px); max-width: 95vw; max-height: 90vh; width: auto; margin: 0 auto; padding: clamp(8px, 2vmin, 15px); background: rgba(26, 45, 61, 0.95); border-radius: 8px; border: 2px solid var(--color-illuminated-blue);">
+                <h2 style="grid-column: 1 / -1; text-align: center; color: var(--color-antique-gold); margin: 0 0 clamp(8px, 1.5vmin, 12px) 0; font-size: clamp(14px, 3vmin, 20px);">Gobernador: Elige un Evento</h2>
                 <div class="event-option" data-event-index="0" style="cursor: pointer; transition: transform 0.2s;">
                     <div class="event-card" style="
-                        width: 100%;
-                        aspect-ratio: 2/3;
+                        width: clamp(120px, 25vw, 200px);
+                        height: clamp(180px, 37.5vw, 300px);
                         background-image: url('${event1Image}');
                         background-size: cover;
                         background-position: center;
-                        border-radius: 8px;
-                        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.5);
+                        border-radius: 6px;
+                        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+                        border: 2px solid transparent;
                     ">
                     </div>
                 </div>
                 <div class="event-option" data-event-index="1" style="cursor: pointer; transition: transform 0.2s;">
                     <div class="event-card" style="
-                        width: 100%;
-                        aspect-ratio: 2/3;
+                        width: clamp(120px, 25vw, 200px);
+                        height: clamp(180px, 37.5vw, 300px);
                         background-image: url('${event2Image}');
                         background-size: cover;
                         background-position: center;
-                        border-radius: 8px;
-                        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.5);
+                        border-radius: 6px;
+                        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+                        border: 2px solid transparent;
                     ">
                     </div>
                 </div>
@@ -1908,15 +1914,29 @@ class UIController {
         `;
 
         document.body.appendChild(modal);
+        modal.offsetHeight; // Force reflow
 
         // Add click handlers and hover effects
         modal.querySelectorAll('.event-option').forEach(option => {
+            const card = option.querySelector('.event-card');
+
             // Add hover effect
             option.addEventListener('mouseenter', () => {
                 option.style.transform = 'scale(1.05)';
+                card.style.border = '2px solid var(--color-antique-gold)';
+                card.style.boxShadow = '0 0 20px rgba(201, 169, 97, 0.8)';
             });
             option.addEventListener('mouseleave', () => {
                 option.style.transform = 'scale(1)';
+                card.style.border = '2px solid transparent';
+                card.style.boxShadow = '0 8px 16px rgba(0, 0, 0, 0.5)';
+            });
+
+            // Add touch support for mobile
+            option.addEventListener('touchstart', () => {
+                option.style.transform = 'scale(1.05)';
+                card.style.border = '2px solid var(--color-antique-gold)';
+                card.style.boxShadow = '0 0 20px rgba(201, 169, 97, 0.8)';
             });
 
             option.addEventListener('click', () => {
