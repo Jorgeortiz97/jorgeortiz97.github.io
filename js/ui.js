@@ -5,6 +5,11 @@ class UIController {
         this.game = game;
         game.ui = this;
 
+        // Double-tap tracking
+        this.lastTapTime = 0;
+        this.lastTapTarget = null;
+        this.doubleTapDelay = 300; // milliseconds
+
         // Cache DOM elements
         this.elements = {
             guildsGrid: document.getElementById('guilds-grid'),
@@ -93,6 +98,12 @@ class UIController {
             guild.addEventListener('dragover', (e) => this.handleDragOver(e));
             guild.addEventListener('dragleave', (e) => this.handleDragLeave(e));
             guild.addEventListener('drop', (e) => this.handleDropOnGuild(e));
+
+            // Add double-click handler for desktop
+            guild.addEventListener('dblclick', (e) => this.handleGuildDoubleClick(e));
+
+            // Add touch handler for mobile double-tap
+            guild.addEventListener('click', (e) => this.handleGuildClick(e));
         });
     }
 
@@ -103,6 +114,12 @@ class UIController {
         expedition.addEventListener('dragover', (e) => this.handleDragOver(e));
         expedition.addEventListener('dragleave', (e) => this.handleDragLeave(e));
         expedition.addEventListener('drop', (e) => this.handleDropOnExpedition(e));
+
+        // Add double-click handler for desktop
+        expedition.addEventListener('dblclick', (e) => this.handleExpeditionDoubleClick(e));
+
+        // Add touch handler for mobile double-tap
+        expedition.addEventListener('click', (e) => this.handleExpeditionClick(e));
     }
 
     handleDragStart(e) {
@@ -279,6 +296,96 @@ class UIController {
         }
 
         return false;
+    }
+
+    // Double-click/tap handlers for guild investment
+    handleGuildDoubleClick(e) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        const guildCard = e.currentTarget;
+        const guildNumber = parseInt(guildCard.dataset.guildNumber);
+        const player = this.game.players[0]; // Human player
+
+        // Check if it's human player's turn and investment phase
+        if (player.isAI || this.game.phase !== 'investment') {
+            return;
+        }
+
+        // Attempt investment
+        if (this.game.investInGuild(player, guildNumber)) {
+            this.updateGameState();
+        }
+    }
+
+    handleGuildClick(e) {
+        const currentTime = Date.now();
+        const guildCard = e.currentTarget;
+
+        // Check if this is a double-tap (same target within delay time)
+        if (this.lastTapTarget === guildCard && (currentTime - this.lastTapTime) < this.doubleTapDelay) {
+            // Double-tap detected
+            this.handleGuildDoubleClick(e);
+            // Reset tracking
+            this.lastTapTime = 0;
+            this.lastTapTarget = null;
+            // Remove visual feedback
+            guildCard.classList.remove('tap-highlight');
+        } else {
+            // First tap - show visual feedback
+            this.lastTapTime = currentTime;
+            this.lastTapTarget = guildCard;
+
+            // Add highlight effect
+            guildCard.classList.add('tap-highlight');
+            setTimeout(() => {
+                guildCard.classList.remove('tap-highlight');
+            }, this.doubleTapDelay);
+        }
+    }
+
+    // Double-click/tap handlers for expedition investment
+    handleExpeditionDoubleClick(e) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        const player = this.game.players[0]; // Human player
+
+        // Check if it's human player's turn and investment phase
+        if (player.isAI || this.game.phase !== 'investment') {
+            return;
+        }
+
+        // Attempt investment
+        if (this.game.investInExpedition(player)) {
+            this.updateGameState();
+        }
+    }
+
+    handleExpeditionClick(e) {
+        const currentTime = Date.now();
+        const expeditionCard = e.currentTarget;
+
+        // Check if this is a double-tap (same target within delay time)
+        if (this.lastTapTarget === expeditionCard && (currentTime - this.lastTapTime) < this.doubleTapDelay) {
+            // Double-tap detected
+            this.handleExpeditionDoubleClick(e);
+            // Reset tracking
+            this.lastTapTime = 0;
+            this.lastTapTarget = null;
+            // Remove visual feedback
+            expeditionCard.classList.remove('tap-highlight');
+        } else {
+            // First tap - show visual feedback
+            this.lastTapTime = currentTime;
+            this.lastTapTarget = expeditionCard;
+
+            // Add highlight effect
+            expeditionCard.classList.add('tap-highlight');
+            setTimeout(() => {
+                expeditionCard.classList.remove('tap-highlight');
+            }, this.doubleTapDelay);
+        }
     }
 
     getCoinImageFromColor(color) {
@@ -969,7 +1076,7 @@ class UIController {
         if (coinCount) coinCount.textContent = player.coins;
         // Show full VP including treasures for human player
         if (vpCount) vpCount.textContent = player.getVictoryPoints(this.game, true);
-        if (landsCount) landsCount.textContent = player.lands.length;
+        if (landsCount) landsCount.textContent = player.getUncultivatedLandsCount();
 
         // Cultivated lands with green color if > 0
         if (cultivatedCount) {
@@ -981,7 +1088,7 @@ class UIController {
             }
         }
 
-        if (innsCount) innsCount.textContent = player.inns.length;
+        if (innsCount) innsCount.textContent = player.getActiveInnsCount();
 
         // Destroyed inns with red color if > 0
         if (destroyedCount) {
@@ -1309,36 +1416,29 @@ class UIController {
                         </div>
                     </div>
                 </div>` : ''}
-                <div class="player-resources">
-                    <!-- Row 1: Lands -->
-                    <div class="resource-row lands-row">
-                        <div class="resource-item">
-                            <img src="resources/other/Land.png" class="resource-icon-large" alt="Lands" title="Tierras">
-                            <span class="resource-count lands-count">${player.lands.length}</span>
-                        </div>
-                        <div class="resource-item">
-                            <img src="resources/other/Cultivated_Land.png" class="resource-icon-large" alt="Cultivated" title="Tierras Cultivadas">
-                            <span class="resource-count cultivated-count ${player.getCultivatedLandsCount() > 0 ? 'resource-count-green' : ''}">${player.getCultivatedLandsCount()}</span>
-                        </div>
+                <div class="player-resources ai-resources-grid">
+                    <!-- Row 1: Lands, Cultivated Lands, Treasures (3 columns) -->
+                    <div class="resource-item">
+                        <img src="resources/other/Land.png" class="resource-icon-large" alt="Lands" title="Tierras">
+                        <span class="resource-count lands-count">${player.getUncultivatedLandsCount()}</span>
+                    </div>
+                    <div class="resource-item">
+                        <img src="resources/other/Cultivated_Land.png" class="resource-icon-large" alt="Cultivated" title="Tierras Cultivadas">
+                        <span class="resource-count cultivated-count ${player.getCultivatedLandsCount() > 0 ? 'resource-count-green' : ''}">${player.getCultivatedLandsCount()}</span>
+                    </div>
+                    <div class="resource-item">
+                        <img src="resources/other/Treasure.png" class="resource-icon-large" alt="Treasures" title="Tesoros">
+                        <span class="resource-count treasures-count">${player.getTreasureCount()}</span>
                     </div>
 
-                    <!-- Row 2: Inns + Treasures -->
-                    <div class="resource-row inns-treasures-row">
-                        <div class="resource-item">
-                            <img src="resources/other/Inn.png" class="resource-icon-large" alt="Inns" title="Posadas">
-                            <span class="resource-count inns-count">${player.inns.length}</span>
-                        </div>
-                        <div class="resource-item">
-                            <img src="resources/other/Destroyed_Inn.png" class="resource-icon-large" alt="Destroyed" title="Posadas Destruidas">
-                            <span class="resource-count destroyed-count ${player.getDestroyedInnsCount() > 0 ? 'resource-count-red' : ''}">${player.getDestroyedInnsCount()}</span>
-                        </div>
-                        <div class="resource-item">
-                            <img src="resources/other/Treasure.png" class="resource-icon-large" alt="Treasures" title="Tesoros">
-                            <span class="resource-count treasures-count">${player.getTreasureCount()}</span>
-                        </div>
-                        <div class="resource-item">
-                            ${player.hasDiscovererEmblem ? '<img src="resources/other/Badge.png" class="discoverer-emblem resource-icon-large" alt="Emblem" title="Emblema del Descubridor (+1 VP)">' : ''}
-                        </div>
+                    <!-- Row 2: Inns, Destroyed Inns (2 items span across) -->
+                    <div class="resource-item resource-item-wide">
+                        <img src="resources/other/Inn.png" class="resource-icon-large" alt="Inns" title="Posadas">
+                        <span class="resource-count inns-count">${player.getActiveInnsCount()}</span>
+                    </div>
+                    <div class="resource-item resource-item-wide">
+                        <img src="resources/other/Destroyed_Inn.png" class="resource-icon-large" alt="Destroyed" title="Posadas Destruidas">
+                        <span class="resource-count destroyed-count ${player.getDestroyedInnsCount() > 0 ? 'resource-count-red' : ''}">${player.getDestroyedInnsCount()}</span>
                     </div>
                 </div>
             </div>
@@ -1382,9 +1482,9 @@ class UIController {
         const destroyedCount = container.querySelector('.destroyed-count');
         const treasuresCount = container.querySelector('.treasures-count');
 
-        if (landsCount) landsCount.textContent = player.lands.length;
+        if (landsCount) landsCount.textContent = player.getUncultivatedLandsCount();
         if (cultivatedCount) cultivatedCount.textContent = player.getCultivatedLandsCount();
-        if (innsCount) innsCount.textContent = player.inns.length;
+        if (innsCount) innsCount.textContent = player.getActiveInnsCount();
         if (destroyedCount) destroyedCount.textContent = player.getDestroyedInnsCount();
         if (treasuresCount) {
             treasuresCount.textContent = player.getTreasureCount();

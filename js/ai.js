@@ -50,7 +50,7 @@ class AIPlayer {
         }
 
         // Build inn if has enough coins and lands
-        if (player.coins >= 6 && player.lands.length > 0 && Math.random() > 0.7) {
+        if (player.coins >= 6 && player.getUncultivatedLandsCount() > 0 && Math.random() > 0.7) {
             actions.push({ action: 'build-inn', landIndex: 0 });
         }
 
@@ -89,7 +89,7 @@ class AIPlayer {
 
         // 4. Build inn if profitable (has lands and enough coins)
         const innCost = player.character && player.character.innCost ? player.character.innCost : 6;
-        if (player.coins >= innCost && player.lands.length > 2) {
+        if (player.coins >= innCost && player.getUncultivatedLandsCount() > 2) {
             // Prioritize cultivated lands for inn
             const cultivatedIndex = player.lands.findIndex(l => l.cultivated);
             const landIndex = cultivatedIndex >= 0 ? cultivatedIndex : 0;
@@ -103,7 +103,7 @@ class AIPlayer {
         }
 
         // 6. Buy land for future inns/cultivation
-        if (player.coins >= 2 && player.lands.length < 4) {
+        if (player.coins >= 2 && player.getUncultivatedLandsCount() < 4) {
             actions.push({ action: 'buy-land' });
         }
 

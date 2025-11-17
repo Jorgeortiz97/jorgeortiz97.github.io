@@ -51,7 +51,7 @@
                             <div class="character-info"></div>
                         </div>
                         <div class="player-resources">
-                            <!-- Row 1: Lands -->
+                            <!-- Row 1: Lands + Treasures -->
                             <div class="resource-row lands-row">
                                 <div class="resource-item">
                                     <img src="resources/other/Land.png" class="resource-icon-large" alt="Lands" title="Tierras">
@@ -61,10 +61,14 @@
                                     <img src="resources/other/Cultivated_Land.png" class="resource-icon-large" alt="Cultivated" title="Tierras Cultivadas">
                                     <span class="resource-count cultivated-count">0</span>
                                 </div>
+                                <div class="resource-item">
+                                    <img src="resources/other/Treasure.png" class="resource-icon-large" alt="Treasures" title="Tesoros">
+                                    <span class="resource-count treasures-count">0</span>
+                                </div>
                             </div>
 
-                            <!-- Row 2: Inns + Treasures -->
-                            <div class="resource-row inns-treasures-row">
+                            <!-- Row 2: Inns -->
+                            <div class="resource-row inns-row">
                                 <div class="resource-item">
                                     <img src="resources/other/Inn.png" class="resource-icon-large" alt="Inns" title="Posadas">
                                     <span class="resource-count inns-count">0</span>
@@ -73,13 +77,11 @@
                                     <img src="resources/other/Destroyed_Inn.png" class="resource-icon-large" alt="Destroyed" title="Posadas Destruidas">
                                     <span class="resource-count destroyed-count">0</span>
                                 </div>
-                                <div class="resource-item">
-                                    <img src="resources/other/Treasure.png" class="resource-icon-large" alt="Treasures" title="Tesoros">
-                                    <span class="resource-count treasures-count">0</span>
-                                </div>
-                                <div class="resource-item">
-                                    <img src="resources/other/Badge.png" class="discoverer-emblem resource-icon-large discoverer-emblem-hidden" alt="Emblem" title="Emblema del Descubridor (+1 VP)">
-                                </div>
+                            </div>
+
+                            <!-- Row 3: Treasure Breakdown -->
+                            <div id="human-treasures-detail" class="resource-row treasure-breakdown-row">
+                                <!-- Treasure breakdown will be populated by JavaScript -->
                             </div>
                         </div>
                         </div>

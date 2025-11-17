@@ -152,7 +152,7 @@
     }
 
     .character-name {
-        font-size: clamp(10px, 1.8vmin, 16px) !important;
+        font-size: clamp(10px, 1.7vmin, 20px) !important;
         margin-bottom: 8px !important;
         white-space: nowrap !important;
         line-height: 1.1;
@@ -708,7 +708,7 @@ body:not(.character-selection-phase) #ai-players-column {
 #ai-players-column {
     display: grid;
     grid-template-columns: 1fr;
-    gap: clamp(8px, 1.5vmin, 20px);
+    gap: clamp(24px, 4vmin, 48px);
 }
 
 /* DURING character selection - equal height for full character images */
@@ -853,10 +853,13 @@ body:not(.character-selection-phase) .ai-player-info .player-character {
 
 body:not(.character-selection-phase) .ai-player-info .player-resources {
     display: flex !important;
+    flex-direction: column !important;
 }
 
 /* Resources container styling */
-.ai-player-info .player-resources {
+.ai-player-info .player-resources:not(.ai-resources-grid) {
+    display: flex;
+    flex-direction: column;
     background: transparent;
     border: none;
     padding: clamp(2px, 0.4vmin, 4px);
@@ -1219,6 +1222,15 @@ body:not(.character-selection-phase) #ai-players-column .character-info {
     transform: scale(1.05) translateZ(0);
 }
 
+/* Tap highlight for double-tap feedback */
+.guild-card.tap-highlight,
+#expedition-card.tap-highlight {
+    box-shadow: 0 0 15px rgba(201, 169, 97, 0.9), 0 4px 8px rgba(0, 0, 0, 0.4);
+    transform: scale(1.03) translateZ(0);
+    border: 2px solid var(--color-antique-gold);
+    transition: all 0.15s ease-out;
+}
+
 .guild-number {
     position: absolute;
     top: var(--spacing-xs);
@@ -1439,8 +1451,42 @@ body:not(.character-selection-phase) #ai-players-column .character-info {
     overflow-y: auto;
 }
 
+/* AI resources grid - 3 columns, 2 rows */
+#ai-player-1 .ai-resources-grid,
+#ai-player-2 .ai-resources-grid {
+    display: grid !important;
+    grid-template-columns: repeat(3, 1fr) !important;
+    grid-template-rows: auto auto !important;
+    gap: clamp(4px, 0.8vmin, 8px) !important;
+    padding: clamp(4px, 0.8vmin, 8px) !important;
+    align-items: center;
+    justify-items: center;
+}
+
+.ai-resources-grid .resource-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: clamp(2px, 0.4vmin, 4px);
+    width: 100%;
+}
+
+/* Wide items in row 2 span 1.5 columns for better spacing */
+.ai-resources-grid .resource-item-wide {
+    grid-column: span 1;
+}
+
+/* Center the second row items by starting from column 1 */
+.ai-resources-grid .resource-item:nth-child(4) {
+    grid-column: 1;
+}
+
+.ai-resources-grid .resource-item:nth-child(5) {
+    grid-column: 2;
+}
+
 #ai-players-column .player-name {
-    font-size: clamp(9px, 1.6vmin, 18px);
+    font-size: clamp(10px, 1.7vmin, 20px);
     flex: 1 0 100%;
     margin-bottom: var(--spacing-xs);
     white-space: nowrap;
@@ -1508,8 +1554,10 @@ body:not(.character-selection-phase) #ai-players-column .character-info {
 }
 
 /* Reduce resources spacing in AI sections */
-#ai-players-column .player-resources {
-    gap: 0 !important;  /* No gap between resource rows */
+#ai-players-column .player-resources:not(.ai-resources-grid) {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: clamp(4px, 0.8vmin, 8px) !important;  /* Small gap between resource rows */
     padding: 2px 4px;  /* Minimal padding */
     margin: 0 !important;  /* NO margin */
 }
@@ -1549,7 +1597,7 @@ body:not(.character-selection-phase) #ai-players-column .character-info {
 
 .player-name {
     color: var(--color-antique-gold);
-    font-size: clamp(10px, 1.8vmin, 16px); /* Match AI player character name size */
+    font-size: clamp(10px, 1.7vmin, 20px); /* Standardized across all players */
     margin: 0;  /* Reset h3 default margin */
     line-height: 1.1;
     display: flex;
@@ -1729,14 +1777,25 @@ body:not(.character-selection-phase) #ai-players-column .character-info {
 }
 
 /* Inline treasure breakdown for Row 3 */
+/* Treasure breakdown row - ensure it's visible when content exists */
+.treasure-breakdown-row {
+    min-height: 0;
+    margin: clamp(3px, 0.6vmin, 6px) 0;
+}
+
+.treasure-breakdown-row:empty {
+    display: none;
+}
+
 .treasure-breakdown-inline {
-    display: inline-flex;
+    display: flex;
     align-items: center;
     gap: clamp(4px, 0.8vmin, 8px);
-    flex-wrap: nowrap;
-    padding: clamp(2px, 0.4vmin, 4px);
-    background: rgba(0, 0, 0, 0.15);
+    flex-wrap: wrap;
+    padding: clamp(3px, 0.6vmin, 6px);
+    background: rgba(0, 0, 0, 0.2);
     border-radius: var(--border-radius-sm);
+    width: 100%;
 }
 
 /* Treasure breakdown item spacing */
@@ -1924,6 +1983,18 @@ body:not(.character-selection-phase) #ai-players-column .character-info {
     overflow-y: auto;
     overflow-x: hidden;
     max-height: none;
+    min-height: 0;
+}
+
+/* Ensure all resource rows in human player are visible */
+#player-info-view .resource-row {
+    flex-shrink: 0;
+    min-height: 0;
+}
+
+#player-info-view .lands-row,
+#player-info-view .inns-row {
+    flex-wrap: nowrap;
 }
 
 .resource-group {
@@ -3751,7 +3822,7 @@ body.low-resolution-blocked #difficulty-modal {
     }
 
     #ai-players-column {
-        gap: clamp(3px, 0.5vmin, 6px);
+        gap: clamp(20px, 4vmin, 40px) !important;
         padding: clamp(2px, 0.4vmin, 5px) !important;
         max-height: 100vh;
         overflow: hidden; /* Prevent overflow */
@@ -3896,7 +3967,7 @@ body.low-resolution-blocked #difficulty-modal {
     }
 
     .player-name {
-        font-size: clamp(14px, 2vmin, 24px); /* Larger player names for better visibility */
+        font-size: clamp(10px, 1.7vmin, 20px); /* Standardized across all players */
         white-space: nowrap;
         flex-shrink: 1;
         min-width: 0;
@@ -4259,7 +4330,7 @@ body.low-resolution-blocked #difficulty-modal {
     #character-options-inline .character-option h3,
     .character-name {
         color: var(--color-antique-gold);
-        font-size: clamp(16px, 2.5vmin, 22px) !important;
+        font-size: clamp(9px, 1.3vmin, 14px) !important;
         font-weight: bold;
         line-height: 1.2;
         margin-bottom: clamp(6px, 0.8vmin, 10px) !important;
@@ -4334,7 +4405,7 @@ body.low-resolution-blocked #difficulty-modal {
 
     /* Player names - flexible width, full text visible */
     .player-name {
-        font-size: clamp(15px, 3vmin, 28px) !important;
+        font-size: clamp(10px, 1.7vmin, 20px) !important; /* Standardized across all players */
         font-weight: bold;
         line-height: 1.1;
         overflow: visible;
@@ -4355,7 +4426,7 @@ body.low-resolution-blocked #difficulty-modal {
 
     /* AI player sections - REDUCED sizes to prevent overlap */
     #ai-players-column .player-name {
-        font-size: clamp(13px, 2.5vmin, 24px) !important;
+        font-size: clamp(10px, 1.7vmin, 20px) !important; /* Standardized across all players */
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
@@ -4422,8 +4493,8 @@ body.low-resolution-blocked #difficulty-modal {
         text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
     }
 
-    /* FORCE AI resources to be highly visible */
-    #ai-players-column .player-resources {
+    /* FORCE AI resources to be highly visible (but not grid layout) */
+    #ai-players-column .player-resources:not(.ai-resources-grid) {
         font-size: clamp(10px, 1.4vmin, 16px) !important; /* Standardized font size */
         display: flex !important;
         visibility: visible !important;
@@ -4728,7 +4799,7 @@ body.low-resolution-blocked #difficulty-modal {
         font-size: 0.8em;
     }
 
-    #ai-players-column .player-resources {
+    #ai-players-column .player-resources:not(.ai-resources-grid) {
         font-size: clamp(10px, 1.4vmin, 16px); /* Standardized font size */
         display: flex;
         flex-direction: row;

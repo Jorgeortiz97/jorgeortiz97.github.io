@@ -175,6 +175,10 @@ class Player {
         return this.lands.filter(l => l.cultivated).length;
     }
 
+    getUncultivatedLandsCount() {
+        return this.lands.filter(l => !l.cultivated).length;
+    }
+
     getActiveInnsCount() {
         return this.inns.filter(i => !i.destroyed).length;
     }

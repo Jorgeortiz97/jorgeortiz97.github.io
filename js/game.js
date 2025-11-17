@@ -228,13 +228,31 @@ class GremiosGame {
     }
 
     reshuffleEventDeck() {
+        // Get active guild numbers
+        const activeGuildNumbers = this.activeGuilds.map(g => g.number);
+
+        // Filter out guild foundation events for guilds that are already active
+        // Guilds are unique and should not be reshuffled once they're on the board
+        const filteredDiscard = this.eventDiscard.filter(event => {
+            if (event.type === EVENT_TYPES.GUILD_FOUNDATION) {
+                return !activeGuildNumbers.includes(event.guild);
+            }
+            return true; // Keep all ACTION and TEMPORARY events
+        });
+
+        const filteredSetAside = this.setAsideEvents.filter(event => {
+            if (event.type === EVENT_TYPES.GUILD_FOUNDATION) {
+                return !activeGuildNumbers.includes(event.guild);
+            }
+            return true; // Keep all ACTION and TEMPORARY events
+        });
+
         // Shuffle discard pile and set-aside events back into deck
-        // This includes all event types: GUILD_FOUNDATION, ACTION, and TEMPORARY
-        this.eventDeck = shuffleArray([...this.eventDiscard, ...this.setAsideEvents]);
+        this.eventDeck = shuffleArray([...filteredDiscard, ...filteredSetAside]);
         this.eventDiscard = [];
         this.setAsideEvents = [];
 
-        this.log('Se rebaraja el mazo de eventos');
+        this.log('Se rebaraja el mazo de eventos (gremios activos excluidos)');
 
         // Discard 3 random cards again after reshuffle
         this.discardRandomEvents(3);
