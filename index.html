@@ -20,7 +20,7 @@
     <!-- PWA Manifest -->
     <link rel="manifest" href="manifest.json">
 
-    <link rel="stylesheet" href="css/styles.css?v=2">
+    <link rel="stylesheet" href="css/styles.css?v=16">
 </head>
 <body>
     <div id="game-container">
@@ -113,6 +113,9 @@
                         </button>
                         <button class="action-btn" data-action="repair-inn" disabled>
                             <span class="action-text">Reparar Posada (1)</span>
+                        </button>
+                        <button class="action-btn" data-action="sell-wealth" disabled>
+                            <span class="action-text">Vender Riqueza</span>
                         </button>
                         <button class="action-btn character-ability character-ability-hidden" data-action="cause-mutiny" disabled>
                             <span class="action-text">Causar Motín (1)</span>
@@ -225,6 +228,15 @@
                 <h2>Selecciona un Gremio</h2>
                 <div id="guild-options"></div>
                 <button class="btn-secondary" id="cancel-guild-btn">Cancelar</button>
+            </div>
+        </div>
+
+        <!-- Modal for Wealth Treasure Selling -->
+        <div id="sell-wealth-modal" class="modal hidden">
+            <div class="modal-content">
+                <h2>Vender Riqueza</h2>
+                <div id="sell-wealth-options"></div>
+                <button class="btn-secondary" id="cancel-sell-wealth-btn">Cancelar</button>
             </div>
         </div>
 
