@@ -1,5 +1,5 @@
 // Service Worker for Gremios PWA
-const CACHE_NAME = 'gremios-v23';
+const CACHE_NAME = 'gremios-v24';
 const urlsToCache = [
   '/index.html',
   '/css/styles.css',
@@ -12,7 +12,10 @@ const urlsToCache = [
   '/js/ui.js',
   '/js/game.js',
   '/js/main.js',
+  '/js/menu.js',
   '/manifest.json',
+  // Video for loading screen
+  '/resources/other/Intro.mp4',
   // PWA Icons
   '/resources/icons/icon-192x192.png',
   '/resources/icons/icon-512x512.png',

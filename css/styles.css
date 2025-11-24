@@ -100,86 +100,6 @@
 }
 
 /* ===========================
-   UNIVERSAL PLAYER HEADER STYLES
-   Applied to ALL resolutions as foundation
-   Media queries can override with !important if needed
-   =========================== */
-
-/* Player header container - consistent flex layout */
-.player-header {
-    display: flex !important;
-    flex-wrap: nowrap !important;
-    justify-content: space-between !important;
-    align-items: center !important;
-    gap: clamp(4px, 0.8vmin, 10px);
-    min-height: clamp(24px, 4.5vmin, 40px);
-    padding: clamp(3px, 0.6vmin, 8px);
-    box-sizing: border-box;
-}
-
-/* Player name - unified for ALL players */
-.player-header .player-name,
-.player-name {
-    color: var(--color-antique-gold);
-    font-size: clamp(8px, 1.5vmin, 14px);
-    flex: 0 1 auto;
-    min-width: 30px;
-    max-width: 40%;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    line-height: 1.2;
-    margin: 0;
-}
-
-/* Coins and VP containers - unified for ALL players */
-.player-header .player-coins,
-.player-coins {
-    font-size: clamp(8px, 1.5vmin, 14px);
-    flex: 0 0 auto;
-    min-width: 30px;
-    display: flex;
-    align-items: center;
-    gap: clamp(2px, 0.4vmin, 4px);
-    line-height: 1;
-}
-
-.player-header .player-vp,
-.player-vp {
-    font-size: clamp(8px, 1.5vmin, 14px);
-    flex: 0 0 auto;
-    min-width: 30px;
-    line-height: 1;
-    display: flex;
-    align-items: center;
-    gap: clamp(2px, 0.4vmin, 4px);
-}
-
-/* Coin and VP counts - LARGE numbers, unified for ALL players */
-.player-header .coin-count,
-.player-header .vp-count,
-.player-coins .coin-count,
-.player-vp .vp-count,
-.coin-count,
-.vp-count {
-    color: var(--color-antique-gold);
-    font-size: clamp(16px, 3.2vmin, 26px);
-    font-weight: 800;
-    line-height: 1;
-}
-
-/* Coin icons - unified size for ALL players */
-.player-header .coin-icon,
-.coin-icon,
-.coin-icon.coin-image {
-    width: clamp(14px, 2.5vmin, 22px);
-    height: clamp(14px, 2.5vmin, 22px);
-    flex-shrink: 0;
-    max-width: 22px;  /* Prevent coins from becoming huge */
-    max-height: 22px;
-}
-
-/* ===========================
    Responsive Font Adjustments
    Fine-tuning for specific screen sizes
    =========================== */
@@ -188,9 +108,6 @@
    Responsive Font Adjustments - OPTIMIZED
    Consolidated from 24 to 6 essential breakpoints
    =========================== */
-
-/* Ultra-Wide Screens (2:1 aspect ratio or wider, e.g., 600x300) */
-/* Ultra-wide media query removed - was causing issues at 700x350 and 750x270 */
 
 /* Near-Square Resolutions ONLY - Specific fix for aspect ratios 0.95-1.05 */
 @media screen and (min-aspect-ratio: 19/20) and (max-aspect-ratio: 21/20) {
@@ -259,7 +176,7 @@
     }
 
     .actions-grid {
-        grid-template-columns: repeat(2, 1fr) !important;  /* Always 2 columns */
+        grid-template-columns: repeat(auto-fit, minmax(clamp(65px, 11vw, 110px), 1fr)) !important;
         gap: clamp(2px, 0.3vmin, 4px) !important;
     }
 
@@ -353,73 +270,13 @@
     }
 
     /* === PLAYER INFO OPTIMIZATION === */
-    /* UNIFIED PLAYER HEADER STYLES - Apply to ALL players (human and AI) */
-    .player-header {
-        display: flex !important;
-        flex-wrap: nowrap !important;
-        justify-content: space-between !important;
-        align-items: center !important;
-        gap: clamp(4px, 0.8vmin, 8px) !important;
-        min-height: clamp(24px, 4.5vmin, 35px) !important;
-        padding: clamp(3px, 0.6vmin, 6px) !important;
-    }
-
-    /* Player name - unified size for all players */
-    .player-header .player-name,
     .player-name {
-        font-size: clamp(8px, 1.5vmin, 13px) !important;
-        flex: 0 1 auto !important;
-        min-width: 30px !important;
-        max-width: 40% !important;
-        overflow: hidden !important;
-        text-overflow: ellipsis !important;
-        white-space: nowrap !important;
-        line-height: 1.2 !important;
+        font-size: clamp(11px, 1.9vmin, 20px) !important;
     }
 
-    /* Coins container - unified for all players */
-    .player-header .player-coins,
-    .player-coins {
-        font-size: clamp(8px, 1.5vmin, 13px) !important;
-        flex: 0 0 auto !important;
-        min-width: 30px !important;
-        display: flex !important;
-        align-items: center !important;
-        gap: clamp(2px, 0.4vmin, 4px) !important;
-        line-height: 1 !important;
-    }
-
-    /* VP container - unified for all players */
-    .player-header .player-vp,
-    .player-vp {
-        font-size: clamp(8px, 1.5vmin, 13px) !important;
-        flex: 0 0 auto !important;
-        min-width: 30px !important;
-        line-height: 1 !important;
-        display: flex !important;
-        align-items: center !important;
-        gap: clamp(2px, 0.4vmin, 4px) !important;
-    }
-
-    /* Coin and VP counts - LARGE numbers, unified for all players */
-    .player-header .coin-count,
-    .player-header .vp-count,
-    .player-coins .coin-count,
-    .player-vp .vp-count,
     .coin-count,
     .vp-count {
-        font-size: clamp(16px, 3.2vmin, 24px) !important;
-        font-weight: 800 !important;
-        line-height: 1 !important;
-    }
-
-    /* Coin icon - unified size */
-    .player-header .coin-icon,
-    .coin-icon,
-    .coin-icon.coin-image {
-        width: clamp(14px, 2.5vmin, 20px) !important;
-        height: clamp(14px, 2.5vmin, 20px) !important;
-        flex-shrink: 0 !important;
+        font-size: clamp(18px, 2.8vmin, 32px) !important;
     }
 
     .player-info img {
@@ -431,6 +288,15 @@
     #ai-players-column {
         overflow-y: auto !important;
         overflow-x: hidden !important;
+    }
+
+    #ai-players-column .player-name {
+        font-size: clamp(9px, 1.5vmin, 16px) !important;
+    }
+
+    #ai-players-column .coin-count,
+    #ai-players-column .vp-count {
+        font-size: clamp(14px, 2.2vmin, 24px) !important;
     }
 
     #ai-players-column .resource-item img {
@@ -499,10 +365,10 @@
     }
 
     .character-name {
-        font-size: clamp(7px, 1.2vmin, 14px) !important;
-        margin-bottom: 4px !important;
+        font-size: clamp(10px, 1.7vmin, 20px) !important;
+        margin-bottom: 8px !important;
         white-space: nowrap !important;
-        line-height: 1.0;
+        line-height: 1.1;
         width: 100% !important;
         max-width: 100% !important;
         overflow: hidden !important;
@@ -558,76 +424,6 @@
         transform: translateY(-1px);
     }
 
-    /* CRITICAL FIX: Ensure player headers use flex layout at small resolutions to prevent cramping */
-    /* UNIFIED PLAYER HEADER STYLES - Consistent across ALL players (human and AI) */
-    .player-header {
-        display: flex !important;
-        flex-wrap: nowrap !important;
-        justify-content: space-between !important;
-        align-items: center !important;
-        gap: clamp(4px, 0.8vmin, 8px) !important;
-        min-height: clamp(24px, 4.5vmin, 35px) !important;
-        padding: clamp(3px, 0.6vmin, 6px) !important;
-    }
-
-    /* Player name - unified for ALL players */
-    .player-header .player-name,
-    .player-name {
-        font-size: clamp(8px, 1.5vmin, 13px) !important;
-        flex: 0 1 auto !important;
-        min-width: 30px !important;
-        max-width: 40% !important;
-        overflow: hidden !important;
-        text-overflow: ellipsis !important;
-        white-space: nowrap !important;
-        line-height: 1.2 !important;
-    }
-
-    /* Coins container - unified for ALL players */
-    .player-header .player-coins,
-    .player-coins {
-        font-size: clamp(8px, 1.5vmin, 13px) !important;
-        flex: 0 0 auto !important;
-        min-width: 30px !important;
-        display: flex !important;
-        align-items: center !important;
-        gap: clamp(2px, 0.4vmin, 4px) !important;
-        line-height: 1 !important;
-    }
-
-    /* VP container - unified for ALL players */
-    .player-header .player-vp,
-    .player-vp {
-        font-size: clamp(8px, 1.5vmin, 13px) !important;
-        flex: 0 0 auto !important;
-        min-width: 30px !important;
-        line-height: 1 !important;
-        display: flex !important;
-        align-items: center !important;
-        gap: clamp(2px, 0.4vmin, 4px) !important;
-    }
-
-    /* Coin and VP counts - LARGE numbers, unified for ALL players */
-    .player-header .coin-count,
-    .player-header .vp-count,
-    .player-coins .coin-count,
-    .player-vp .vp-count,
-    .coin-count,
-    .vp-count {
-        font-size: clamp(16px, 3.2vmin, 24px) !important;
-        font-weight: 800 !important;
-        line-height: 1 !important;
-    }
-
-    /* Coin icon - unified size for ALL players */
-    .player-header .coin-icon,
-    .coin-icon,
-    .coin-icon.coin-image {
-        width: clamp(14px, 2.5vmin, 20px) !important;
-        height: clamp(14px, 2.5vmin, 20px) !important;
-        flex-shrink: 0 !important;
-    }
-
     .character-info:active {
         transform: translateY(0);
     }
@@ -653,7 +449,10 @@
         font-size: clamp(12px, 2.8vmin, 17px) !important;
     }
 
-    /* Removed conflicting player-coins/vp font-size - now using unified styles from player-header section */
+    .player-coins,
+    .player-vp {
+        font-size: clamp(13px, 2.9vmin, 18px) !important;
+    }
 
     /* Resource display improvements */
     .player-resources {
@@ -663,10 +462,10 @@
     }
 
     .resource-icon-large {
-        width: clamp(14px, 2.2vmin, 20px) !important;  /* INCREASED: 14-20px for better visibility */
-        height: clamp(14px, 2.2vmin, 20px) !important;
-        min-width: 14px !important;
-        min-height: 14px !important;
+        width: 26px !important;
+        height: 26px !important;
+        min-width: 26px !important;
+        min-height: 26px !important;
     }
 
     .resource-count {
@@ -778,7 +577,6 @@
     }
 
     .actions-grid {
-        grid-template-columns: repeat(2, 1fr) !important;  /* Always 2 columns */
         gap: 8px !important;
     }
 
@@ -801,84 +599,6 @@
 
     .treasure-breakdown-item {
         gap: clamp(4px, 0.7vmin, 7px);
-    }
-}
-
-/* Very Small Screens: < 500px width - Extra protection for cramped layouts */
-@media screen and (max-width: 499px) {
-    /* Force flex layout with stronger specificity for very small screens */
-    .player-header,
-    #player-info-view .player-header,
-    #ai-player-1 .player-header,
-    #ai-player-2 .player-header,
-    .ai-player-header .player-header {
-        display: flex !important;
-        flex-direction: row !important;
-        flex-wrap: nowrap !important;
-        justify-content: space-between !important;
-        align-items: center !important;
-        gap: clamp(5px, 1.2vmin, 10px) !important;
-        width: 100% !important;
-        min-height: 24px !important;
-    }
-
-    /* Player name - UNIFIED with other media queries */
-    .player-header .player-name,
-    .player-name {
-        flex: 0 1 auto !important;
-        min-width: 30px !important;
-        max-width: 40% !important;
-        font-size: clamp(8px, 1.5vmin, 13px) !important;
-        overflow: hidden !important;
-        text-overflow: ellipsis !important;
-        white-space: nowrap !important;
-        line-height: 1.2 !important;
-    }
-
-    /* Coins and VP sections - UNIFIED with other media queries */
-    .player-header .player-coins,
-    .player-coins {
-        flex: 0 0 auto !important;
-        min-width: 30px !important;
-        font-size: clamp(8px, 1.5vmin, 13px) !important;
-        white-space: nowrap !important;
-        display: flex !important;
-        align-items: center !important;
-        gap: clamp(2px, 0.4vmin, 4px) !important;
-        line-height: 1 !important;
-    }
-
-    .player-header .player-vp,
-    .player-vp {
-        flex: 0 0 auto !important;
-        min-width: 30px !important;
-        font-size: clamp(8px, 1.5vmin, 13px) !important;
-        white-space: nowrap !important;
-        display: flex !important;
-        align-items: center !important;
-        gap: clamp(2px, 0.4vmin, 4px) !important;
-        line-height: 1 !important;
-    }
-
-    /* Coin/VP count numbers - UNIFIED with other media queries */
-    .player-header .coin-count,
-    .player-header .vp-count,
-    .player-coins .coin-count,
-    .player-vp .vp-count,
-    .coin-count,
-    .vp-count {
-        font-size: clamp(16px, 3.2vmin, 24px) !important;
-        font-weight: 800 !important;
-        line-height: 1 !important;
-    }
-
-    /* Coin icons - UNIFIED with other media queries */
-    .player-header .coin-icon,
-    .coin-icon,
-    .coin-icon.coin-image {
-        width: clamp(14px, 2.5vmin, 20px) !important;
-        height: clamp(14px, 2.5vmin, 20px) !important;
-        flex-shrink: 0 !important;
     }
 }
 
@@ -909,8 +629,21 @@
         /* Natural sizing without transform */
     }
 
-    /* REMOVED - using universal player-header styles for consistency */
-    /* Player names, coin counts use unified styles from base */
+    /* Increase player name sizes */
+    .player-name {
+        font-size: clamp(12px, 2vmin, 22px) !important;
+    }
+
+    /* Increase character name sizes */
+    .character-name {
+        font-size: clamp(11px, 1.8vmin, 20px) !important;
+    }
+
+    /* Increase coin/VP display sizes */
+    .coin-count,
+    .vp-count {
+        font-size: clamp(20px, 3vmin, 38px) !important;
+    }
 
     /* Increase coin/VP icon sizes */
     .player-info img {
@@ -1234,7 +967,7 @@ body.character-selection-phase #human-column {
 /* Grid layout after character selection - fit content without scrolling */
 body:not(.character-selection-phase) #human-column {
     display: grid;
-    grid-template-rows: minmax(0, 10vh) minmax(0, auto) 1fr;  /* Header (max 10vh), resources (constrained auto), actions (remaining space) */
+    grid-template-rows: minmax(0, 15vh) auto 1fr;  /* Header (max 15vh), resources (auto-fit content), actions (remaining space) */
     grid-template-columns: 1fr;
     overflow: hidden;  /* Prevent scrolling */
     height: 100%;  /* Fill parent height */
@@ -1243,7 +976,7 @@ body:not(.character-selection-phase) #human-column {
 /* Grid item placement for human column */
 body:not(.character-selection-phase) #human-column .player-header {
     grid-row: 1;
-    max-height: 10vh;  /* Constrain header to prevent overflow */
+    max-height: 15vh;  /* Constrain header to prevent overflow */
     overflow: hidden;
 }
 
@@ -1251,18 +984,16 @@ body:not(.character-selection-phase) #human-column .player-character-and-resourc
     grid-row: 2;
     display: flex;
     flex-direction: column;
-    gap: clamp(2px, 0.4vmin, 4px);
-    overflow: visible;  /* Allow treasure breakdown to show */
-    min-height: 0;  /* Allow shrinking */
+    gap: var(--spacing-sm);
 }
 
 body:not(.character-selection-phase) #human-column .player-actions-section {
     grid-row: 3;
     display: flex;
     flex-direction: column;
-    min-height: 200px;  /* Reduced minimum space for action buttons */
+    min-height: 250px;  /* Ensure enough space for action buttons */
     overflow: hidden;  /* NO scrolling - everything must fit in viewport */
-    gap: clamp(1px, 0.2vh, 3px);  /* Shrink gaps to fit more buttons */
+    gap: clamp(1px, 0.3vh, 4px);  /* Shrink gaps to fit more buttons */
 }
 
 /* Column 2: Game Board (Center, 50% width - 2fr) */
@@ -1291,9 +1022,10 @@ body.character-selection-phase #ai-players-column {
     overflow: visible;
 }
 
-/* After character selection - no scrolling, content must fit */
+/* After character selection - allow scrolling if needed */
 body:not(.character-selection-phase) #ai-players-column {
-    overflow: hidden;  /* No scrolling */
+    overflow-y: auto;
+    overflow-x: hidden;
 }
 
 /* Grid layout - both during and after character selection */
@@ -1436,7 +1168,7 @@ body.character-selection-phase .ai-player-info .character-image {
 /* ========== AFTER CHARACTER SELECTION ========== */
 body:not(.character-selection-phase) .ai-player-info {
     flex: 0 0 auto;
-    overflow: hidden;  /* No scrolling */
+    overflow-y: auto;
 }
 
 body:not(.character-selection-phase) .ai-player-info .player-character {
@@ -1457,17 +1189,16 @@ body:not(.character-selection-phase) .ai-player-info .player-resources {
     padding: clamp(2px, 0.4vmin, 4px);
 }
 
-/* AI player resource icons - MATCHES human player exactly */
+/* AI player resource icons - standardized with human player */
 .ai-player-info .resource-icon-large {
-    width: clamp(14px, 2.2vmin, 20px);
-    height: clamp(14px, 2.2vmin, 20px);
+    width: clamp(18px, 2.5vmin, 32px);
+    height: clamp(18px, 2.5vmin, 32px);
 }
 
-/* AI player resource counts - MATCHES human player exactly */
+/* AI player resource counts - standardized with human player */
 .ai-player-info .resource-count {
-    font-size: clamp(13px, 3vmin, 18px);
+    font-size: clamp(12px, 1.8vmin, 24px);
     min-width: clamp(16px, 2.2vmin, 30px);
-    font-weight: 700;
 }
 
 /* Ensure AI character info auto-sizes to content */
@@ -1994,7 +1725,7 @@ body:not(.character-selection-phase) #ai-players-column .character-info {
 /* Player info zone - fills available height */
 #player-human {
     flex: 1; /* Grow to fill available height */
-    overflow: hidden;  /* No scrolling */
+    overflow-y: auto;
     height: 100vh;
 }
 
@@ -2006,7 +1737,7 @@ body:not(.character-selection-phase) #ai-players-column .character-info {
 /* AI Player Compact Display Optimizations */
 .player-zone.ai-player {
     padding: var(--spacing-xs);
-    /* REMOVED font-size - using unified player-header styles for consistency */
+    font-size: clamp(8px, 1.2vmin, 18px);
 }
 
 #ai-players-column .player-zone {
@@ -2016,8 +1747,8 @@ body:not(.character-selection-phase) #ai-players-column .character-info {
 #ai-players-column .player-header {
     gap: var(--spacing-xs);
     flex-wrap: wrap;
-    /* REMOVED font-size - using unified styles to ensure coin/VP counts are visible */
-    align-items: center;  /* Center alignment for consistent positioning */
+    font-size: clamp(9px, 1.3vmin, 20px);
+    align-items: baseline;  /* Use baseline for proper text alignment */
 }
 
 /* AI player section height constraints - normal gameplay */
@@ -2043,10 +1774,10 @@ body:not(.character-selection-phase) #ai-players-column .character-info {
     max-height: 35vh;
     flex: 1 1 auto;
     box-sizing: border-box;
-    overflow: hidden;  /* No scrolling */
+    overflow-y: auto;
 }
 
-/* AI resources grid - 3 columns, 2 rows, no treasure breakdown (only total count) */
+/* AI resources grid - 3 columns, 2 rows */
 #ai-player-1 .ai-resources-grid,
 #ai-player-2 .ai-resources-grid {
     display: grid !important;
@@ -2056,7 +1787,6 @@ body:not(.character-selection-phase) #ai-players-column .character-info {
     padding: clamp(4px, 0.8vmin, 8px) !important;
     align-items: center;
     justify-items: center;
-    overflow: hidden; /* No scrolling */
 }
 
 .ai-resources-grid .resource-item {
@@ -2083,13 +1813,12 @@ body:not(.character-selection-phase) #ai-players-column .character-info {
 
 #ai-players-column .player-name {
     font-size: clamp(10px, 1.7vmin, 20px);
-    flex: 0 1 auto; /* Changed from 1 0 100% to allow shrinking and prevent overflow */
+    flex: 1 0 100%;
     margin-bottom: var(--spacing-xs);
     white-space: nowrap;
     line-height: 1.1;
     max-width: 100%;
     overflow: hidden;
-    text-overflow: ellipsis; /* Add ellipsis for long names */
 }
 
 #ai-players-column .player-coins,
@@ -2162,9 +1891,9 @@ body:not(.character-selection-phase) #ai-players-column .character-info {
 .player-header {
     display: flex;
     justify-content: space-between;
-    align-items: center;  /* Center alignment for consistent positioning of name, coins, VP */
-    margin-bottom: clamp(2px, 0.4vmin, 4px);
-    padding-bottom: clamp(2px, 0.3vmin, 3px);
+    align-items: baseline;  /* Use baseline instead of center for text alignment */
+    margin-bottom: var(--spacing-md);
+    padding-bottom: var(--spacing-sm);
     border-bottom: 1px solid var(--color-illuminated-blue);
     flex: 0 0 auto;
 }
@@ -2175,21 +1904,63 @@ body:not(.character-selection-phase) #ai-players-column .character-info {
     padding-bottom: 0;  /* No padding for seamless connection with info section */
 }
 
-/* REMOVED conflicting AI-specific styles - now using unified styles */
-/* AI player headers use the same styles as human player for consistency */
+/* Remove spacing from .player-header inside AI player headers */
+.ai-player-header .player-header {
+    margin-bottom: 0 !important;  /* No margin in AI headers */
+    padding-bottom: 0 !important;  /* No padding in AI headers */
+    padding: 0 !important;  /* No padding at all */
+    border-bottom: none !important;  /* No border needed */
+    gap: 0 !important;  /* No gap between flex items */
+    min-height: 0;  /* Allow it to shrink */
+    height: auto;  /* Auto height */
+}
+
+/* Remove margin from player name in AI headers */
+#ai-players-column .ai-player-header .player-name {
+    margin-bottom: 0 !important;  /* No margin below name */
+    margin: 0 !important;  /* No margin at all */
+}
 
 .player-name {
     color: var(--color-antique-gold);
+    font-size: clamp(10px, 1.7vmin, 20px); /* Standardized across all players */
     margin: 0;  /* Reset h3 default margin */
-    /* Font-size, line-height, and other properties come from unified media query styles */
+    line-height: 1.1;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    white-space: nowrap;
+    max-width: 100%;
+    overflow: hidden;
+    flex-shrink: 1;
 }
 
-/* REMOVED conflicting player-coins, player-vp, coin-count, coin-icon styles */
-/* Now using unified styles from media queries for consistency */
+.player-coins, .player-vp {
+    font-size: var(--font-body); /* Consistent with player info */
+    font-weight: bold;
+    line-height: 1;  /* Consistent line height */
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
 
 .coin-count {
     color: var(--color-antique-gold);
-    /* font-size comes from unified media query styles */
+    font-size: clamp(18px, 2.5vmin, 36px);
+    font-weight: bold;
+}
+
+.coin-icon {
+    font-size: clamp(20px, 2.8vmin, 40px);
+    display: inline-block;
+    vertical-align: middle;
+}
+
+/* Coin icon images for AI players */
+.coin-icon.coin-image {
+    width: clamp(20px, 2.8vmin, 40px);
+    height: clamp(20px, 2.8vmin, 40px);
+    transition: transform 0.2s ease, opacity 0.2s ease;
 }
 
 /* Draggable coin states */
@@ -2240,13 +2011,13 @@ body:not(.character-selection-phase) #ai-players-column .character-info {
     justify-content: flex-start;
     gap: clamp(15px, 2vmin, 30px);
     margin: clamp(6px, 1vmin, 12px) 0;
-    flex-wrap: nowrap;  /* Prevent wrapping on small screens */
+    flex-wrap: wrap;
 }
 
 /* Human player resource rows - more compact */
 #player-info-view .resource-row {
-    gap: clamp(6px, 1.2vmin, 12px);
-    margin: clamp(2px, 0.4vmin, 4px) 0;
+    gap: clamp(8px, 1.5vmin, 15px);
+    margin: clamp(3px, 0.6vmin, 6px) 0;
 }
 
 .resource-item {
@@ -2257,7 +2028,7 @@ body:not(.character-selection-phase) #ai-players-column .character-info {
 
 /* Human player resource items - more compact */
 #player-info-view .resource-item {
-    gap: clamp(3px, 0.6vmin, 6px);
+    gap: clamp(4px, 0.8vmin, 8px);
 }
 
 .resource-count {
@@ -2326,11 +2097,10 @@ body:not(.character-selection-phase) #ai-players-column .character-info {
     display: flex;
     align-items: center;
     gap: clamp(12px, 2vmin, 24px);
-    flex-wrap: nowrap;  /* Force single row */
+    flex-wrap: wrap;
     padding: clamp(6px, 1vmin, 12px);
     background: rgba(0, 0, 0, 0.2);
     border-radius: var(--border-radius-md);
-    overflow-x: auto;  /* Allow horizontal scroll if needed */
 }
 
 /* Human player treasure breakdown - more compact */
@@ -2365,12 +2135,11 @@ body:not(.character-selection-phase) #ai-players-column .character-info {
     display: flex;
     align-items: center;
     gap: clamp(4px, 0.8vmin, 8px);
-    flex-wrap: nowrap;  /* Force single row to prevent overflow */
+    flex-wrap: wrap;
     padding: clamp(3px, 0.6vmin, 6px);
     background: rgba(0, 0, 0, 0.2);
     border-radius: var(--border-radius-sm);
     width: 100%;
-    overflow-x: auto;  /* Allow horizontal scroll if needed on very small screens */
 }
 
 /* Treasure breakdown item spacing */
@@ -2437,10 +2206,13 @@ body:not(.character-selection-phase) #ai-players-column .character-info {
 
 .vp-count {
     color: #ffffff; /* White text for VP */
-    /* REMOVED conflicting font-size - using unified styles from media queries */
+    font-size: clamp(18px, 2.5vmin, 36px);
+    font-weight: bold;
 }
 
-/* REMOVED .player-vp font-size - using unified styles from media queries */
+.player-vp {
+    font-size: clamp(16px, 2.2vmin, 32px);
+}
 
 /* Draggable Coins */
 .draggable-coin {
@@ -2550,29 +2322,32 @@ body:not(.character-selection-phase) #ai-players-column .character-info {
     color: inherit; /* Ensure paragraphs inherit white color from parent */
 }
 
-/* Common player resources base styles - shared between human and AI */
 .player-resources {
-    font-size: clamp(10px, 1.4vmin, 16px);
+    font-size: clamp(10px, 1.4vmin, 16px); /* Standardized font size */
     display: flex;
-    gap: clamp(4px, 0.8vmin, 10px);
+    flex-direction: row;
+    gap: clamp(4px, 0.8vmin, 10px); /* Standardized spacing */
     align-items: center;
+    flex-wrap: nowrap; /* Keep all items in single row */
     background: rgba(0, 0, 0, 0.4);
     padding: clamp(3px, 0.9vmin, 12px) clamp(4px, 1.3vmin, 16px);
     border-radius: 6px;
     border: 1px solid rgba(201, 169, 97, 0.3);
-    width: 100%;
-    box-sizing: border-box;
-    overflow: hidden; /* No scrolling */
+    width: 100%; /* Expand to full available width */
+    box-sizing: border-box; /* Include padding in width calculation */
+    overflow-x: auto; /* Allow horizontal scroll if needed */
+    overflow-y: hidden;
     flex: 0 0 auto;
 }
 
-/* Human player resources - stack vertically, includes treasure breakdown */
+/* Human player resources - stack vertically */
 #player-info-view .player-resources {
     flex-direction: column;
-    align-items: center;  /* CENTERED: horizontally center all resource rows */
-    gap: clamp(3px, 0.6vmin, 6px);
-    padding: clamp(3px, 0.8vmin, 8px);
-    overflow: visible; /* Allow treasure breakdown to show */
+    align-items: stretch;
+    gap: clamp(4px, 0.8vmin, 8px);
+    padding: clamp(4px, 1vmin, 10px);
+    overflow-y: auto;
+    overflow-x: hidden;
     max-height: none;
     min-height: 0;
 }
@@ -2665,7 +2440,7 @@ body:has(#character-selection-view[style*="display: block"]) .player-actions-sec
 
 .actions-grid {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);  /* Always 2 columns */
+    grid-template-columns: repeat(auto-fit, minmax(clamp(70px, 12vw, 120px), 1fr));  /* Smaller buttons */
     gap: clamp(2px, 0.4vmin, 6px);  /* Smaller gaps */
     height: 100%;
     align-content: start;  /* Align to top */
@@ -2678,7 +2453,7 @@ body:has(#character-selection-view[style*="display: block"]) .player-actions-sec
     padding: clamp(0.3em, 1vmin, 0.8em);  /* Reduced padding for more space */
     color: var(--color-text-light);
     cursor: pointer;
-    font-size: clamp(11px, 2.2vmin, 16px);  /* FIXED: Increased minimum from 10px to 11px */
+    font-size: clamp(10px, 1.8vmin, 16px);  /* Smaller, responsive font size */
     transition: all 0.2s;
     min-height: var(--action-button-height);
     display: flex;
@@ -2686,9 +2461,9 @@ body:has(#character-selection-view[style*="display: block"]) .player-actions-sec
     justify-content: center;
     white-space: normal; /* Allow text to wrap into multiple lines */
     text-align: center; /* Center multi-line text */
-    line-height: 1.15; /* Tighter line spacing for better text fit */
+    line-height: 1.2; /* Comfortable line spacing for wrapped text */
     word-break: break-word;  /* Break long words if needed */
-    overflow: visible;  /* Allow text to display properly */
+    overflow: hidden;  /* Prevent overflow */
 }
 
 .action-btn:hover:not(:disabled) {
@@ -2739,9 +2514,6 @@ body:not(.character-selection-phase) .action-text {
     border-color: var(--color-burgundy);
     font-weight: bold;
     font-size: 1.2em;
-    position: sticky;
-    bottom: 0;
-    z-index: 10;  /* Ensure it stays on top */
 }
 
 /* Utility buttons (fullscreen, help) */
@@ -3489,97 +3261,6 @@ body:not(.character-selection-phase) .action-text {
     .reshuffle-deck-label {
         font-size: 0.9em;
     }
-}
-
-/* =============================================
-   CRITICAL: Ensure treasure visibility on small screens (480-640px)
-   ============================================= */
-@media screen and (max-width: 640px) and (min-width: 480px) {
-    /* REMOVED player-header styles - using universal unified styles instead */
-    /* This ensures consistency across ALL resolutions */
-
-    /* Character names - keep small for this tight resolution */
-    .character-name {
-        font-size: clamp(9px, 1.5vmin, 13px) !important;
-        margin-bottom: 2px !important;
-        line-height: 1.1 !important;
-    }
-
-    /* Resource icons - smaller to save space */
-    .resource-icon-large {
-        width: clamp(12px, 1.8vmin, 18px) !important;
-        height: clamp(12px, 1.8vmin, 18px) !important;
-    }
-
-    .resource-item img {
-        width: clamp(12px, 1.8vmin, 18px) !important;
-        height: clamp(12px, 1.8vmin, 18px) !important;
-    }
-
-    /* Resource counts - smaller */
-    .resource-count {
-        font-size: clamp(9px, 1.4vmin, 13px) !important;
-    }
-
-    .resource-item span {
-        font-size: clamp(9px, 1.4vmin, 13px) !important;
-    }
-
-    /* Resource rows - minimal spacing */
-    .player-resources {
-        gap: clamp(2px, 0.3vmin, 4px) !important;
-        padding: clamp(2px, 0.3vmin, 5px) !important;
-    }
-
-    .resource-row {
-        gap: clamp(2px, 0.4vmin, 5px) !important;
-        margin: 0 !important;
-    }
-
-    .resource-item {
-        gap: clamp(2px, 0.3vmin, 3px) !important;
-    }
-
-    /* TREASURE BREAKDOWN - Ensure maximum visibility */
-    .treasure-breakdown-row {
-        display: flex !important;
-        flex-wrap: wrap !important;
-        gap: clamp(2px, 0.4vmin, 4px) !important;
-        margin: clamp(2px, 0.4vmin, 4px) 0 !important;
-        min-height: auto !important;
-        overflow: visible !important;
-    }
-
-    .treasure-breakdown-inline {
-        display: flex !important;
-        flex-wrap: wrap !important;
-        gap: clamp(3px, 0.5vmin, 5px) !important;
-        padding: clamp(2px, 0.3vmin, 4px) !important;
-        font-size: clamp(8px, 1.3vmin, 12px) !important;
-    }
-
-    .treasure-breakdown-item {
-        display: flex !important;
-        align-items: center !important;
-        gap: clamp(2px, 0.3vmin, 3px) !important;
-        flex-shrink: 0 !important;  /* Prevent treasure items from shrinking */
-    }
-
-    /* Treasure icons - MUST be visible */
-    .resource-icon-small {
-        width: clamp(14px, 2.2vmin, 20px) !important;
-        height: clamp(14px, 2.2vmin, 20px) !important;
-        flex-shrink: 0 !important;
-    }
-
-    /* Treasure counts - MUST be readable */
-    .resource-count-small {
-        font-size: clamp(12px, 2vmin, 16px) !important;
-        font-weight: bold !important;
-        min-width: 15px !important;  /* Ensure width for visibility */
-    }
-
-    /* REMOVED AI-specific player-header rules - using unified styles for consistency */
 }
 
 .help-section {
@@ -5685,34 +5366,20 @@ body.low-resolution-blocked #difficulty-modal {
         color: #ffffff !important; /* Ensure paragraphs stay white on all zoom levels */
     }
 
-    /* Override base 7px font-size for player-headers to ensure visibility */
-    .player-header {
-        font-size: clamp(12px, 2vmin, 20px) !important;
+    #ai-players-column .player-header {
+        font-size: 0.8em;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: baseline;  /* Use baseline for proper text alignment */
     }
 
-    .player-name {
-        font-size: clamp(10px, 1.6vmin, 16px) !important;
+    #ai-players-column .player-name {
+        font-size: 1em; /* Increased from 0.85em for better visibility on extreme low-res */
     }
 
-    /* Ensure containers are sized properly for their contents */
-    .player-coins,
-    .player-vp {
-        font-size: clamp(16px, 3vmin, 24px) !important;
-        flex: 0 1 auto !important;
-        min-width: 40px !important;
-    }
-
-    .coin-count,
-    .vp-count {
-        font-size: clamp(16px, 3vmin, 24px) !important;
-        font-weight: 800 !important;
-        line-height: 1 !important;
-        display: block !important;
-    }
-
-    .coin-icon {
-        width: clamp(14px, 2.5vmin, 20px) !important;
-        height: clamp(14px, 2.5vmin, 20px) !important;
+    #ai-players-column .player-coins,
+    #ai-players-column .player-vp {
+        font-size: 0.8em;
     }
 
     #ai-players-column .player-resources:not(.ai-resources-grid) {
@@ -5862,56 +5529,6 @@ body.low-resolution-blocked #difficulty-modal {
        ENHANCED MOBILE EXPERIENCE FOR VERY SMALL SCREENS
        ======================================== */
 
-    /* CRITICAL: Prioritize treasure visibility over everything else */
-    .player-name {
-        font-size: clamp(4px, 0.8vmin, 7px) !important;
-    }
-
-    .character-name {
-        font-size: clamp(4px, 0.8vmin, 7px) !important;
-    }
-
-    .coin-count, .vp-count {
-        font-size: clamp(3px, 0.6vmin, 5px) !important;
-    }
-
-    .player-coins, .player-vp {
-        font-size: clamp(3px, 0.6vmin, 5px) !important;
-    }
-
-    .coin-icon, .coin-icon.coin-image {
-        width: clamp(6px, 1vmin, 10px) !important;
-        height: clamp(6px, 1vmin, 10px) !important;
-    }
-
-    /* TREASURE - Maximum priority */
-    .treasure-breakdown-row {
-        display: flex !important;
-        flex-wrap: wrap !important;
-        min-height: auto !important;
-    }
-
-    .treasure-breakdown-inline {
-        display: flex !important;
-        flex-wrap: wrap !important;
-    }
-
-    .treasure-breakdown-item {
-        flex-shrink: 0 !important;
-    }
-
-    .resource-icon-small {
-        width: clamp(12px, 2vmin, 18px) !important;
-        height: clamp(12px, 2vmin, 18px) !important;
-        flex-shrink: 0 !important;
-    }
-
-    .resource-count-small {
-        font-size: clamp(11px, 1.8vmin, 15px) !important;
-        font-weight: bold !important;
-        min-width: 15px !important;  /* Ensure width for visibility */
-    }
-
     /* Further enhanced modals for tiny screens */
     .modal-content {
         max-width: 98%;
@@ -6046,7 +5663,6 @@ body.low-resolution-blocked #difficulty-modal {
 
     /* Improve actions grid spacing */
     .actions-grid {
-        grid-template-columns: repeat(2, 1fr) !important;  /* Always 2 columns */
         gap: 10px !important;
     }
 
@@ -6310,30 +5926,25 @@ body.low-resolution-blocked #difficulty-modal {
         padding: 2px !important;
     }
 
-    /* Make player header ultra-compact - but KEEP unified count sizes */
+    /* Make player header ultra-compact */
     .player-header {
         padding: clamp(2px, 0.3vmin, 4px) !important;
         gap: clamp(2px, 0.3vmin, 4px) !important;
     }
 
-    /* REMOVED player-name and player-coins font-size overrides */
-    /* Using universal unified styles to ensure coins/VP counts stay visible */
+    /* Compact player name and coins */
+    .player-name {
+        font-size: clamp(10px, 1.5vmin, 14px) !important;
+    }
 
-    /* Remove player header bottom margin to save space */
-    #human-column .player-header {
-        margin-bottom: 0 !important;
+    .player-coins {
+        font-size: clamp(10px, 1.5vmin, 14px) !important;
     }
 
     /* Compact character and resources section */
     body:not(.character-selection-phase) #human-column .player-character-and-resources {
         gap: clamp(1px, 0.2vmin, 2px) !important;
         padding: 0 !important;
-    }
-
-    /* Ultra-compact player resources to save vertical space */
-    #player-info-view .player-resources {
-        gap: clamp(1px, 0.2vmin, 2px) !important;  /* Reduced from 6px */
-        padding: clamp(1px, 0.2vmin, 2px) !important;  /* Reduced from 8px */
     }
 
     .character-info {
@@ -6346,37 +5957,28 @@ body.low-resolution-blocked #difficulty-modal {
         margin: 0 !important;
     }
 
-    /* Compact resource icons and counts - APPLIES TO BOTH HUMAN AND AI */
+    /* Ultra-compact resource icons and counts */
     .resource-icon-large,
     #player-info-view .resource-icon-large,
     .ai-player-info .resource-icon-large {
-        width: clamp(14px, 1.8vmin, 18px) !important;  /* INCREASED: 14-18px for better visibility */
-        height: clamp(14px, 1.8vmin, 18px) !important;
+        width: clamp(14px, 2vmin, 20px) !important;
+        height: clamp(14px, 2vmin, 20px) !important;
     }
 
     .resource-count,
     #player-info-view .resource-count,
     .ai-player-info .resource-count {
-        font-size: clamp(8px, 1.2vmin, 10px) !important;  /* INCREASED: 8-10px for better readability */
-        min-width: 8px !important;  /* Ensure text has space */
-        flex-shrink: 0 !important;  /* Prevent text from shrinking to zero */
+        font-size: clamp(9px, 1.4vmin, 14px) !important;
+        min-width: clamp(12px, 1.8vmin, 18px) !important;
     }
 
-    .resource-row,
-    #player-info-view .resource-row,
-    .ai-player-info .resource-row {
-        gap: clamp(2px, 0.4vmin, 3px) !important;  /* INCREASED: more breathing room */
+    .resource-row {
+        gap: clamp(2px, 0.5vmin, 4px) !important;  /* Reduced from 4-8px */
         margin: 0 !important;  /* Removed margin */
-        flex-wrap: nowrap !important;  /* Force single row */
     }
 
-    .resource-item,
-    #player-info-view .resource-item,
-    .ai-player-info .resource-item {
-        gap: clamp(2px, 0.3vmin, 3px) !important;  /* INCREASED: more space between icon and text */
-        flex-shrink: 1 !important;  /* Allow shrinking */
-        max-width: 30px !important;  /* INCREASED: 30px to accommodate larger elements */
-        min-width: 0 !important;
+    .resource-item {
+        gap: clamp(2px, 0.3vmin, 3px) !important;  /* Reduced from 2-4px */
     }
 
     /* Compact treasure detail row - CRITICAL FOR VISIBILITY */
@@ -6385,65 +5987,39 @@ body.low-resolution-blocked #difficulty-modal {
         gap: clamp(2px, 0.3vmin, 3px) !important;  /* Reduced gap */
     }
 
-    /* ENSURE treasure breakdown is always visible - SINGLE ROW */
+    /* ENSURE treasure breakdown is always visible */
     .treasure-breakdown-row {
         overflow: visible !important;  /* Override parent clipping */
         position: relative !important;
         z-index: 10 !important;  /* Stay on top */
-        min-height: 14px !important;  /* Guarantee visibility */
+        min-height: 16px !important;  /* Guarantee visibility */
         margin: 0 !important;
-        gap: 0 !important;
     }
 
     .treasure-breakdown-inline {
-        gap: clamp(1px, 0.15vmin, 2px) !important;  /* Minimal spacing */
-        padding: clamp(1px, 0.15vmin, 2px) !important;  /* Minimal padding */
-        flex-wrap: nowrap !important;  /* FORCE SINGLE ROW */
-        overflow: visible !important;
-    }
-
-    .treasure-breakdown-item {
-        gap: clamp(1px, 0.2vmin, 2px) !important;
-        flex-shrink: 1 !important;  /* Allow shrinking to fit */
+        gap: clamp(2px, 0.4vmin, 4px) !important;  /* Compact spacing */
+        padding: clamp(2px, 0.3vmin, 3px) !important;  /* Reduced padding */
     }
 
     .resource-icon-small {
-        width: clamp(11px, 2.5vmin, 16px) !important;  /* Ultra-compact for single row */
-        height: clamp(11px, 2.5vmin, 16px) !important;
-        flex-shrink: 0 !important;  /* Don't shrink icons */
+        width: clamp(16px, 2.2vmin, 20px) !important;  /* Increased for visibility */
+        height: clamp(16px, 2.2vmin, 20px) !important;
     }
 
     .resource-count-small {
-        font-size: clamp(8px, 1.5vmin, 11px) !important;  /* Small font */
+        font-size: clamp(11px, 1.6vmin, 14px) !important;  /* Increased for readability */
         font-weight: bold !important;
-        min-width: clamp(8px, 1.2vmin, 11px) !important;
-        white-space: nowrap !important;
-        flex-shrink: 0 !important;  /* Don't shrink count */
+        min-width: clamp(16px, 2vmin, 22px) !important;  /* Ensure count has space */
     }
 
-    /* Ultra-compact sell buttons - show only "V" */
+    /* CRITICAL: Make sell buttons visible and tappable */
     .sell-treasure-btn {
-        padding: 0px 1px !important;
-        font-size: clamp(6px, 1vmin, 8px) !important;
-        min-width: 8px !important;
-        max-width: 10px !important;
-        width: 10px !important;
-        min-height: 9px !important;
+        padding: 2px 5px !important;  /* Increased from 1px 3px */
+        font-size: clamp(9px, 1.4vmin, 12px) !important;  /* Increased from 7-10px */
+        min-width: 25px !important;  /* Ensure tappable width */
+        min-height: 13px !important;  /* Ensure tappable height */
         line-height: 1 !important;
-        overflow: hidden !important;
-        text-overflow: clip !important;
-        text-indent: -999px !important;  /* Hide full text */
-        flex-shrink: 0 !important;
-        position: relative !important;
-    }
-
-    /* Show only first letter "V" */
-    .sell-treasure-btn::before {
-        content: "V" !important;
-        text-indent: 0 !important;
-        position: absolute !important;
-        left: 1px !important;
-        top: 0 !important;
+        white-space: nowrap !important;
     }
 
     /* Compact action buttons section - minimize vertical space */
@@ -6460,7 +6036,7 @@ body.low-resolution-blocked #difficulty-modal {
 
     /* Make action buttons much smaller and more compact */
     .actions-grid {
-        grid-template-columns: repeat(2, 1fr) !important;  /* Always 2 columns */
+        grid-template-columns: repeat(auto-fit, minmax(clamp(50px, 9vw, 85px), 1fr)) !important;  /* Reduced from 55px */
         gap: 1px !important;  /* Minimal gap */
     }
 
@@ -6494,12 +6070,11 @@ body.low-resolution-blocked #difficulty-modal {
         margin-right: 2px !important;
     }
 
-    /* Ensure actions section is scrollable and fits in viewport */
+    /* Ensure actions section is scrollable */
     body:not(.character-selection-phase) #human-column .player-actions-section {
         overflow-y: auto !important;
         overflow-x: hidden !important;
         max-height: none !important;
-        min-height: 0 !important;  /* Allow shrinking to fit viewport */
     }
 
     /* Compact AI players column */
@@ -6519,942 +6094,437 @@ body.low-resolution-blocked #difficulty-modal {
 }
 
 /* ===========================
-   FINAL OVERRIDE: Critical fix for 481-499px screens
-   Must be at end of file for highest precedence
+   MENU SYSTEM STYLES
    =========================== */
-@media screen and (min-width: 481px) and (max-width: 499px) {
-    /* Force small labels, large numbers */
-    #player-info-view .player-name,
-    #ai-player-1 .player-name,
-    #ai-player-2 .player-name,
-    .player-header .player-name,
-    .player-name {
-        font-size: clamp(6px, 1.2vmin, 10px) !important;
-    }
 
-    #player-info-view .player-vp,
-    #ai-player-1 .player-vp,
-    #ai-player-2 .player-vp,
-    .player-header .player-vp,
-    .player-vp {
-        font-size: clamp(6px, 1.2vmin, 10px) !important;
-    }
+/* CSS Variables for transition speeds (can be modified by MenuController) */
+:root {
+    --transition-duration: 0.3s;
+    --animation-duration: 0.6s;
+}
 
-    #player-info-view .player-coins,
-    #ai-player-1 .player-coins,
-    #ai-player-2 .player-coins,
-    .player-header .player-coins,
-    .player-coins {
-        font-size: clamp(6px, 1.2vmin, 10px) !important;
-    }
+/* Hide game board when in menu mode */
+body.menu-active #game-container > #game-board {
+    display: none;
+}
 
-    /* Large numbers - the important info */
-    #player-info-view .coin-count,
-    #ai-player-1 .coin-count,
-    #ai-player-2 .coin-count,
-    .player-header .coin-count,
-    .player-coins .coin-count,
-    .coin-count {
-        font-size: clamp(18px, 3.6vmin, 28px) !important;
-        font-weight: 800 !important;
-    }
+body.menu-active #game-log-section {
+    display: none;
+}
 
-    #player-info-view .vp-count,
-    #ai-player-1 .vp-count,
-    #ai-player-2 .vp-count,
-    .player-header .vp-count,
-    .player-vp .vp-count,
-    .vp-count {
-        font-size: clamp(18px, 3.6vmin, 28px) !important;
-        font-weight: 800 !important;
-    }
+/* Loading Screen */
+#loading-screen-modal {
+    z-index: 10000;
+}
 
-    /* Small coin icon */
-    #player-info-view .coin-icon,
-    #ai-player-1 .coin-icon,
-    #ai-player-2 .coin-icon,
-    .player-header .coin-icon,
-    .coin-icon,
-    .coin-icon.coin-image {
-        width: clamp(12px, 2vmin, 16px) !important;
-        height: clamp(12px, 2vmin, 16px) !important;
+.loading-screen-content {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: #000;
+}
+
+#intro-video {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    max-width: 100%;
+    max-height: 100%;
+    width: auto;
+    height: auto;
+    transform: translate(-50%, -50%);
+    object-fit: contain;
+    z-index: 1;
+}
+
+.loading-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        to bottom,
+        rgba(0, 0, 0, 0.6) 0%,
+        rgba(0, 0, 0, 0.4) 50%,
+        rgba(0, 0, 0, 0.7) 100%
+    );
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 2;
+    padding: 20px;
+}
+
+.game-title {
+    font-size: clamp(48px, 8vw, 96px);
+    font-weight: bold;
+    color: var(--gold-primary);
+    text-shadow:
+        0 0 10px rgba(201, 169, 97, 0.5),
+        2px 2px 4px rgba(0, 0, 0, 0.8),
+        0 0 30px rgba(201, 169, 97, 0.3);
+    margin-bottom: 60px;
+    letter-spacing: 8px;
+    animation: titlePulse var(--animation-duration) ease-in-out infinite alternate;
+    transition: opacity 0.3s ease-out;
+}
+
+@keyframes titlePulse {
+    0% {
+        text-shadow:
+            0 0 10px rgba(201, 169, 97, 0.5),
+            2px 2px 4px rgba(0, 0, 0, 0.8),
+            0 0 30px rgba(201, 169, 97, 0.3);
+    }
+    100% {
+        text-shadow:
+            0 0 20px rgba(201, 169, 97, 0.8),
+            2px 2px 4px rgba(0, 0, 0, 0.8),
+            0 0 50px rgba(201, 169, 97, 0.5);
     }
 }
 
-/* ========================================
-   MOBILE-FIRST: 500x300 and similar small resolutions
-   Fixes: treasure count visibility, player info sizing
-   ======================================== */
-@media screen and (max-width: 520px) and (max-height: 320px) {
-    /* Reduce player name font size */
-    .player-name {
-        font-size: clamp(7px, 1.1vmin, 9px) !important;
+.loading-bar-container {
+    width: 100%;
+    max-width: 500px;
+    text-align: center;
+    transition: opacity 0.3s ease-out;
+}
+
+.loading-bar {
+    width: 100%;
+    height: 30px;
+    background: rgba(0, 0, 0, 0.5);
+    border: 2px solid var(--gold-primary);
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow:
+        0 0 10px rgba(201, 169, 97, 0.3),
+        inset 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.loading-progress {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg,
+        var(--gold-primary) 0%,
+        #dac272 50%,
+        var(--gold-primary) 100%
+    );
+    transition: width var(--transition-duration) ease-out;
+    box-shadow: 0 0 15px rgba(201, 169, 97, 0.6);
+}
+
+.loading-text {
+    margin-top: 15px;
+    font-size: clamp(16px, 3vw, 24px);
+    color: var(--gold-primary);
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+    font-weight: 600;
+}
+
+.skip-btn {
+    position: absolute;
+    bottom: 40px;
+    right: 40px;
+    padding: 12px 24px;
+    font-size: 18px;
+    transition: all var(--transition-duration) ease;
+}
+
+.skip-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 20px rgba(201, 169, 97, 0.5);
+}
+
+/* Menu Modal Content */
+.menu-modal-content {
+    text-align: center;
+    padding: 40px;
+    min-width: 400px;
+    max-width: 600px;
+}
+
+.main-menu-title {
+    font-size: clamp(42px, 6vw, 72px);
+    color: var(--gold-primary);
+    margin-bottom: 50px;
+    text-shadow:
+        2px 2px 4px rgba(0, 0, 0, 0.8),
+        0 0 20px rgba(201, 169, 97, 0.3);
+    letter-spacing: 6px;
+}
+
+.menu-buttons-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    align-items: center;
+    width: 100%;
+}
+
+.menu-btn {
+    width: 100%;
+    max-width: 350px;
+    padding: 18px 32px;
+    font-size: clamp(18px, 3vw, 24px);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    transition: all var(--transition-duration) ease;
+    border: 2px solid var(--gold-primary);
+    margin: 0 auto;
+}
+
+.menu-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 20px rgba(201, 169, 97, 0.4);
+}
+
+.menu-btn:active {
+    transform: translateY(-1px);
+}
+
+.menu-button-wrapper {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+}
+
+/* Settings Panel */
+.settings-panel {
+    background: rgba(0, 0, 0, 0.3);
+    border: 2px solid var(--gold-primary);
+    border-radius: var(--border-radius-md);
+    padding: 30px;
+    margin-bottom: 30px;
+    text-align: left;
+}
+
+.setting-item {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.setting-item label {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--gold-primary);
+}
+
+/* Custom Select Styling */
+.custom-select-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+.custom-select-display {
+    padding: 12px 20px;
+    font-size: 16px;
+    background: rgba(0, 0, 0, 0.6);
+    color: var(--gold-primary);
+    border: 2px solid var(--gold-primary);
+    border-radius: var(--border-radius-sm);
+    cursor: pointer;
+    transition: all var(--transition-duration) ease;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.custom-select-display::after {
+    content: '▼';
+    font-size: 12px;
+    margin-left: 10px;
+    transition: transform var(--transition-duration) ease;
+}
+
+.custom-select-display:hover {
+    background: rgba(201, 169, 97, 0.2);
+    box-shadow: 0 0 10px rgba(201, 169, 97, 0.3);
+}
+
+.custom-select-options {
+    position: absolute;
+    top: calc(100% + 5px);
+    left: 0;
+    right: 0;
+    background: rgba(0, 0, 0, 0.9);
+    border: 2px solid var(--gold-primary);
+    border-radius: var(--border-radius-sm);
+    overflow: hidden;
+    z-index: 1000;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5);
+}
+
+.custom-select-options.hidden {
+    display: none;
+}
+
+.custom-option {
+    padding: 12px 20px;
+    font-size: 16px;
+    color: var(--gold-primary);
+    cursor: pointer;
+    transition: all var(--transition-duration) ease;
+    border-bottom: 1px solid rgba(201, 169, 97, 0.2);
+}
+
+.custom-option:last-child {
+    border-bottom: none;
+}
+
+.custom-option:hover {
+    background: rgba(201, 169, 97, 0.3);
+}
+
+.custom-option.selected {
+    background: rgba(201, 169, 97, 0.2);
+    font-weight: 700;
+}
+
+.setting-description {
+    font-size: 14px;
+    color: rgba(201, 169, 97, 0.8);
+    font-style: italic;
+    margin-top: -5px;
+}
+
+/* Credits Content */
+.credits-content {
+    background: rgba(0, 0, 0, 0.3);
+    border: 2px solid var(--gold-primary);
+    border-radius: var(--border-radius-md);
+    padding: 30px;
+    margin-bottom: 30px;
+    text-align: left;
+}
+
+.credits-text {
+    font-size: 18px;
+    line-height: 1.8;
+    color: var(--text-primary);
+    margin-bottom: 20px;
+}
+
+.credits-text:last-child {
+    margin-bottom: 0;
+}
+
+.credits-text strong {
+    color: var(--gold-primary);
+    font-weight: 700;
+}
+
+.credits-text a {
+    color: var(--gold-primary);
+    text-decoration: none;
+    border-bottom: 1px solid var(--gold-primary);
+    transition: all var(--transition-duration) ease;
+}
+
+.credits-text a:hover {
+    color: #dac272;
+    border-bottom-color: #dac272;
+    text-shadow: 0 0 8px rgba(201, 169, 97, 0.5);
+}
+
+/* Responsive adjustments for menu system */
+@media screen and (max-width: 768px) {
+    .menu-modal-content {
+        min-width: 300px;
+        padding: 30px 20px;
     }
 
-    /* Reduce coins and VP font sizes */
-    .player-coins, .player-vp {
-        font-size: clamp(7px, 1.1vmin, 9px) !important;
+    .main-menu-title {
+        margin-bottom: 40px;
     }
 
-    .coin-count, .vp-count {
-        font-size: clamp(9px, 1.3vmin, 12px) !important;
+    .menu-btn {
+        padding: 15px 24px;
+        font-size: clamp(16px, 4vw, 20px);
     }
 
-    /* Smaller coin icons */
-    .coin-icon, .coin-icon.coin-image {
-        width: clamp(10px, 1.5vmin, 14px) !important;
-        height: clamp(10px, 1.5vmin, 14px) !important;
+    .settings-panel,
+    .credits-content {
+        padding: 20px;
     }
 
-    /* Reduce resource icon sizes AGGRESSIVELY to fit 3 items in 89px */
-    #player-info-view .resource-icon-large {
-        width: clamp(12px, 1.8vmin, 16px) !important;  /* Much smaller: 12-16px */
-        height: clamp(12px, 1.8vmin, 16px) !important;
+    .credits-text {
+        font-size: 16px;
     }
 
-    /* Make resource items VERY compact */
-    #player-info-view .resource-item {
-        gap: clamp(1px, 0.2vmin, 2px) !important;  /* Minimal gap */
-        min-width: 0 !important;
-        flex-shrink: 1 !important;
-        max-width: 28px !important;  /* Force small width: icon(12-16px) + gap(1-2px) + text(~10px) = ~28px max */
-    }
-
-    /* Reduce resource count font size */
-    #player-info-view .resource-count {
-        font-size: clamp(7px, 1.1vmin, 9px) !important;  /* Smaller text */
-        min-width: 0 !important;
-    }
-
-    /* Ensure treasure icons are visible */
-    .resource-icon-small {
-        width: clamp(12px, 1.8vmin, 16px) !important;
-        height: clamp(12px, 1.8vmin, 16px) !important;
-    }
-
-    /* Reduce resource count font sizes */
-    #player-info-view .resource-count {
-        font-size: clamp(9px, 1.4vmin, 14px) !important;
-    }
-
-    .resource-count-small {
-        font-size: clamp(8px, 1.2vmin, 12px) !important;
-    }
-
-    /* Tighten gaps and spacing to fit all resources */
-    #player-info-view .resource-row {
-        gap: clamp(2px, 0.5vmin, 4px) !important;  /* Reduced from 3-6px to 2-4px */
-        margin: clamp(1px, 0.2vmin, 2px) 0 !important;
-        flex-wrap: nowrap !important;  /* Prevent wrapping */
-        max-width: 100% !important;
-    }
-
-    /* Ensure treasure breakdown is visible in single row */
-    .treasure-breakdown-inline {
-        gap: clamp(2px, 0.4vmin, 4px) !important;
-        padding: clamp(2px, 0.3vmin, 3px) !important;
-    }
-
-    /* Reduce spacing in player header */
-    .player-header {
-        gap: clamp(2px, 0.4vmin, 4px) !important;
-        padding-bottom: clamp(1px, 0.2vmin, 2px) !important;
-        margin-bottom: clamp(1px, 0.2vmin, 2px) !important;
-    }
-
-    /* Make AI player resources more compact */
-    #ai-players-column .resource-item {
-        gap: clamp(2px, 0.4vmin, 4px) !important;
-    }
-
-    .ai-resources-grid {
-        gap: clamp(2px, 0.4vmin, 4px) !important;
-        padding: clamp(2px, 0.3vmin, 3px) !important;
-    }
-
-    /* ADDED: Action button sizing for 500x300 */
-    .action-btn {
-        font-size: clamp(9px, 1.8vmin, 11px) !important;  /* Smaller font to fit */
-        padding: clamp(0.15em, 0.6vmin, 0.4em) !important;
-        min-height: clamp(36px, 6vh, 48px) !important;  /* MUCH taller for text wrapping */
-        line-height: 1.1 !important;
-    }
-
-    /* Force single column for very small screens */
-    .actions-grid {
-        grid-template-columns: repeat(2, 1fr) !important;  /* Always 2 columns */
-        gap: clamp(1px, 0.3vmin, 3px) !important;
+    .skip-btn {
+        bottom: 20px;
+        right: 20px;
+        padding: 10px 20px;
+        font-size: 16px;
     }
 }
 
-/* ========================================
-   MOBILE-FIRST: 500x450 resolution
-   Fixes: action button text display
-   ======================================== */
-@media screen and (max-width: 520px) and (min-height: 430px) and (max-height: 470px) {
-    /* Adjust action button sizing for better text fit */
-    .action-btn {
-        font-size: clamp(10px, 2.2vmin, 13px) !important;  /* Reduced to fit in narrower buttons */
-        padding: clamp(0.25em, 0.8vmin, 0.6em) !important;
-        line-height: 1.15 !important;
-        min-height: clamp(38px, 6vh, 50px) !important;  /* Taller for text wrapping */
+@media screen and (max-width: 480px) {
+    .menu-modal-content {
+        min-width: 90%;
+        padding: 20px 15px;
     }
 
-    /* Force single column */
-    .actions-grid {
-        grid-template-columns: repeat(2, 1fr) !important;  /* Always 2 columns */
-        gap: clamp(2px, 0.4vmin, 4px) !important;
-    }
-}
-
-/* ========================================
-   MOBILE-FIRST: 500x400 resolution
-   Fixes: Treasure icons visibility, player header alignment
-   ======================================== */
-@media screen and (max-width: 520px) and (min-height: 380px) and (max-height: 420px) {
-    /* FIX: Make treasure icons VISIBLE - currently 12px is too small */
-    #player-info-view .resource-icon-small,
-    .treasure-breakdown-inline .resource-icon-small {
-        width: clamp(18px, 2.5vmin, 22px) !important;  /* Increased from 12px to 18px minimum */
-        height: clamp(18px, 2.5vmin, 22px) !important;
+    .loading-bar-container {
+        max-width: 90%;
     }
 
-    /* FIX: Increase treasure breakdown row height to accommodate icons */
-    .treasure-breakdown-inline {
-        min-height: 20px !important;
-        padding: clamp(2px, 0.4vmin, 4px) !important;
+    .game-title {
+        margin-bottom: 40px;
+        letter-spacing: 4px;
     }
 
-    /* FIX: Better alignment for player header elements */
-    #player-info-view .player-header {
-        align-items: center !important;
-        gap: clamp(4px, 0.8vmin, 8px) !important;
-        display: flex !important;
+    .menu-btn {
+        padding: 12px 20px;
     }
 
-    /* FIX: CRITICAL - Reset h3 default browser styles that cause misalignment */
-    #player-info-view .player-name {
-        font-size: 7px !important;  /* REDUCED: to 8px for long names like "Baldric", "Siegfried" */
-        line-height: 1.2 !important;
-        display: flex !important;
-        align-items: center !important;
-        margin: 0 !important;  /* Remove h3 default margin */
-        padding: 0 !important;  /* Remove any padding */
-        font-weight: 700 !important;  /* Match AI players - bold */
+    .settings-panel,
+    .credits-content {
+        padding: 15px;
     }
 
-    #player-info-view .player-coins,
-    #player-info-view .player-vp {
-        font-size: 7px !important;  /* REDUCED: to 8px for consistency */
-        line-height: 1.2 !important;
-        display: flex !important;
-        align-items: center !important;
-        margin: 0 !important;
-        padding: 0 !important;
-        font-weight: 700 !important;  /* Match AI players - bold */
+    .setting-item {
+        gap: 8px;
     }
 
-    /* Ensure all text elements have same properties */
-    #player-info-view .coin-count,
-    #player-info-view .vp-count {
-        font-size: 7px !important;  /* REDUCED: to 8px for consistency */
-        line-height: 1.2 !important;
-        margin: 0 !important;
-        padding: 0 !important;
-        display: inline-block !important;
-        vertical-align: middle !important;
+    .setting-item label {
+        font-size: 16px;
     }
 
-    /* Ensure coin icon aligns perfectly with text - smaller to match reduced font */
-    #player-info-view .coin-icon,
-    #player-info-view .coin-icon.coin-image {
-        width: 9px !important;  /* REDUCED: to 10px to match 8px text */
-        height: 9px !important;
-        display: inline-block !important;
-        vertical-align: middle !important;
-        margin: 0 !important;
-        padding: 0 !important;
+    .custom-select-display,
+    .custom-option {
+        font-size: 14px;
+        padding: 10px 15px;
     }
 
-    /* Reduce player header padding to save space for treasure leader icon */
-    #player-info-view .player-header {
-        padding-bottom: clamp(1px, 0.2vmin, 2px) !important;
-        margin-bottom: clamp(2px, 0.3vmin, 3px) !important;
-    }
-
-    /* Also reduce emblem badge size if present */
-    #player-info-view .emblem-badge {
-        font-size: 10px !important;
-    }
-
-    /* Reduce AI player font sizes - SAME AS HUMAN for long names */
-    #ai-players-column .player-name {
-        font-size: 7px !important;  /* Fixed 8px for long names like "Baldric", "Siegfried" */
-    }
-
-    #ai-players-column .player-coins,
-    #ai-players-column .player-vp {
-        font-size: 7px !important;  /* Match name size */
-    }
-
-    #ai-players-column .coin-count,
-    #ai-players-column .vp-count {
-        font-size: 7px !important;  /* Consistent sizing */
-    }
-
-    /* Smaller AI player coin icons - MATCH HUMAN */
-    #ai-players-column .coin-icon,
-    #ai-players-column .coin-icon.coin-image {
-        width: 9px !important;  /* Match human player */
-        height: 9px !important;
-    }
-
-    /* Reduce AI player header padding for space */
-    #ai-players-column .player-header {
-        padding-bottom: clamp(1px, 0.2vmin, 2px) !important;
-        margin-bottom: clamp(2px, 0.3vmin, 3px) !important;
-    }
-
-    /* Reduce AI player resource icon sizes */
-    #ai-players-column .resource-icon-large {
-        width: clamp(16px, 2.2vmin, 24px) !important;
-        height: clamp(16px, 2.2vmin, 24px) !important;
-    }
-
-    /* Reduce AI player resource counts */
-    #ai-players-column .resource-count {
-        font-size: clamp(10px, 1.5vmin, 16px) !important;
-    }
-
-    /* Tighter AI player spacing */
-    #ai-players-column {
-        gap: clamp(4px, 0.8vmin, 8px) !important;
-    }
-
-    .ai-resources-grid {
-        gap: clamp(2px, 0.4vmin, 4px) !important;
-        padding: clamp(2px, 0.3vmin, 3px) !important;
-    }
-
-    /* Reduce AI player header height */
-    #ai-player-1 .player-header,
-    #ai-player-2 .player-header {
-        height: auto !important;
-        max-height: none !important;
-        flex: 0 0 auto !important;
-        padding: clamp(2px, 0.3vmin, 3px) !important;
-    }
-
-    /* Make AI player containers more compact */
-    .ai-player-container {
-        gap: clamp(2px, 0.4vmin, 4px) !important;
-    }
-
-    /* Action button sizing for 500x400 */
-    .action-btn {
-        font-size: clamp(8px, 1.8vmin, 11px) !important;  /* REDUCED: from 10-13px to 8-11px */
-        padding: clamp(0.2em, 0.6vmin, 0.4em) !important;
-        min-height: clamp(30px, 5vh, 38px) !important;
-        line-height: 1.15 !important;
-    }
-
-    /* Two-column grid for better space usage */
-    .actions-grid {
-        grid-template-columns: repeat(2, 1fr) !important;
-        gap: clamp(3px, 0.5vmin, 5px) !important;
+    .credits-text {
+        font-size: 14px;
     }
 }
 
-/* ========================================
-   MOBILE-FIRST: 500x300 resolution
-   Fixes: Treasure count visibility, compact player info
-   ======================================== */
-@media screen and (max-width: 520px) and (max-height: 320px) {
-    /* Apply same compact resource styling as 500x400 */
-    .resource-icon-large,
-    #player-info-view .resource-icon-large,
-    .ai-player-info .resource-icon-large {
-        width: clamp(14px, 1.8vmin, 18px) !important;
-        height: clamp(14px, 1.8vmin, 18px) !important;
+/* Landscape mobile optimization for loading screen */
+@media screen and (max-height: 500px) and (orientation: landscape) {
+    .game-title {
+        font-size: clamp(32px, 6vw, 48px);
+        margin-bottom: 30px;
     }
 
-    .resource-count,
-    #player-info-view .resource-count,
-    .ai-player-info .resource-count {
-        font-size: clamp(8px, 1.2vmin, 10px) !important;
-        min-width: 8px !important;
-        flex-shrink: 0 !important;
+    .loading-bar {
+        height: 20px;
     }
 
-    .resource-row,
-    #player-info-view .resource-row,
-    .ai-player-info .resource-row {
-        gap: clamp(2px, 0.4vmin, 3px) !important;
-        margin: 0 !important;
-        flex-wrap: nowrap !important;
-    }
-
-    .resource-item,
-    #player-info-view .resource-item,
-    .ai-player-info .resource-item {
-        gap: clamp(2px, 0.3vmin, 3px) !important;
-        flex-shrink: 1 !important;
-        max-width: 30px !important;
-        min-width: 0 !important;
-    }
-
-    /* Player header alignment and sizing - SAME AS 500x400 */
-    #player-info-view .player-header {
-        align-items: center !important;
-        gap: clamp(4px, 0.8vmin, 8px) !important;
-        display: flex !important;
-    }
-
-    #player-info-view .player-name {
-        font-size: 7px !important;
-        line-height: 1.2 !important;
-        margin: 0 !important;
-        padding: 0 !important;
-        font-weight: 700 !important;
-        display: flex !important;
-        align-items: center !important;
-    }
-
-    #player-info-view .player-coins,
-    #player-info-view .player-vp {
-        font-size: 7px !important;
-        line-height: 1.2 !important;
-        display: flex !important;
-        align-items: center !important;
-        margin: 0 !important;
-        padding: 0 !important;
-        font-weight: 700 !important;
-    }
-
-    #player-info-view .coin-count,
-    #player-info-view .vp-count {
-        font-size: 7px !important;
-        line-height: 1.2 !important;
-        margin: 0 !important;
-        padding: 0 !important;
-        display: inline-block !important;
-        vertical-align: middle !important;
-    }
-
-    #player-info-view .coin-icon,
-    #player-info-view .coin-icon.coin-image {
-        width: 12px !important;
-        height: 9px !important;
-        display: inline-block !important;
-        vertical-align: middle !important;
-        margin: 0 !important;
-        padding: 0 !important;
-    }
-
-    /* AI player headers - EXACT SAME AS HUMAN - using #ai-players-column for specificity */
-    #ai-players-column .player-header {
-        align-items: center !important;
-        gap: clamp(4px, 0.8vmin, 8px) !important;
-        display: flex !important;
-    }
-
-    #ai-players-column .player-name {
-        font-size: 7px !important;  /* SAME AS HUMAN - reduced for long names */
-        line-height: 1.2 !important;
-        margin: 0 !important;
-        padding: 0 !important;
-        font-weight: 700 !important;
-        display: flex !important;
-        align-items: center !important;
-    }
-
-    #ai-players-column .player-coins,
-    #ai-players-column .player-vp {
-        font-size: 7px !important;  /* SAME AS HUMAN - reduced for long names */
-        line-height: 1.2 !important;
-        display: flex !important;
-        align-items: center !important;
-        margin: 0 !important;
-        padding: 0 !important;
-        font-weight: 700 !important;
-    }
-
-    #ai-players-column .coin-count,
-    #ai-players-column .vp-count {
-        font-size: 7px !important;  /* SAME AS HUMAN - reduced for long names */
-        line-height: 1.2 !important;
-        margin: 0 !important;
-        padding: 0 !important;
-        display: inline-block !important;
-        vertical-align: middle !important;
-    }
-
-    #ai-players-column .coin-icon,
-    #ai-players-column .coin-icon.coin-image {
-        width: 9px !important;  /* SAME AS HUMAN - reduced for long names */
-        height: 9px !important;
-        display: inline-block !important;
-        vertical-align: middle !important;
-        margin: 0 !important;
-        padding: 0 !important;
-    }
-}
-
-/* ========================================
-   MOBILE-FIRST: 500x350 resolution
-   Fixes: Player header alignment, AI player visibility, resource sizing
-   ======================================== */
-@media screen and (max-width: 520px) and (min-height: 330px) and (max-height: 370px) {
-    /* Apply same compact resource styling as other resolutions */
-    .resource-icon-large,
-    #player-info-view .resource-icon-large,
-    #ai-players-column .resource-icon-large {
-        width: clamp(14px, 1.8vmin, 18px) !important;
-        height: clamp(14px, 1.8vmin, 18px) !important;
-    }
-
-    .resource-count,
-    #player-info-view .resource-count,
-    #ai-players-column .resource-count {
-        font-size: clamp(8px, 1.2vmin, 10px) !important;
-        min-width: 8px !important;
-        flex-shrink: 0 !important;
-    }
-
-    .resource-row,
-    #player-info-view .resource-row,
-    #ai-players-column .resource-row {
-        gap: clamp(2px, 0.4vmin, 3px) !important;
-        margin: 0 !important;
-        flex-wrap: nowrap !important;
-    }
-
-    .resource-item,
-    #player-info-view .resource-item,
-    #ai-players-column .resource-item {
-        gap: clamp(2px, 0.3vmin, 3px) !important;
-        flex-shrink: 1 !important;
-        max-width: 30px !important;
-        min-width: 0 !important;
-    }
-
-    /* Player header alignment and sizing - SAME AS OTHER RESOLUTIONS */
-    #player-info-view .player-header {
-        align-items: center !important;
-        gap: clamp(4px, 0.8vmin, 8px) !important;
-        display: flex !important;
-    }
-
-    #player-info-view .player-name {
-        font-size: 7px !important;
-        line-height: 1.2 !important;
-        margin: 0 !important;
-        padding: 0 !important;
-        font-weight: 700 !important;
-        display: flex !important;
-        align-items: center !important;
-    }
-
-    #player-info-view .player-coins,
-    #player-info-view .player-vp {
-        font-size: 7px !important;
-        line-height: 1.2 !important;
-        display: flex !important;
-        align-items: center !important;
-        margin: 0 !important;
-        padding: 0 !important;
-        font-weight: 700 !important;
-    }
-
-    #player-info-view .coin-count,
-    #player-info-view .vp-count {
-        font-size: 7px !important;
-        line-height: 1.2 !important;
-        margin: 0 !important;
-        padding: 0 !important;
-        display: inline-block !important;
-        vertical-align: middle !important;
-    }
-
-    #player-info-view .coin-icon,
-    #player-info-view .coin-icon.coin-image {
-        width: 12px !important;
-        height: 9px !important;
-        display: inline-block !important;
-        vertical-align: middle !important;
-        margin: 0 !important;
-        padding: 0 !important;
-    }
-
-    /* AI player headers - EXACT SAME AS HUMAN - using #ai-players-column for specificity */
-    #ai-players-column .player-header {
-        align-items: center !important;
-        gap: clamp(4px, 0.8vmin, 8px) !important;
-        display: flex !important;
-    }
-
-    #ai-players-column .player-name {
-        font-size: 7px !important;  /* SAME AS HUMAN - reduced for long names */
-        line-height: 1.2 !important;
-        margin: 0 !important;
-        padding: 0 !important;
-        font-weight: 700 !important;
-        display: flex !important;
-        align-items: center !important;
-    }
-
-    #ai-players-column .player-coins,
-    #ai-players-column .player-vp {
-        font-size: 7px !important;  /* SAME AS HUMAN - reduced for long names */
-        line-height: 1.2 !important;
-        display: flex !important;
-        align-items: center !important;
-        margin: 0 !important;
-        padding: 0 !important;
-        font-weight: 700 !important;
-    }
-
-    #ai-players-column .coin-count,
-    #ai-players-column .vp-count {
-        font-size: 7px !important;  /* SAME AS HUMAN - reduced for long names */
-        line-height: 1.2 !important;
-        margin: 0 !important;
-        padding: 0 !important;
-        display: inline-block !important;
-        vertical-align: middle !important;
-    }
-
-    #ai-players-column .coin-icon,
-    #ai-players-column .coin-icon.coin-image {
-        width: 9px !important;  /* SAME AS HUMAN - reduced for long names */
-        height: 9px !important;
-        display: inline-block !important;
-        vertical-align: middle !important;
-        margin: 0 !important;
-        padding: 0 !important;
-    }
-}
-
-/* ========================================
-   MOBILE-FIRST: 500x450 resolution
-   Fixes: Action button text readability
-   ======================================== */
-@media screen and (max-width: 520px) and (min-height: 430px) and (max-height: 470px) {
-    /* Apply same compact resource styling as 500x400 */
-    .resource-icon-large,
-    #player-info-view .resource-icon-large,
-    .ai-player-info .resource-icon-large {
-        width: clamp(14px, 1.8vmin, 18px) !important;
-        height: clamp(14px, 1.8vmin, 18px) !important;
-    }
-
-    .resource-count,
-    #player-info-view .resource-count,
-    .ai-player-info .resource-count {
-        font-size: clamp(8px, 1.2vmin, 10px) !important;
-        min-width: 8px !important;
-        flex-shrink: 0 !important;
-    }
-
-    .resource-row,
-    #player-info-view .resource-row,
-    .ai-player-info .resource-row {
-        gap: clamp(2px, 0.4vmin, 3px) !important;
-        margin: 0 !important;
-        flex-wrap: nowrap !important;
-    }
-
-    .resource-item,
-    #player-info-view .resource-item,
-    .ai-player-info .resource-item {
-        gap: clamp(2px, 0.3vmin, 3px) !important;
-        flex-shrink: 1 !important;
-        max-width: 30px !important;
-        min-width: 0 !important;
-    }
-
-    /* Player header alignment and sizing - SAME AS 500x400 */
-    #player-info-view .player-header {
-        align-items: center !important;
-        gap: clamp(4px, 0.8vmin, 8px) !important;
-        display: flex !important;
-    }
-
-    #player-info-view .player-name {
-        font-size: 7px !important;
-        line-height: 1.2 !important;
-        margin: 0 !important;
-        padding: 0 !important;
-        font-weight: 700 !important;
-        display: flex !important;
-        align-items: center !important;
-    }
-
-    #player-info-view .player-coins,
-    #player-info-view .player-vp {
-        font-size: 7px !important;
-        line-height: 1.2 !important;
-        display: flex !important;
-        align-items: center !important;
-        margin: 0 !important;
-        padding: 0 !important;
-        font-weight: 700 !important;
-    }
-
-    #player-info-view .coin-count,
-    #player-info-view .vp-count {
-        font-size: 7px !important;
-        line-height: 1.2 !important;
-        margin: 0 !important;
-        padding: 0 !important;
-        display: inline-block !important;
-        vertical-align: middle !important;
-    }
-
-    #player-info-view .coin-icon,
-    #player-info-view .coin-icon.coin-image {
-        width: 12px !important;
-        height: 9px !important;
-        display: inline-block !important;
-        vertical-align: middle !important;
-        margin: 0 !important;
-        padding: 0 !important;
-    }
-
-    /* AI player headers - EXACT SAME AS HUMAN - using #ai-players-column for specificity */
-    #ai-players-column .player-header {
-        align-items: center !important;
-        gap: clamp(4px, 0.8vmin, 8px) !important;
-        display: flex !important;
-    }
-
-    #ai-players-column .player-name {
-        font-size: 7px !important;  /* SAME AS HUMAN - reduced for long names */
-        line-height: 1.2 !important;
-        margin: 0 !important;
-        padding: 0 !important;
-        font-weight: 700 !important;
-        display: flex !important;
-        align-items: center !important;
-    }
-
-    #ai-players-column .player-coins,
-    #ai-players-column .player-vp {
-        font-size: 7px !important;  /* SAME AS HUMAN - reduced for long names */
-        line-height: 1.2 !important;
-        display: flex !important;
-        align-items: center !important;
-        margin: 0 !important;
-        padding: 0 !important;
-        font-weight: 700 !important;
-    }
-
-    #ai-players-column .coin-count,
-    #ai-players-column .vp-count {
-        font-size: 7px !important;  /* SAME AS HUMAN - reduced for long names */
-        line-height: 1.2 !important;
-        margin: 0 !important;
-        padding: 0 !important;
-        display: inline-block !important;
-        vertical-align: middle !important;
-    }
-
-    #ai-players-column .coin-icon,
-    #ai-players-column .coin-icon.coin-image {
-        width: 9px !important;  /* SAME AS HUMAN - reduced for long names */
-        height: 9px !important;
-        display: inline-block !important;
-        vertical-align: middle !important;
-        margin: 0 !important;
-        padding: 0 !important;
-    }
-
-    /* Ensure action buttons are readable */
-    .action-btn {
-        font-size: clamp(10px, 2.2vmin, 13px) !important;
-        padding: clamp(0.3em, 0.8vmin, 0.6em) !important;
-        line-height: 1.2 !important;
-        min-height: clamp(40px, 6vh, 52px) !important;
-    }
-}
-
-/* ========================================
-   MOBILE-FIRST: Ultra-wide short screens (700x350, 750x270, etc.)
-   Fixes: Action button text too small on short ultra-wide screens
-   ======================================== */
-@media screen and (min-width: 600px) and (max-height: 370px) {
-    /* Override tablet query grid layout to prevent AI column overflow */
-    #game-board {
-        grid-template-columns: 1fr 2fr 1fr !important;  /* 25% | 50% | 25% - more space for side columns */
-    }
-
-    /* FIX: Force AI player resources to be HORIZONTAL like human player */
-    #ai-players-column .player-resources:not(.ai-resources-grid) {
-        flex-direction: row !important;  /* HORIZONTAL - single line */
-        flex-wrap: nowrap !important;
-        align-items: center !important;
-        gap: clamp(3px, 0.6vmin, 6px) !important;
-    }
-
-    #ai-players-column .resource-row {
-        flex-wrap: nowrap !important;
-        gap: clamp(2px, 0.4vmin, 3px) !important;
-    }
-
-    /* Apply same compact resource styling as 500x400 for consistency */
-    .resource-icon-large,
-    #player-info-view .resource-icon-large,
-    #ai-players-column .resource-icon-large {
-        width: clamp(14px, 1.8vmin, 18px) !important;
-        height: clamp(14px, 1.8vmin, 18px) !important;
-    }
-
-    .resource-count,
-    #player-info-view .resource-count,
-    #ai-players-column .resource-count {
-        font-size: clamp(8px, 1.2vmin, 10px) !important;
-        min-width: 8px !important;
-        flex-shrink: 0 !important;
-    }
-
-    .resource-row,
-    #player-info-view .resource-row,
-    #ai-players-column .resource-row {
-        gap: clamp(2px, 0.4vmin, 3px) !important;
-        margin: 0 !important;
-        flex-wrap: nowrap !important;
-    }
-
-    .resource-item,
-    #player-info-view .resource-item,
-    #ai-players-column .resource-item {
-        gap: clamp(2px, 0.3vmin, 3px) !important;
-        flex-shrink: 1 !important;
-        max-width: 30px !important;
-        min-width: 0 !important;
-    }
-
-    /* Compact player header for all players - SINGLE ROW */
-    #player-info-view .player-header {
-        display: flex !important;
-        flex-direction: row !important;
-        flex-wrap: nowrap !important;
-        align-items: center !important;
-        gap: clamp(6px, 1.2vmin, 12px) !important;
-    }
-
-    #player-info-view .player-name {
-        font-size: 16px !important;
-        line-height: 1.2 !important;
-        margin: 0 !important;
-        padding: 0 !important;
-        font-weight: 700 !important;
-        display: flex !important;
-        align-items: center !important;
-    }
-
-    #player-info-view .player-coins,
-    #player-info-view .player-vp {
-        font-size: 16px !important;
-        line-height: 1.2 !important;
-        display: flex !important;
-        align-items: center !important;
-        margin: 0 !important;
-        padding: 0 !important;
-        font-weight: 700 !important;
-    }
-
-    #player-info-view .coin-count,
-    #player-info-view .vp-count {
-        font-size: 16px !important;
-        line-height: 1.2 !important;
-        margin: 0 !important;
-        padding: 0 !important;
-        display: inline-block !important;
-        vertical-align: middle !important;
-    }
-
-    #player-info-view .coin-icon,
-    #player-info-view .coin-icon.coin-image {
-        width: 20px !important;
-        height: 20px !important;
-        min-width: 20px !important;  /* Override base 20px min-width */
-        min-height: 20px !important;  /* Override base 20px min-height */
-    }
-
-    /* AI player headers - EXACT SAME AS HUMAN - using #ai-players-column for specificity */
-    #ai-players-column .player-header {
-        display: flex !important;
-        flex-direction: row !important;
-        flex-wrap: nowrap !important;
-        align-items: center !important;
-        gap: clamp(6px, 1.2vmin, 12px) !important;  /* SAME AS HUMAN */
-        max-width: 100% !important;  /* Prevent overflow */
-        overflow: hidden !important;  /* Hide overflow */
-    }
-
-    #ai-players-column .player-name {
-        font-size: 16px !important;  /* SAME AS HUMAN */
-        line-height: 1.2 !important;
-        margin: 0 !important;
-        padding: 0 !important;
-        font-weight: 700 !important;
-        display: flex !important;
-        align-items: center !important;
-        flex-shrink: 1 !important;  /* Allow name to shrink */
-        min-width: 0 !important;  /* Allow name to shrink below content size */
-        overflow: hidden !important;
-        text-overflow: ellipsis !important;
-        white-space: nowrap !important;
-    }
-
-    #ai-players-column .player-coins,
-    #ai-players-column .player-vp {
-        font-size: 16px !important;  /* SAME AS HUMAN */
-        line-height: 1.2 !important;
-        display: flex !important;
-        align-items: center !important;
-        margin: 0 !important;
-        padding: 0 !important;
-        font-weight: 700 !important;
-        flex-shrink: 0 !important;  /* Prevent coins/VP from shrinking */
-    }
-
-    #ai-players-column .coin-count,
-    #ai-players-column .vp-count {
-        font-size: 16px !important;  /* SAME AS HUMAN */
-        line-height: 1.2 !important;
-        margin: 0 !important;
-        padding: 0 !important;
-        display: inline-block !important;
-        vertical-align: middle !important;
-        flex-shrink: 0 !important;
-    }
-
-    #ai-players-column .coin-icon,
-    #ai-players-column .coin-icon.coin-image {
-        width: 20px !important;  /* SAME AS HUMAN */
-        height: 20px !important;
-        min-width: 20px !important;  /* Override base 20px min-width */
-        min-height: 20px !important;  /* Override base 20px min-height */
-        display: inline-block !important;
-        vertical-align: middle !important;
-        margin: 0 !important;
-        padding: 0 !important;
-        flex-shrink: 0 !important;
-    }
-
-    /* Action buttons need readable text on ultra-wide short screens */
-    .action-btn {
-        font-size: clamp(10px, 2.8vmin, 13px) !important;
-        padding: clamp(0.2em, 0.8vmin, 0.5em) !important;
-        min-height: clamp(38px, 7vh, 48px) !important;  /* Taller buttons */
-        line-height: 1.15 !important;
-    }
-
-    /* Single column for better readability */
-    .actions-grid {
-        grid-template-columns: repeat(2, 1fr) !important;  /* Always 2 columns */
-        gap: clamp(2px, 0.4vmin, 5px) !important;
+    .skip-btn {
+        bottom: 15px;
+        right: 15px;
+        padding: 8px 16px;
+        font-size: 14px;
     }
 }

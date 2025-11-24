@@ -30,9 +30,6 @@ class UIController {
             characterOptions: document.getElementById('character-options'),
             guildModal: document.getElementById('guild-modal'),
             guildOptions: document.getElementById('guild-options'),
-            sellWealthModal: document.getElementById('sell-wealth-modal'),
-            sellWealthOptions: document.getElementById('sell-wealth-options'),
-            cancelSellWealthBtn: document.getElementById('cancel-sell-wealth-btn'),
             gameOverModal: document.getElementById('game-over-modal'),
             finalScores: document.getElementById('final-scores'),
             selectCharacterBtn: document.getElementById('select-character-btn'),
@@ -75,11 +72,6 @@ class UIController {
         // Cancel guild selection
         this.elements.cancelGuildBtn.addEventListener('click', () => {
             this.hideGuildModal();
-        });
-
-        // Cancel sell wealth
-        this.elements.cancelSellWealthBtn.addEventListener('click', () => {
-            this.hideSellWealthModal();
         });
 
         // Toggle game log
@@ -417,17 +409,6 @@ class UIController {
 
         // Defer until after browser finishes rendering/layout
         requestAnimationFrame(() => {
-            // On very small screens (< 500px width), use much smaller minimum font sizes
-            const viewportWidth = window.innerWidth;
-            let effectiveMinSize = minFontSize;
-
-            if (viewportWidth < 500) {
-                // For player names on tiny screens, use smaller minimum
-                if (element.classList.contains('player-name')) {
-                    effectiveMinSize = 6;
-                }
-            }
-
             // Force reflow to get accurate measurements
             element.offsetHeight;
 
@@ -442,9 +423,9 @@ class UIController {
             let currentFontSize = parseFloat(computedStyle.fontSize);
 
             // Check if text overflows its container
-            if (element.scrollWidth > element.clientWidth && currentFontSize > effectiveMinSize) {
+            if (element.scrollWidth > element.clientWidth && currentFontSize > minFontSize) {
                 // Text overflows - reduce font-size progressively
-                while (element.scrollWidth > element.clientWidth && currentFontSize > effectiveMinSize) {
+                while (element.scrollWidth > element.clientWidth && currentFontSize > minFontSize) {
                     currentFontSize -= 0.5; // Reduce by 0.5px increments
                     element.style.fontSize = currentFontSize + 'px';
                 }
@@ -494,9 +475,6 @@ class UIController {
                 break;
             case 'repair-inn':
                 this.selectInnToRepair(player);
-                break;
-            case 'sell-wealth':
-                this.showSellWealthModal();
                 break;
             case 'cause-mutiny':
                 this.showMutinyGuildSelection();
@@ -809,83 +787,6 @@ class UIController {
 
     hideGuildModal() {
         this.elements.guildModal.classList.add('hidden');
-    }
-
-    showSellWealthModal() {
-        const player = this.game.players[0]; // Human player
-
-        // Check if player has any wealth treasures
-        const has3Coins = player.treasures.some(t => t.type === TREASURE_TYPES.WEALTH && t.coinValue === 3);
-        const has4Coins = player.treasures.some(t => t.type === TREASURE_TYPES.WEALTH && t.coinValue === 4);
-
-        if (!has3Coins && !has4Coins) {
-            this.game.log('No tienes riquezas para vender');
-            return;
-        }
-
-        this.elements.sellWealthOptions.innerHTML = '';
-        this.elements.sellWealthOptions.style.display = 'grid';
-        this.elements.sellWealthOptions.style.gridTemplateColumns = '1fr 1fr';
-        this.elements.sellWealthOptions.style.gap = '15px';
-
-        // Option 1: Sell 3 coins wealth
-        const div3 = document.createElement('div');
-        div3.className = 'guild-option';
-        if (!has3Coins) {
-            div3.classList.add('guild-option-disabled');
-            div3.style.opacity = '0.3';
-            div3.style.pointerEvents = 'none';
-        }
-
-        div3.innerHTML = `
-            <img src="resources/other/Wealth_3coins.png" alt="3 Coins" style="width: 80px; height: 80px; object-fit: contain; margin: 0 auto; display: block;">
-            <strong>Vender Riqueza</strong>
-            <p>3 monedas</p>
-        `;
-
-        if (has3Coins) {
-            div3.addEventListener('click', () => {
-                const index = player.treasures.findIndex(t => t.type === TREASURE_TYPES.WEALTH && t.coinValue === 3);
-                if (index !== -1) {
-                    this.handleSellTreasure(player, index);
-                    this.hideSellWealthModal();
-                }
-            });
-        }
-
-        // Option 2: Sell 4 coins wealth
-        const div4 = document.createElement('div');
-        div4.className = 'guild-option';
-        if (!has4Coins) {
-            div4.classList.add('guild-option-disabled');
-            div4.style.opacity = '0.3';
-            div4.style.pointerEvents = 'none';
-        }
-
-        div4.innerHTML = `
-            <img src="resources/other/Wealth_4coins.png" alt="4 Coins" style="width: 80px; height: 80px; object-fit: contain; margin: 0 auto; display: block;">
-            <strong>Vender Riqueza</strong>
-            <p>4 monedas</p>
-        `;
-
-        if (has4Coins) {
-            div4.addEventListener('click', () => {
-                const index = player.treasures.findIndex(t => t.type === TREASURE_TYPES.WEALTH && t.coinValue === 4);
-                if (index !== -1) {
-                    this.handleSellTreasure(player, index);
-                    this.hideSellWealthModal();
-                }
-            });
-        }
-
-        this.elements.sellWealthOptions.appendChild(div3);
-        this.elements.sellWealthOptions.appendChild(div4);
-
-        this.elements.sellWealthModal.classList.remove('hidden');
-    }
-
-    hideSellWealthModal() {
-        this.elements.sellWealthModal.classList.add('hidden');
     }
 
     selectLandToCultivate(player) {
@@ -1305,6 +1206,68 @@ class UIController {
         }
     }
 
+    renderPlayerTreasures(player) {
+        const treasuresContainer = document.getElementById('human-treasures');
+        if (!treasuresContainer) return;
+
+        if (player.treasures.length === 0) {
+            treasuresContainer.innerHTML = '';
+            return;
+        }
+
+        const treasuresByType = {
+            '1 VP': [],
+            '2 VP': [],
+            '3 💰': [],
+            '4 💰': []
+        };
+
+        player.treasures.forEach((treasure, index) => {
+            let label;
+            if (treasure.type === TREASURE_TYPES.WEALTH) {
+                label = `${treasure.coinValue} 💰`;
+            } else if (treasure.vp === 1) {
+                label = '1 VP';
+            } else if (treasure.vp === 2) {
+                label = '2 VP';
+            }
+
+            if (label) {
+                treasuresByType[label].push(index);
+            }
+        });
+
+        let html = '<div class="treasures-list" style="margin-top: 10px; font-size: 0.9em;">';
+        html += '<h5 style="margin: 5px 0;">Mis Tesoros:</h5>';
+
+        for (let [type, indices] of Object.entries(treasuresByType)) {
+            if (indices.length > 0) {
+                html += `<div class="treasure-type-row" style="display: flex; align-items: center; margin: 5px 0; gap: 8px;">`;
+                html += `<span style="min-width: 50px;">${type}</span>`;
+                html += `<span style="color: #888;">x${indices.length}</span>`;
+
+                // Add sell button for coin treasures
+                if (type.includes('💰')) {
+                    html += `<button class="sell-treasure-btn" data-treasure-index="${indices[0]}"
+                             style="padding: 2px 8px; font-size: 0.8em; cursor: pointer;">Vender</button>`;
+                }
+
+                html += `</div>`;
+            }
+        }
+
+        html += '</div>';
+        treasuresContainer.innerHTML = html;
+
+        // Bind sell buttons
+        const sellButtons = treasuresContainer.querySelectorAll('.sell-treasure-btn');
+        sellButtons.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const index = parseInt(e.target.dataset.treasureIndex);
+                this.handleSellTreasure(player, index);
+            });
+        });
+    }
 
     renderInlineTreasureDetails(player) {
         const detailsContainer = document.getElementById('human-treasure-details');
@@ -1393,21 +1356,36 @@ class UIController {
         }
 
         if (treasureCounts['3coins'] > 0) {
-            html += `<div class="resource-item treasure-breakdown-item">
+            // Find first 3-coin treasure index
+            const index3 = player.treasures.findIndex(t => t.type === TREASURE_TYPES.WEALTH && t.coinValue === 3);
+            html += `<div class="resource-item treasure-breakdown-item treasure-item-with-sell">
                 <img src="resources/other/Wealth_3coins.png" class="resource-icon-small" alt="3 Coins" title="Riquezas de 3 monedas">
                 <span class="resource-count-small">×${treasureCounts['3coins']}</span>
+                <button class="sell-treasure-btn" data-treasure-index="${index3}">Vender</button>
             </div>`;
         }
 
         if (treasureCounts['4coins'] > 0) {
-            html += `<div class="resource-item treasure-breakdown-item">
+            // Find first 4-coin treasure index
+            const index4 = player.treasures.findIndex(t => t.type === TREASURE_TYPES.WEALTH && t.coinValue === 4);
+            html += `<div class="resource-item treasure-breakdown-item treasure-item-with-sell">
                 <img src="resources/other/Wealth_4coins.png" class="resource-icon-small" alt="4 Coins" title="Riquezas de 4 monedas">
                 <span class="resource-count-small">×${treasureCounts['4coins']}</span>
+                <button class="sell-treasure-btn" data-treasure-index="${index4}">Vender</button>
             </div>`;
         }
 
         html += '</div>';
         breakdownContainer.innerHTML = html;
+
+        // Bind sell button click handlers
+        const sellButtons = breakdownContainer.querySelectorAll('.sell-treasure-btn');
+        sellButtons.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const index = parseInt(e.target.dataset.treasureIndex);
+                this.handleSellTreasure(player, index);
+            });
+        });
     }
 
     handleSellTreasure(player, treasureIndex) {
@@ -1940,12 +1918,6 @@ class UIController {
         const repairInnBtn = document.querySelector('[data-action="repair-inn"]');
         repairInnBtn.disabled = !isHumanTurn || player.coins < 1 ||
             player.getDestroyedInnIndices().length === 0;
-
-        // Sell Wealth (available when player has wealth treasures)
-        const sellWealthBtn = document.querySelector('[data-action="sell-wealth"]');
-        const hasWealthTreasures = player.treasures.some(t => t.type === TREASURE_TYPES.WEALTH);
-        sellWealthBtn.disabled = !isHumanTurn || !hasWealthTreasures;
-        sellWealthBtn.style.opacity = sellWealthBtn.disabled ? '0.5' : '1';
 
         // End Turn
         const endTurnBtn = document.querySelector('[data-action="end-turn"]');

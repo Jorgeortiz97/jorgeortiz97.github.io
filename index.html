@@ -20,7 +20,7 @@
     <!-- PWA Manifest -->
     <link rel="manifest" href="manifest.json">
 
-    <link rel="stylesheet" href="css/styles.css?v=16">
+    <link rel="stylesheet" href="css/styles.css?v=2">
 </head>
 <body>
     <div id="game-container">
@@ -113,9 +113,6 @@
                         </button>
                         <button class="action-btn" data-action="repair-inn" disabled>
                             <span class="action-text">Reparar Posada (1)</span>
-                        </button>
-                        <button class="action-btn" data-action="sell-wealth" disabled>
-                            <span class="action-text">Vender Riqueza</span>
                         </button>
                         <button class="action-btn character-ability character-ability-hidden" data-action="cause-mutiny" disabled>
                             <span class="action-text">Causar Motín (1)</span>
@@ -214,6 +211,94 @@
             </div>
         </aside>
 
+        <!-- Loading Screen Modal -->
+        <div id="loading-screen-modal" class="modal">
+            <div class="loading-screen-content">
+                <video id="intro-video" autoplay muted playsinline>
+                    <source src="resources/other/Intro.mp4" type="video/mp4">
+                </video>
+                <div class="loading-overlay">
+                    <h1 class="game-title">GREMIOS</h1>
+                    <div class="loading-bar-container">
+                        <div class="loading-bar">
+                            <div id="loading-progress" class="loading-progress"></div>
+                        </div>
+                        <div id="loading-text" class="loading-text">Cargando recursos... 0%</div>
+                    </div>
+                    <button id="skip-loading-btn" class="btn-secondary skip-btn hidden">Saltar</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Menu Modal -->
+        <div id="main-menu-modal" class="modal hidden">
+            <div class="modal-content menu-modal-content">
+                <h1 class="main-menu-title">GREMIOS</h1>
+                <div class="menu-buttons-container">
+                    <button class="menu-btn btn-primary" data-menu-action="play">Jugar</button>
+                    <button class="menu-btn btn-primary" data-menu-action="settings">Configuración</button>
+                    <button class="menu-btn btn-primary" data-menu-action="credits">Créditos</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Play Menu Modal -->
+        <div id="play-menu-modal" class="modal hidden">
+            <div class="modal-content menu-modal-content">
+                <h2>Jugar</h2>
+                <div class="menu-buttons-container">
+                    <button class="menu-btn btn-primary" data-menu-action="tutorial">Tutorial</button>
+                    <button class="menu-btn btn-primary" data-menu-action="classic">Partida Clásica</button>
+                    <button class="menu-btn btn-secondary" data-menu-action="back-to-main">Atrás</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Settings Modal -->
+        <div id="settings-modal" class="modal hidden">
+            <div class="modal-content menu-modal-content">
+                <h2>Configuración</h2>
+                <div class="settings-panel">
+                    <div class="setting-item">
+                        <label for="transition-speed">Velocidad de Transiciones</label>
+                        <div class="custom-select-wrapper">
+                            <div id="transition-speed-display" class="custom-select-display">Normal</div>
+                            <div id="transition-speed-options" class="custom-select-options hidden">
+                                <div class="custom-option" data-value="fast">Rápida</div>
+                                <div class="custom-option selected" data-value="normal">Normal</div>
+                                <div class="custom-option" data-value="slow">Lenta</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="setting-description">
+                        Controla la velocidad de las animaciones y transiciones durante el juego.
+                    </div>
+                </div>
+                <div class="menu-button-wrapper">
+                    <button class="menu-btn btn-secondary" data-menu-action="back-to-main">Atrás</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Credits Modal -->
+        <div id="credits-modal" class="modal hidden">
+            <div class="modal-content menu-modal-content">
+                <h2>Créditos</h2>
+                <div class="credits-content">
+                    <p class="credits-text">
+                        <strong>Gremios Mobile</strong> es una adaptación para navegadores del juego de mesa original <strong>Gremios</strong>,
+                        diseñado y desarrollado por <strong><a href="https://elenport.es/gremios" target="_blank" rel="noopener noreferrer">Elenport</a></strong>.
+                    </p>
+                    <p class="credits-text">
+                        <strong>Gremios Mobile</strong> fue desarrollado por <strong>Jorge Ortiz</strong>.
+                    </p>
+                </div>
+                <div class="menu-button-wrapper">
+                    <button class="menu-btn btn-secondary" data-menu-action="back-to-main">Atrás</button>
+                </div>
+            </div>
+        </div>
+
         <!-- Modal for Character Selection -->
         <div id="character-modal" class="modal hidden">
             <div class="modal-content">
@@ -231,33 +316,15 @@
             </div>
         </div>
 
-        <!-- Modal for Wealth Treasure Selling -->
-        <div id="sell-wealth-modal" class="modal hidden">
-            <div class="modal-content">
-                <h2>Vender Riqueza</h2>
-                <div id="sell-wealth-options"></div>
-                <button class="btn-secondary" id="cancel-sell-wealth-btn">Cancelar</button>
-            </div>
-        </div>
-
         <!-- Difficulty Selection Modal -->
-        <div id="difficulty-modal" class="modal">
-            <div class="modal-content">
-                <h2>Bienvenido a Gremios</h2>
-                <p class="difficulty-instruction">Selecciona la dificultad de la IA</p>
-                <div id="difficulty-options">
-                    <button class="difficulty-option" data-difficulty="easy">
-                        <h3>Fácil</h3>
-                        <p>IA con estrategia básica y decisiones aleatorias</p>
-                    </button>
-                    <button class="difficulty-option" data-difficulty="medium">
-                        <h3>Media</h3>
-                        <p>IA con estrategia equilibrada que prioriza VP</p>
-                    </button>
-                    <button class="difficulty-option" data-difficulty="hard">
-                        <h3>Difícil</h3>
-                        <p>IA avanzada que maximiza VP y se adapta al estado del juego</p>
-                    </button>
+        <div id="difficulty-modal" class="modal hidden">
+            <div class="modal-content menu-modal-content">
+                <h2>Selecciona Dificultad</h2>
+                <div class="menu-buttons-container">
+                    <button class="menu-btn btn-primary difficulty-option" data-difficulty="easy">Fácil</button>
+                    <button class="menu-btn btn-primary difficulty-option" data-difficulty="medium">Media</button>
+                    <button class="menu-btn btn-primary difficulty-option" data-difficulty="hard">Difícil</button>
+                    <button class="menu-btn btn-secondary" data-menu-action="back-to-play">Atrás</button>
                 </div>
             </div>
         </div>
@@ -499,6 +566,7 @@
     <script src="js/ai.js"></script>
     <script src="js/ui.js"></script>
     <script src="js/game.js"></script>
+    <script src="js/menu.js"></script>
     <script src="js/main.js"></script>
 </body>
 </html>

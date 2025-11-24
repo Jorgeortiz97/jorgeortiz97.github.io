@@ -3,6 +3,7 @@
 // Global references for debugging
 window.gameInstance = null;
 window.uiInstance = null;
+window.menuInstance = null;
 
 // Game timer
 let gameStartTime = null;
@@ -81,13 +82,12 @@ function checkResolution() {
 // Show low resolution blocking modal
 function showLowResolutionModal() {
     const modal = document.getElementById('low-resolution-modal');
-    const difficultyModal = document.getElementById('difficulty-modal');
     if (modal) {
         modal.classList.remove('hidden');
         document.body.classList.add('low-resolution-blocked');
-        // Hide difficulty modal if it's showing
-        if (difficultyModal) {
-            difficultyModal.classList.add('hidden');
+        // Hide all menu modals if they're showing
+        if (window.menuInstance) {
+            window.menuInstance.hideAllModals();
         }
     } else {
         console.error('Modal element not found!');
@@ -97,14 +97,9 @@ function showLowResolutionModal() {
 // Hide low resolution blocking modal
 function hideLowResolutionModal() {
     const modal = document.getElementById('low-resolution-modal');
-    const difficultyModal = document.getElementById('difficulty-modal');
     if (modal) {
         modal.classList.add('hidden');
         document.body.classList.remove('low-resolution-blocked');
-        // Show difficulty modal again if game hasn't started yet
-        if (difficultyModal && !window.gameInstance) {
-            difficultyModal.classList.remove('hidden');
-        }
     }
 }
 
@@ -135,17 +130,17 @@ function checkScreenRequirements() {
 
 // Check if landscape prompt should be shown
 function checkOrientation() {
-    const difficultyModal = document.getElementById('difficulty-modal');
     const gameBoard = document.getElementById('game-board');
+    const menuController = window.menuInstance;
 
     if (isMobileDevice()) {
         if (isPortrait()) {
             // In portrait mode - BLOCK the game completely
             showLandscapePrompt();
 
-            // Hide difficulty modal in portrait mode
-            if (difficultyModal && !window.gameInstance) {
-                difficultyModal.classList.add('hidden');
+            // Hide all menu modals in portrait mode if game hasn't started
+            if (menuController && !window.gameInstance) {
+                menuController.hideAllModals();
             }
 
             // Hide game board if game has started
@@ -159,9 +154,14 @@ function checkOrientation() {
             // In landscape mode - allow game to proceed
             hideLandscapePrompt();
 
-            // Show difficulty modal if game hasn't started yet
-            if (difficultyModal && !window.gameInstance) {
-                difficultyModal.classList.remove('hidden');
+            // Show loading screen or current menu if game hasn't started yet
+            if (menuController && !window.gameInstance) {
+                // Menu controller will handle showing the appropriate screen
+                if (menuController.currentScreen === 'loading') {
+                    // Do nothing - loading screen is already showing
+                } else if (menuController.currentScreen !== 'loading') {
+                    // Menu is in progress, show the current screen
+                }
             }
 
             // Restore game board if game has started
@@ -179,9 +179,6 @@ function checkOrientation() {
     } else {
         // Desktop - allow everything
         hideLandscapePrompt();
-        if (difficultyModal && !window.gameInstance) {
-            difficultyModal.classList.remove('hidden');
-        }
         if (gameBoard && window.gameInstance) {
             gameBoard.style.pointerEvents = 'auto';
             gameBoard.style.opacity = '1';
@@ -288,6 +285,42 @@ function toggleFullscreen() {
         }
     }
 }
+
+// Function to start the game with selected difficulty
+// Called by MenuController
+function startGameWithDifficulty(difficulty) {
+    // CRITICAL: Prevent game start if in portrait mode on mobile
+    if (isMobileDevice() && isPortrait()) {
+        console.warn('Cannot start game in portrait mode. Please rotate to landscape.');
+        showLandscapePrompt();
+        return;
+    }
+
+    // Create game instance
+    const game = new GremiosGame();
+
+    // Create UI controller
+    const ui = new UIController(game);
+
+    // Store references globally for debugging
+    window.gameInstance = game;
+    window.uiInstance = ui;
+
+    // Always initialize with 3 players (1 human + 2 AI)
+    const numPlayers = 3;
+
+    // Initialize game with selected difficulty for AI players
+    game.initialize(numPlayers, difficulty);
+
+    // Show character selection for human player
+    ui.showCharacterSelection();
+
+    // Start game timer
+    startGameTimer();
+}
+
+// Make function globally available for MenuController
+window.startGameWithDifficulty = startGameWithDifficulty;
 
 // Help modal functions
 function toggleHelpModal() {
@@ -575,51 +608,10 @@ document.addEventListener('DOMContentLoaded', () => {
         checkScreenRequirements();
     }, 500); // Delay to let page fully load
 
-    // Difficulty modal will be shown/hidden by checkOrientation()
-    // based on device orientation (only in landscape mode)
-    const difficultyModal = document.getElementById('difficulty-modal');
-    const difficultyOptions = document.querySelectorAll('.difficulty-option');
-
-    difficultyOptions.forEach(option => {
-        option.addEventListener('click', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-
-            // CRITICAL: Prevent game start if in portrait mode on mobile
-            if (isMobileDevice() && isPortrait()) {
-                console.warn('Cannot start game in portrait mode. Please rotate to landscape.');
-                showLandscapePrompt();
-                return;
-            }
-
-            const difficulty = option.dataset.difficulty;
-
-            // Hide difficulty modal
-            difficultyModal.classList.add('hidden');
-
-            // Create game instance
-            const game = new GremiosGame();
-
-            // Create UI controller
-            const ui = new UIController(game);
-
-            // Store references globally for debugging
-            window.gameInstance = game;
-            window.uiInstance = ui;
-
-            // Always initialize with 3 players (1 human + 2 AI)
-            const numPlayers = 3;
-
-            // Initialize game with selected difficulty for AI players
-            game.initialize(numPlayers, difficulty);
-
-            // Show character selection for human player
-            ui.showCharacterSelection();
-
-            // Start game timer
-            startGameTimer();
-        });
-    });
+    // Initialize MenuController
+    // The loading screen will be shown automatically by the MenuController
+    const menuController = new MenuController();
+    window.menuInstance = menuController;
 });
 
 // ============================================
