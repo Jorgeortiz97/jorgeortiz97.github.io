@@ -6249,17 +6249,56 @@ body.low-resolution-blocked #difficulty-modal {
         max-height: 8vh !important;
         min-height: 0 !important;
         padding: clamp(2px, 0.4vmin, 5px) !important;
-        gap: clamp(2px, 0.4vmin, 5px) !important;
+        gap: clamp(4px, 0.6vmin, 8px) !important;  /* Increased to prevent name/coin overlap */
         overflow: hidden !important;
         margin: 0 !important;  /* Remove margins */
     }
 
-    .player-name {
-        font-size: clamp(10px, 1.6vmin, 16px) !important;
+    /* Unified player name for ALL players */
+    .player-name,
+    #human-column .player-name,
+    #ai-players-column .player-name {
+        font-size: clamp(9px, 1.4vmin, 14px) !important;
+        min-width: 0 !important;
+        overflow: visible !important;
+        flex: 1 1 auto !important;
+        display: flex !important;
+        align-items: center !important;
+        gap: 2px !important;
     }
 
-    .player-coins {
-        font-size: clamp(10px, 1.6vmin, 16px) !important;
+    /* Emblem badge visibility */
+    .emblem-badge-inline {
+        font-size: clamp(8px, 1.2vmin, 12px) !important;
+        flex-shrink: 0 !important;
+    }
+
+    /* Unified coin/VP sizes for ALL players - reduced */
+    .coin-count,
+    .vp-count,
+    #human-column .coin-count,
+    #human-column .vp-count,
+    #ai-players-column .coin-count,
+    #ai-players-column .vp-count {
+        font-size: clamp(9px, 1.4vmin, 16px) !important;
+    }
+
+    .coin-icon.coin-image {
+        width: clamp(12px, 1.6vmin, 18px) !important;
+        height: clamp(12px, 1.6vmin, 18px) !important;
+    }
+
+    /* Unified player-coins and player-vp for ALL players */
+    .player-coins,
+    .player-vp,
+    #human-column .player-coins,
+    #human-column .player-vp,
+    #ai-players-column .player-coins,
+    #ai-players-column .player-vp {
+        font-size: clamp(9px, 1.4vmin, 16px) !important;
+        flex-shrink: 0 !important;
+        white-space: nowrap !important;
+        gap: 2px !important;
     }
 
     /* CRITICAL: Constrain character and resources section to prevent overlap */
@@ -6296,26 +6335,34 @@ body.low-resolution-blocked #difficulty-modal {
         font-size: clamp(8px, 1.2vmin, 12px) !important;
     }
 
-    /* Reduce resource icon and count sizes */
+    /* Unified resource icon and count sizes for ALL players (human + AI) and ALL rows - reduced */
     .resource-icon-large,
+    .resource-item img,
+    #human-column .resource-item img,
+    #ai-players-column .resource-item img,
     #player-info-view .resource-icon-large {
-        width: clamp(16px, 2.2vmin, 24px) !important;
-        height: clamp(16px, 2.2vmin, 24px) !important;
+        width: clamp(12px, 1.5vmin, 18px) !important;
+        height: clamp(12px, 1.5vmin, 18px) !important;
     }
 
     .resource-count,
+    .resource-item span,
+    #human-column .resource-item span,
+    #ai-players-column .resource-item span,
     #player-info-view .resource-count {
-        font-size: clamp(10px, 1.5vmin, 16px) !important;
-        min-width: clamp(14px, 2vmin, 20px) !important;
+        font-size: clamp(8px, 1.2vmin, 12px) !important;
+        min-width: clamp(8px, 1.2vmin, 14px) !important;
     }
 
     .resource-row {
-        gap: clamp(3px, 0.5vmin, 6px) !important;
+        gap: clamp(4px, 0.6vmin, 8px) !important;
         margin: clamp(1px, 0.2vh, 3px) 0 !important;
     }
 
     .resource-item {
-        gap: clamp(2px, 0.4vmin, 4px) !important;
+        gap: clamp(1px, 0.15vmin, 2px) !important;
+        flex-shrink: 1 !important;
+        min-width: 0 !important;
     }
 
     /* Compact treasure sections */
