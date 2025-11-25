@@ -100,21 +100,21 @@ const GAME_ASSETS = {
 
     // App shell (HTML, CSS, JS)
     appShell: [
-        '/',
-        '/index.html',
-        '/css/styles.css',
-        '/js/assets.js',
-        '/js/config.js',
-        '/js/cards.js',
-        '/js/characters.js',
-        '/js/player.js',
-        '/js/events.js',
-        '/js/ai.js',
-        '/js/ui.js',
-        '/js/game.js',
-        '/js/main.js',
-        '/js/menu.js',
-        '/manifest.json'
+        './',
+        './index.html',
+        './css/styles.css',
+        './js/assets.js',
+        './js/config.js',
+        './js/cards.js',
+        './js/characters.js',
+        './js/player.js',
+        './js/events.js',
+        './js/ai.js',
+        './js/ui.js',
+        './js/game.js',
+        './js/main.js',
+        './js/menu.js',
+        './manifest.json'
     ]
 };
 
@@ -134,20 +134,20 @@ function getPreloadImages() {
 
 /**
  * Get all assets for service worker caching
- * @returns {string[]} Array of all asset paths (with leading /)
+ * @returns {string[]} Array of all asset paths (relative paths with ./)
  */
 function getCacheAssets() {
     const allAssets = [
         ...GAME_ASSETS.appShell,
-        ...GAME_ASSETS.video.map(p => '/' + p),
-        ...GAME_ASSETS.icons.map(p => '/' + p),
-        ...GAME_ASSETS.screenshots.map(p => '/' + p),
-        ...GAME_ASSETS.backgrounds.map(p => '/' + p),
-        ...GAME_ASSETS.images.map(p => '/' + p),
-        ...GAME_ASSETS.characters.map(p => '/' + p),
-        ...GAME_ASSETS.guilds.map(p => '/' + p),
-        ...GAME_ASSETS.actionEvents.map(p => '/' + p),
-        ...GAME_ASSETS.blockingEvents.map(p => '/' + p)
+        ...GAME_ASSETS.video.map(p => './' + p),
+        ...GAME_ASSETS.icons.map(p => './' + p),
+        ...GAME_ASSETS.screenshots.map(p => './' + p),
+        ...GAME_ASSETS.backgrounds.map(p => './' + p),
+        ...GAME_ASSETS.images.map(p => './' + p),
+        ...GAME_ASSETS.characters.map(p => './' + p),
+        ...GAME_ASSETS.guilds.map(p => './' + p),
+        ...GAME_ASSETS.actionEvents.map(p => './' + p),
+        ...GAME_ASSETS.blockingEvents.map(p => './' + p)
     ];
     return allAssets;
 }

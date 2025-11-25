@@ -1,8 +1,8 @@
 // Service Worker for Gremios PWA
-const CACHE_NAME = 'gremios-v25';
+const CACHE_NAME = 'gremios-v26';
 
 // Import shared asset configuration
-importScripts('/js/assets.js');
+importScripts('./js/assets.js');
 
 // Get all URLs to cache from shared config
 const urlsToCache = getCacheAssets();
