@@ -9,8 +9,14 @@ class MenuController {
         this.canSkip = false;
         this.selectedDifficulty = null;
         this.transitionSpeed = 'normal';
-        this.loadingStartTime = Date.now();
-        this.minLoadingTime = 3000; // Minimum 3 seconds on loading screen
+        this.minLoadingTime = 1000; // Minimum 1 second at 100% before video starts
+
+        // Store video event handlers so we can remove them later
+        this.videoEndedHandler = null;
+        this.videoErrorHandler = null;
+
+        // Check for quickstart URL parameter
+        this.quickstartDifficulty = this.checkQuickstartParameter();
 
         // Add menu-active class to body
         document.body.classList.add('menu-active');
@@ -39,8 +45,96 @@ class MenuController {
         // Initialize event listeners
         this.initEventListeners();
 
-        // Start asset preloading
-        this.preloadAssets();
+        // Check if quickstart mode is active
+        if (this.quickstartDifficulty) {
+            this.quickstartGame();
+        } else {
+            // Normal flow: Check orientation before starting
+            this.checkInitialOrientation();
+        }
+    }
+
+    /**
+     * Check initial orientation and only start loading if in landscape mode
+     */
+    checkInitialOrientation() {
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+                        (window.matchMedia && window.matchMedia('(max-width: 768px)').matches) ||
+                        ('ontouchstart' in window);
+        const isPortraitMode = window.matchMedia('(orientation: portrait)').matches;
+
+        if (isMobile && isPortraitMode) {
+            // Hide loading modal and show landscape prompt
+            this.loadingModal.classList.add('hidden');
+            const landscapeModal = document.getElementById('landscape-prompt-modal');
+            if (landscapeModal) {
+                landscapeModal.classList.remove('hidden');
+            }
+
+            // Wait for orientation change to landscape before starting
+            const orientationHandler = () => {
+                const stillPortrait = window.matchMedia('(orientation: portrait)').matches;
+                if (!stillPortrait) {
+                    // Now in landscape, show loading and start preloading
+                    this.loadingModal.classList.remove('hidden');
+                    if (landscapeModal) {
+                        landscapeModal.classList.add('hidden');
+                    }
+                    this.preloadAssets();
+                    // Remove listeners as we only need this once
+                    window.removeEventListener('orientationchange', orientationHandler);
+                    window.removeEventListener('resize', orientationHandler);
+                }
+            };
+
+            window.addEventListener('orientationchange', orientationHandler);
+            window.addEventListener('resize', orientationHandler);
+        } else {
+            // Not mobile or already in landscape, start normally
+            this.preloadAssets();
+        }
+    }
+
+    /**
+     * Check for quickstart URL parameter (?quickstart=easy|medium|hard)
+     * @returns {string|null} The difficulty level or null if not present
+     */
+    checkQuickstartParameter() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const quickstart = urlParams.get('quickstart');
+
+        // Validate difficulty level
+        if (quickstart && ['easy', 'medium', 'hard'].includes(quickstart.toLowerCase())) {
+            return quickstart.toLowerCase();
+        }
+
+        return null;
+    }
+
+    /**
+     * Quickstart mode: Skip all menus and start game directly
+     */
+    quickstartGame() {
+        console.log(`Quickstart mode: Starting game with ${this.quickstartDifficulty} difficulty`);
+
+        // Set global flag for quickstart mode
+        window.quickstartMode = true;
+
+        // Hide all modals immediately
+        this.hideAllModals();
+
+        // Remove menu-active class to show game board
+        document.body.classList.remove('menu-active');
+
+        // Start the game directly with the specified difficulty
+        // We need to wait a short moment for the DOM to be fully ready
+        setTimeout(() => {
+            if (window.startGameWithDifficulty) {
+                window.startGameWithDifficulty(this.quickstartDifficulty);
+            } else {
+                console.error('startGameWithDifficulty function not found');
+            }
+        }, 100);
     }
 
     /**
@@ -50,18 +144,28 @@ class MenuController {
         // Skip button
         this.skipButton.addEventListener('click', () => this.skipLoading());
 
-        // Video ended event
-        this.introVideo.addEventListener('ended', () => {
-            this.videoEnded = true;
-            this.checkLoadingComplete();
-        });
+        // Only set up video event listeners if NOT in quickstart mode
+        if (!this.quickstartDifficulty) {
+            // Store handlers so we can remove them later
+            this.videoEndedHandler = () => {
+                this.videoEnded = true;
+                this.removeVideoEventListeners();
+                this.checkLoadingComplete();
+            };
 
-        // Video error handling
-        this.introVideo.addEventListener('error', () => {
-            console.warn('Video failed to load, continuing without video');
-            this.videoEnded = true;
-            this.checkLoadingComplete();
-        });
+            this.videoErrorHandler = () => {
+                console.warn('Video failed to load, continuing without video');
+                this.videoEnded = true;
+                this.removeVideoEventListeners();
+                this.checkLoadingComplete();
+            };
+
+            // Video ended event
+            this.introVideo.addEventListener('ended', this.videoEndedHandler);
+
+            // Video error handling
+            this.introVideo.addEventListener('error', this.videoErrorHandler);
+        }
 
         // Menu button clicks (using event delegation)
         document.addEventListener('click', (e) => {
@@ -165,53 +269,61 @@ class MenuController {
             'resources/other/Land.png',
             'resources/other/Cultivated_Land.png',
             'resources/other/Treasure.png',
+            'resources/other/Treasure_1VP.png',
+            'resources/other/Treasure_2VP.png',
             'resources/other/Inn.png',
             'resources/other/Destroyed_Inn.png',
+            'resources/other/Wealth_3coins.png',
+            'resources/other/Wealth_4coins.png',
+            'resources/other/Event_Back.png',
+            'resources/other/Badge.png',
+            'resources/other/bronze.png',
+            'resources/other/silver.png',
 
             // Characters (all 12)
             'resources/characters/Archbishop.png',
             'resources/characters/Artisan.png',
-            'resources/characters/Captain.png',
             'resources/characters/Governor.png',
-            'resources/characters/Hermit.png',
-            'resources/characters/Investor.png',
+            'resources/characters/Healer.png',
+            'resources/characters/Innkeeper.png',
+            'resources/characters/Master_Builder.png',
+            'resources/characters/Mercenary.png',
             'resources/characters/Merchant.png',
-            'resources/characters/Nomad.png',
-            'resources/characters/Sage.png',
-            'resources/characters/Scout.png',
-            'resources/characters/Smuggler.png',
-            'resources/characters/Treasurer.png',
+            'resources/characters/Peasant.png',
+            'resources/characters/Pirate.png',
+            'resources/characters/Shopkeeper.png',
+            'resources/characters/Stowaway.png',
 
-            // Guild cards
-            'resources/guilds/Architects.png',
-            'resources/guilds/Cartographers.png',
-            'resources/guilds/Explorers.png',
-            'resources/guilds/Farmers.png',
-            'resources/guilds/Innkeepers.png',
-            'resources/guilds/Merchants.png',
-            'resources/guilds/Miners.png',
-            'resources/guilds/Navigators.png',
-            'resources/guilds/Settlers.png',
-            'resources/guilds/Traders.png',
-            'resources/guilds/Vanguard.png',
+            // Guild cards (all 11)
+            'resources/guilds/Blacksmith.png',
+            'resources/guilds/Church.png',
+            'resources/guilds/Farm.png',
+            'resources/guilds/Jewelers.png',
+            'resources/guilds/Market.png',
+            'resources/guilds/Monastery.png',
+            'resources/guilds/Port.png',
+            'resources/guilds/Quarry.png',
+            'resources/guilds/Sawmill.png',
+            'resources/guilds/Tavern.png',
+            'resources/guilds/Expedition.png',
 
-            // Event cards
-            'resources/action_events/Bandits.png',
-            'resources/action_events/Earthquake.png',
-            'resources/action_events/Famine.png',
-            'resources/action_events/Gold_Rush.png',
-            'resources/action_events/Great_Discovery.png',
-            'resources/action_events/Mudslide.png',
-            'resources/action_events/Pirate_Attack.png',
-            'resources/action_events/Sabotage.png',
-            'resources/action_events/Storm.png',
+            // Action event cards (9)
+            'resources/action_events/bad_harvest.png',
+            'resources/action_events/bankruptcy.png',
+            'resources/action_events/expedition.png',
+            'resources/action_events/expropriation.png',
+            'resources/action_events/good_harvest.png',
+            'resources/action_events/invasion.png',
+            'resources/action_events/mutiny.png',
+            'resources/action_events/prosperity.png',
+            'resources/action_events/tax_collection.png',
 
-            // Blocking events
-            'resources/blocking_events/Drought.png',
-            'resources/blocking_events/Fog.png',
-            'resources/blocking_events/Heavy_Rain.png',
-            'resources/blocking_events/Pest.png',
-            'resources/blocking_events/Unrest.png'
+            // Blocking event cards (5)
+            'resources/blocking_events/Famine.png',
+            'resources/blocking_events/MineCollapse.png',
+            'resources/blocking_events/Plague.png',
+            'resources/blocking_events/ResourcesOutage.png',
+            'resources/blocking_events/TradeBlock.png'
         ];
 
         const totalAssets = imagesToLoad.length;
@@ -242,27 +354,49 @@ class MenuController {
             this.assetsLoaded = true;
             this.canSkip = true;
 
-            // Hide the progress bar, loading text, and title
-            if (this.loadingBarContainer) {
-                this.loadingBarContainer.style.opacity = '0';
-                setTimeout(() => {
-                    this.loadingBarContainer.style.display = 'none';
-                }, 300);
-            }
-            if (this.gameTitle) {
-                this.gameTitle.style.opacity = '0';
-                setTimeout(() => {
-                    this.gameTitle.style.display = 'none';
-                }, 300);
-            }
+            // Wait minimum time (2 seconds) before starting video
+            setTimeout(() => {
+                // Hide the progress bar, loading text, and title
+                if (this.loadingBarContainer) {
+                    this.loadingBarContainer.style.opacity = '0';
+                    setTimeout(() => {
+                        this.loadingBarContainer.style.display = 'none';
+                    }, 300);
+                }
+                if (this.gameTitle) {
+                    this.gameTitle.style.opacity = '0';
+                    setTimeout(() => {
+                        this.gameTitle.style.display = 'none';
+                    }, 300);
+                }
+
+                // Start video playback after the delay
+                if (this.introVideo && this.introVideo.paused) {
+                    this.introVideo.play().catch(err => {
+                        console.warn('Video autoplay failed:', err);
+                        // If autoplay fails, mark video as ended to allow progression
+                        this.videoEnded = true;
+                        this.checkLoadingComplete();
+                    });
+                }
+            }, this.minLoadingTime);
 
             // Show skip button
             this.skipButton.classList.remove('hidden');
-            this.checkLoadingComplete();
         } catch (error) {
             console.error('Error loading assets:', error);
             this.assetsLoaded = true;
-            this.checkLoadingComplete();
+
+            // Wait minimum time even on error before starting video
+            setTimeout(() => {
+                if (this.introVideo && this.introVideo.paused) {
+                    this.introVideo.play().catch(err => {
+                        console.warn('Video autoplay failed:', err);
+                        this.videoEnded = true;
+                        this.checkLoadingComplete();
+                    });
+                }
+            }, this.minLoadingTime);
         }
     }
 
@@ -281,17 +415,31 @@ class MenuController {
     }
 
     /**
-     * Check if loading is complete (assets loaded AND video ended AND minimum time elapsed)
+     * Check if loading is complete (assets loaded AND video ended)
      */
     checkLoadingComplete() {
-        if (this.assetsLoaded && this.videoEnded) {
-            const elapsedTime = Date.now() - this.loadingStartTime;
-            const remainingTime = Math.max(0, this.minLoadingTime - elapsedTime);
+        // Don't show menu if in quickstart mode
+        if (this.quickstartDifficulty) {
+            return;
+        }
 
-            // Wait for minimum loading time before transitioning
-            setTimeout(() => {
-                this.showMainMenu();
-            }, remainingTime + 500);
+        if (this.assetsLoaded && this.videoEnded) {
+            // Both assets and video are done, transition to main menu
+            this.showMainMenu();
+        }
+    }
+
+    /**
+     * Remove video event listeners to prevent them from triggering during gameplay
+     */
+    removeVideoEventListeners() {
+        if (this.videoEndedHandler) {
+            this.introVideo.removeEventListener('ended', this.videoEndedHandler);
+            this.videoEndedHandler = null;
+        }
+        if (this.videoErrorHandler) {
+            this.introVideo.removeEventListener('error', this.videoErrorHandler);
+            this.videoErrorHandler = null;
         }
     }
 
@@ -301,7 +449,12 @@ class MenuController {
     skipLoading() {
         if (this.canSkip) {
             this.videoEnded = true;
+
+            // Stop the video and remove event listeners to prevent future triggers
             this.introVideo.pause();
+            this.introVideo.currentTime = 0; // Reset to beginning
+            this.removeVideoEventListeners();
+
             this.checkLoadingComplete();
         }
     }
@@ -369,6 +522,9 @@ class MenuController {
 
         // Remove menu-active class to show game board
         document.body.classList.remove('menu-active');
+
+        // CRITICAL: Remove video event listeners to prevent menu popup during gameplay
+        this.removeVideoEventListeners();
 
         // Initialize the game (this will be called from main.js)
         if (window.startGameWithDifficulty) {

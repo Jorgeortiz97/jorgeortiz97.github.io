@@ -6093,6 +6093,309 @@ body.low-resolution-blocked #difficulty-modal {
     }
 }
 
+/* ========================================
+   ULTRA-LOW HEIGHT VIEWPORTS (270-279px)
+   For minimum supported resolutions like 480x270
+   Applies to ANY width >= 480px with low height
+   ======================================== */
+@media screen and (min-width: 480px) and (min-height: 270px) and (max-height: 279px) {
+    /* Ultra-compact grid allocation */
+    body:not(.character-selection-phase) #human-column {
+        grid-template-rows: minmax(0, 6vh) minmax(0, 22vh) 1fr !important;  /* Header 6vh, Resources 22vh, Actions rest */
+        gap: 0 !important;
+        padding: 2px !important;
+    }
+
+    /* Minimal player header */
+    body:not(.character-selection-phase) #human-column .player-header {
+        max-height: 6vh !important;
+        min-height: 0 !important;
+        padding: 2px !important;
+        gap: 2px !important;
+        overflow: hidden !important;
+        margin: 0 !important;
+    }
+
+    .player-name {
+        font-size: clamp(9px, 1.4vmin, 14px) !important;
+    }
+
+    .player-coins {
+        font-size: clamp(9px, 1.4vmin, 14px) !important;
+    }
+
+    /* Ultra-constrained resources section */
+    body:not(.character-selection-phase) #human-column .player-character-and-resources {
+        gap: 1px !important;
+        padding: 2px !important;
+        margin: 0 !important;
+        max-height: calc(22vh - 10px) !important;  /* Extra buffer for ultra-low heights */
+        overflow-y: auto !important;
+        overflow-x: hidden !important;
+        min-height: 0 !important;
+    }
+
+    /* Compact character info */
+    .character-info {
+        padding: 2px !important;
+        margin: 0 !important;
+    }
+
+    .character-name {
+        font-size: clamp(8px, 1.2vmin, 12px) !important;
+        margin: 0 !important;
+    }
+
+    .character-ability {
+        font-size: clamp(7px, 1vmin, 10px) !important;
+    }
+
+    /* Minimal resource icons */
+    .resource-icon-large,
+    #player-info-view .resource-icon-large {
+        width: clamp(14px, 2vmin, 20px) !important;
+        height: clamp(14px, 2vmin, 20px) !important;
+    }
+
+    .resource-count,
+    #player-info-view .resource-count {
+        font-size: clamp(9px, 1.3vmin, 14px) !important;
+        min-width: clamp(12px, 1.8vmin, 18px) !important;
+    }
+
+    /* Minimal actions section */
+    body:not(.character-selection-phase) #human-column .player-actions-section {
+        min-height: 100px !important;
+        gap: 1px !important;
+        padding: 2px !important;
+        margin: 0 !important;
+        overflow: hidden !important;
+    }
+
+    .player-actions-section h4 {
+        font-size: clamp(9px, 1.4vmin, 12px) !important;
+        margin: 0 0 2px 0 !important;
+        padding: 0 !important;
+    }
+
+    /* Compact action buttons */
+    .actions-grid {
+        grid-template-columns: repeat(auto-fit, minmax(clamp(50px, 9vw, 80px), 1fr)) !important;
+        gap: 1px !important;
+    }
+
+    .action-btn {
+        font-size: clamp(7px, 1.2vmin, 11px) !important;
+        padding: clamp(0.2em, 0.4vmin, 0.5em) !important;
+        min-height: clamp(20px, 3vh, 28px) !important;
+        line-height: 1 !important;
+    }
+
+    /* Ensure critical buttons remain visible */
+    .btn-end-turn {
+        font-size: clamp(8px, 1.4vmin, 13px) !important;
+        min-height: 32px !important;  /* Minimum for ultra-low */
+        padding: clamp(0.3em, 0.5vmin, 0.6em) !important;
+    }
+
+    .utility-buttons-row {
+        gap: 2px !important;
+        margin-top: 2px !important;
+        padding: 1px 0 !important;
+    }
+
+    .btn-utility {
+        font-size: clamp(7px, 1.2vmin, 11px) !important;
+        padding: clamp(0.2em, 0.4vmin, 0.5em) !important;
+        min-height: 28px !important;  /* Minimum for ultra-low */
+    }
+
+    .btn-utility .fullscreen-icon,
+    .btn-utility .help-icon {
+        font-size: 1.2em !important;
+        margin-right: 2px !important;
+    }
+}
+
+/* ========================================
+   LOW-HEIGHT LANDSCAPE VIEWPORTS (280-400px)
+   Applies to ANY width >= 500px with low height
+   ======================================== */
+@media screen and (min-width: 500px) and (min-height: 280px) and (max-height: 400px) {
+    /* Reduce human column header space allocation - use minmax to limit space more strictly */
+    body:not(.character-selection-phase) #human-column {
+        grid-template-rows: minmax(0, 8vh) minmax(0, 28vh) 1fr !important;  /* Header max 8vh, Resources max 28vh, Actions takes rest */
+        gap: 0 !important;  /* Remove gap between grid rows to prevent overlap */
+        padding: clamp(2px, 0.3vmin, 4px) !important;
+    }
+
+    /* Compact player header */
+    body:not(.character-selection-phase) #human-column .player-header {
+        max-height: 8vh !important;
+        min-height: 0 !important;
+        padding: clamp(2px, 0.4vmin, 5px) !important;
+        gap: clamp(2px, 0.4vmin, 5px) !important;
+        overflow: hidden !important;
+        margin: 0 !important;  /* Remove margins */
+    }
+
+    .player-name {
+        font-size: clamp(10px, 1.6vmin, 16px) !important;
+    }
+
+    .player-coins {
+        font-size: clamp(10px, 1.6vmin, 16px) !important;
+    }
+
+    /* CRITICAL: Constrain character and resources section to prevent overlap */
+    body:not(.character-selection-phase) #human-column .player-character-and-resources {
+        gap: clamp(1px, 0.2vh, 3px) !important;
+        padding: clamp(1px, 0.2vh, 3px) !important;
+        margin: 0 !important;  /* Remove margins */
+        max-height: calc(28vh - 8px) !important;  /* Strict height limit with buffer to prevent overlap */
+        overflow-y: auto !important;  /* Allow scrolling if content exceeds */
+        overflow-x: hidden !important;
+        min-height: 0 !important;
+    }
+
+    /* Reduce min-height for actions section to fit buttons */
+    body:not(.character-selection-phase) #human-column .player-actions-section {
+        min-height: 120px !important;  /* Reduced from 150px to allow more space for resources */
+        gap: clamp(1px, 0.2vh, 3px) !important;
+        padding: clamp(1px, 0.2vh, 3px) !important;
+        margin: 0 !important;  /* Remove margins */
+        overflow: hidden !important;  /* Prevent actions from overflowing */
+    }
+
+    .character-info {
+        padding: clamp(3px, 0.5vmin, 6px) !important;
+        margin: 0 !important;
+    }
+
+    .character-name {
+        font-size: clamp(9px, 1.4vmin, 14px) !important;
+        margin: 0 !important;
+    }
+
+    .character-ability {
+        font-size: clamp(8px, 1.2vmin, 12px) !important;
+    }
+
+    /* Reduce resource icon and count sizes */
+    .resource-icon-large,
+    #player-info-view .resource-icon-large {
+        width: clamp(16px, 2.2vmin, 24px) !important;
+        height: clamp(16px, 2.2vmin, 24px) !important;
+    }
+
+    .resource-count,
+    #player-info-view .resource-count {
+        font-size: clamp(10px, 1.5vmin, 16px) !important;
+        min-width: clamp(14px, 2vmin, 20px) !important;
+    }
+
+    .resource-row {
+        gap: clamp(3px, 0.5vmin, 6px) !important;
+        margin: clamp(1px, 0.2vh, 3px) 0 !important;
+    }
+
+    .resource-item {
+        gap: clamp(2px, 0.4vmin, 4px) !important;
+    }
+
+    /* Compact treasure sections */
+    #human-treasures-detail {
+        margin-top: clamp(2px, 0.3vh, 4px) !important;
+        gap: clamp(2px, 0.3vh, 4px) !important;
+    }
+
+    .treasure-breakdown-inline {
+        gap: clamp(2px, 0.4vmin, 5px) !important;
+        padding: clamp(2px, 0.4vmin, 4px) !important;
+    }
+
+    .resource-icon-small {
+        width: clamp(16px, 2.2vmin, 22px) !important;
+        height: clamp(16px, 2.2vmin, 22px) !important;
+    }
+
+    .resource-count-small {
+        font-size: clamp(10px, 1.5vmin, 15px) !important;
+        min-width: clamp(14px, 2vmin, 20px) !important;
+    }
+
+    /* Actions section heading */
+    .player-actions-section h4 {
+        font-size: clamp(10px, 1.5vmin, 14px) !important;
+        margin: 0 0 clamp(2px, 0.3vh, 4px) 0 !important;
+        padding: 0 !important;
+    }
+
+    /* Action buttons grid */
+    .actions-grid {
+        grid-template-columns: repeat(auto-fit, minmax(clamp(55px, 10vw, 90px), 1fr)) !important;
+        gap: clamp(2px, 0.3vh, 4px) !important;
+    }
+
+    /* Action buttons - maintain minimum usable size */
+    .action-btn {
+        font-size: clamp(8px, 1.3vmin, 13px) !important;
+        padding: clamp(0.25em, 0.5vmin, 0.6em) !important;
+        min-height: clamp(22px, 3.2vh, 32px) !important;
+        line-height: 1.1 !important;
+    }
+
+    /* End Turn button - ensure visibility */
+    .btn-end-turn {
+        font-size: clamp(9px, 1.5vmin, 15px) !important;
+        min-height: 36px !important;  /* Ensure always visible */
+        padding: clamp(0.3em, 0.6vmin, 0.7em) clamp(0.5em, 1vmin, 1.2em) !important;
+    }
+
+    /* Utility buttons row */
+    .utility-buttons-row {
+        gap: clamp(3px, 0.4vmin, 6px) !important;
+        margin-top: clamp(3px, 0.4vh, 5px) !important;
+        padding: clamp(2px, 0.3vh, 4px) 0 !important;
+    }
+
+    /* Utility buttons - maintain minimum usable size */
+    .btn-utility {
+        font-size: clamp(8px, 1.3vmin, 13px) !important;
+        padding: clamp(0.3em, 0.5vmin, 0.6em) clamp(0.5em, 0.8vmin, 1em) !important;
+        min-height: 32px !important;  /* Ensure always visible */
+    }
+
+    .btn-utility .fullscreen-icon,
+    .btn-utility .help-icon {
+        font-size: 1.2em !important;
+        margin-right: clamp(2px, 0.4vmin, 4px) !important;
+    }
+
+    /* Reduce AI players column spacing */
+    #ai-players-column {
+        padding: clamp(3px, 0.4vmin, 6px) !important;
+        gap: clamp(4px, 0.6vmin, 10px) !important;
+    }
+
+    .ai-player-header {
+        padding: clamp(2px, 0.3vmin, 5px) clamp(3px, 0.4vmin, 6px) !important;
+        gap: clamp(2px, 0.3vmin, 4px) !important;
+    }
+
+    .ai-player-info {
+        padding: clamp(3px, 0.4vmin, 6px) !important;
+    }
+
+    .ai-player-name {
+        font-size: clamp(10px, 1.5vmin, 15px) !important;
+    }
+
+    .ai-coins {
+        font-size: clamp(10px, 1.5vmin, 15px) !important;
+    }
+}
+
 /* ===========================
    MENU SYSTEM STYLES
    =========================== */
@@ -6526,5 +6829,186 @@ body.menu-active #game-log-section {
         right: 15px;
         padding: 8px 16px;
         font-size: 14px;
+    }
+}
+
+/* Landscape menu optimization - Moderate heights */
+@media screen and (max-height: 600px) and (orientation: landscape) {
+    .modal {
+        padding: 20px 20px;
+    }
+
+    .menu-modal-content {
+        padding: 25px;
+    }
+
+    .main-menu-title {
+        font-size: clamp(36px, 5vw, 60px);
+        margin-bottom: 25px;
+    }
+
+    .menu-modal-content h2 {
+        font-size: clamp(28px, 4vw, 48px);
+        margin-bottom: 20px;
+    }
+
+    .menu-buttons-container {
+        gap: 15px;
+    }
+
+    .menu-btn {
+        padding: 12px 24px;
+        font-size: 16px;
+    }
+
+    .settings-panel,
+    .credits-content {
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+
+    .setting-item {
+        margin-bottom: 15px;
+    }
+
+    .setting-description {
+        font-size: 13px;
+        margin-top: 10px;
+    }
+
+    .credits-text {
+        font-size: 14px;
+        line-height: 1.5;
+    }
+}
+
+/* Landscape menu optimization - Small heights */
+@media screen and (max-height: 500px) and (orientation: landscape) {
+    .modal {
+        padding: 15px 20px;
+    }
+
+    .menu-modal-content {
+        padding: 15px;
+    }
+
+    .main-menu-title {
+        font-size: clamp(32px, 4.5vw, 52px);
+        margin-bottom: 15px;
+    }
+
+    .menu-modal-content h2 {
+        font-size: clamp(24px, 3.5vw, 42px);
+        margin-bottom: 15px;
+    }
+
+    .menu-buttons-container {
+        gap: 10px;
+    }
+
+    .menu-btn {
+        padding: 10px 20px;
+        font-size: 15px;
+    }
+
+    .settings-panel,
+    .credits-content {
+        padding: 15px;
+        margin-bottom: 15px;
+    }
+
+    .setting-item {
+        margin-bottom: 10px;
+    }
+
+    .setting-description {
+        font-size: 12px;
+        margin-top: 8px;
+    }
+
+    .credits-text {
+        font-size: 13px;
+        line-height: 1.4;
+        margin-bottom: 10px;
+    }
+
+    .custom-select-wrapper {
+        font-size: 14px;
+    }
+
+    .custom-select-display,
+    .custom-option {
+        padding: 8px 12px;
+        font-size: 14px;
+    }
+}
+
+/* Landscape menu optimization - Very small heights */
+@media screen and (max-height: 400px) and (orientation: landscape) {
+    .modal {
+        padding: 10px 15px;
+    }
+
+    .menu-modal-content {
+        padding: 12px;
+    }
+
+    .main-menu-title {
+        font-size: clamp(28px, 4vw, 46px);
+        margin-bottom: 10px;
+    }
+
+    .menu-modal-content h2 {
+        font-size: clamp(22px, 3vw, 36px);
+        margin-bottom: 10px;
+    }
+
+    .menu-buttons-container {
+        gap: 8px;
+    }
+
+    .menu-btn {
+        padding: 8px 16px;
+        font-size: 14px;
+    }
+
+    .settings-panel,
+    .credits-content {
+        padding: 12px;
+        margin-bottom: 10px;
+    }
+
+    .setting-item {
+        margin-bottom: 8px;
+    }
+
+    .setting-item label {
+        font-size: 13px;
+        margin-bottom: 6px;
+    }
+
+    .setting-description {
+        font-size: 11px;
+        margin-top: 6px;
+    }
+
+    .credits-text {
+        font-size: 12px;
+        line-height: 1.3;
+        margin-bottom: 8px;
+    }
+
+    .custom-select-wrapper {
+        font-size: 13px;
+    }
+
+    .custom-select-display,
+    .custom-option {
+        padding: 6px 10px;
+        font-size: 13px;
+    }
+
+    .menu-button-wrapper {
+        margin-top: 10px;
     }
 }

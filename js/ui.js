@@ -644,6 +644,28 @@ class UIController {
         document.getElementById('character-selection-view').style.display = 'block';
         document.getElementById('player-info-view').style.display = 'block';
         document.getElementById('player-info-view').classList.remove('hidden');
+
+        // Auto-select first character if in quickstart mode
+        if (window.quickstartMode) {
+            console.log('Quickstart mode: Auto-selecting first character');
+            setTimeout(() => {
+                const firstCharacter = options[0];
+                player.setCharacter(firstCharacter);
+                this.hideCharacterSelection();
+                this.updatePlayerDisplay(player);
+
+                // Reveal AI characters if they were hidden
+                if (!showAICharacters) {
+                    this.renderAIPlayers();
+                }
+
+                this.game.startGame();
+                this.updateGameState();
+
+                // Clear quickstart flag
+                window.quickstartMode = false;
+            }, 500);
+        }
     }
 
     hideCharacterSelection() {
