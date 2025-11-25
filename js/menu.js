@@ -28,6 +28,7 @@ class MenuController {
         this.settingsModal = document.getElementById('settings-modal');
         this.creditsModal = document.getElementById('credits-modal');
         this.difficultyModal = document.getElementById('difficulty-modal');
+        this.panoramicBg = document.getElementById('menu-panoramic-bg');
 
         // Get references to UI elements
         this.introVideo = document.getElementById('intro-video');
@@ -175,6 +176,9 @@ class MenuController {
 
         // Hide all modals immediately
         this.hideAllModals();
+
+        // Hide panoramic background (in case it was somehow shown)
+        this.hidePanoramicBackground();
 
         // Remove menu-active class to show game board
         document.body.classList.remove('menu-active');
@@ -533,6 +537,7 @@ class MenuController {
         this.hideAllModals();
         this.mainMenuModal.classList.remove('hidden');
         this.currentScreen = 'main-menu';
+        this.showPanoramicBackground();
     }
 
     /**
@@ -542,6 +547,7 @@ class MenuController {
         this.hideAllModals();
         this.playMenuModal.classList.remove('hidden');
         this.currentScreen = 'play-menu';
+        this.showPanoramicBackground();
     }
 
     /**
@@ -551,6 +557,7 @@ class MenuController {
         this.hideAllModals();
         this.settingsModal.classList.remove('hidden');
         this.currentScreen = 'settings';
+        this.showPanoramicBackground();
     }
 
     /**
@@ -560,6 +567,7 @@ class MenuController {
         this.hideAllModals();
         this.creditsModal.classList.remove('hidden');
         this.currentScreen = 'credits';
+        this.showPanoramicBackground();
     }
 
     /**
@@ -578,6 +586,7 @@ class MenuController {
         this.hideAllModals();
         this.difficultyModal.classList.remove('hidden');
         this.currentScreen = 'difficulty';
+        this.showPanoramicBackground();
     }
 
     /**
@@ -586,6 +595,9 @@ class MenuController {
     startGame(difficulty) {
         this.selectedDifficulty = difficulty;
         this.difficultyModal.classList.add('hidden');
+
+        // Hide the panoramic menu background
+        this.hidePanoramicBackground();
 
         // Remove menu-active class to show game board
         document.body.classList.remove('menu-active');
@@ -608,6 +620,9 @@ class MenuController {
         this.playMenuModal.classList.add('hidden');
         this.settingsModal.classList.add('hidden');
         this.creditsModal.classList.add('hidden');
+        if (this.difficultyModal) {
+            this.difficultyModal.classList.add('hidden');
+        }
     }
 
     /**
@@ -619,6 +634,9 @@ class MenuController {
         this.playMenuModal.classList.add('hidden');
         this.settingsModal.classList.add('hidden');
         this.creditsModal.classList.add('hidden');
+        if (this.difficultyModal) {
+            this.difficultyModal.classList.add('hidden');
+        }
     }
 
     /**
@@ -640,21 +658,44 @@ class MenuController {
                 break;
             case 'main-menu':
                 this.mainMenuModal.classList.remove('hidden');
+                this.showPanoramicBackground();
                 break;
             case 'play-menu':
                 this.playMenuModal.classList.remove('hidden');
+                this.showPanoramicBackground();
                 break;
             case 'settings':
                 this.settingsModal.classList.remove('hidden');
+                this.showPanoramicBackground();
                 break;
             case 'credits':
                 this.creditsModal.classList.remove('hidden');
+                this.showPanoramicBackground();
                 break;
             case 'difficulty':
                 if (this.difficultyModal) {
                     this.difficultyModal.classList.remove('hidden');
                 }
+                this.showPanoramicBackground();
                 break;
+        }
+    }
+
+    /**
+     * Show the panoramic menu background
+     */
+    showPanoramicBackground() {
+        if (this.panoramicBg) {
+            this.panoramicBg.classList.remove('hidden');
+        }
+    }
+
+    /**
+     * Hide the panoramic menu background
+     */
+    hidePanoramicBackground() {
+        if (this.panoramicBg) {
+            this.panoramicBg.classList.add('hidden');
         }
     }
 
