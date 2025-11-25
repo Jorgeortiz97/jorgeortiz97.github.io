@@ -85,9 +85,13 @@ function showLowResolutionModal() {
     if (modal) {
         modal.classList.remove('hidden');
         document.body.classList.add('low-resolution-blocked');
-        // Hide all menu modals if they're showing
+        // Hide menu modals if they're showing (but keep loading screen during video)
         if (window.menuInstance) {
-            window.menuInstance.hideAllModals();
+            if (window.menuInstance.currentScreen === 'loading') {
+                window.menuInstance.hideMenuModalsOnly();
+            } else {
+                window.menuInstance.hideAllModals();
+            }
         }
     } else {
         console.error('Modal element not found!');
@@ -138,9 +142,14 @@ function checkOrientation() {
             // In portrait mode - BLOCK the game completely
             showLandscapePrompt();
 
-            // Hide all menu modals in portrait mode if game hasn't started
+            // Hide menu modals in portrait mode if game hasn't started
+            // Keep the loading screen visible during video playback
             if (menuController && !window.gameInstance) {
-                menuController.hideAllModals();
+                if (menuController.currentScreen === 'loading') {
+                    menuController.hideMenuModalsOnly();
+                } else {
+                    menuController.hideAllModals();
+                }
             }
 
             // Hide game board if game has started
@@ -154,14 +163,9 @@ function checkOrientation() {
             // In landscape mode - allow game to proceed
             hideLandscapePrompt();
 
-            // Show loading screen or current menu if game hasn't started yet
+            // Restore current menu screen after returning from portrait
             if (menuController && !window.gameInstance) {
-                // Menu controller will handle showing the appropriate screen
-                if (menuController.currentScreen === 'loading') {
-                    // Do nothing - loading screen is already showing
-                } else if (menuController.currentScreen !== 'loading') {
-                    // Menu is in progress, show the current screen
-                }
+                menuController.restoreCurrentScreen();
             }
 
             // Restore game board if game has started

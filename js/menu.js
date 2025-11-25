@@ -533,7 +533,7 @@ class MenuController {
     }
 
     /**
-     * Hide all menu modals
+     * Hide all menu modals (including loading screen)
      */
     hideAllModals() {
         this.loadingModal.classList.add('hidden');
@@ -541,6 +541,54 @@ class MenuController {
         this.playMenuModal.classList.add('hidden');
         this.settingsModal.classList.add('hidden');
         this.creditsModal.classList.add('hidden');
+    }
+
+    /**
+     * Hide menu modals but keep the loading screen visible
+     * Used during orientation changes when video is still playing
+     */
+    hideMenuModalsOnly() {
+        this.mainMenuModal.classList.add('hidden');
+        this.playMenuModal.classList.add('hidden');
+        this.settingsModal.classList.add('hidden');
+        this.creditsModal.classList.add('hidden');
+    }
+
+    /**
+     * Restore the loading screen visibility
+     * Used when returning to landscape during video playback
+     */
+    showLoadingScreen() {
+        this.loadingModal.classList.remove('hidden');
+    }
+
+    /**
+     * Restore the current menu screen visibility after orientation change
+     * Used when returning to landscape from portrait mode
+     */
+    restoreCurrentScreen() {
+        switch (this.currentScreen) {
+            case 'loading':
+                this.loadingModal.classList.remove('hidden');
+                break;
+            case 'main-menu':
+                this.mainMenuModal.classList.remove('hidden');
+                break;
+            case 'play-menu':
+                this.playMenuModal.classList.remove('hidden');
+                break;
+            case 'settings':
+                this.settingsModal.classList.remove('hidden');
+                break;
+            case 'credits':
+                this.creditsModal.classList.remove('hidden');
+                break;
+            case 'difficulty':
+                if (this.difficultyModal) {
+                    this.difficultyModal.classList.remove('hidden');
+                }
+                break;
+        }
     }
 
     /**

@@ -3905,7 +3905,7 @@ body:not(.character-selection-phase) .character-name {
 
 /* Make landscape prompt BLOCKING in portrait mode */
 #landscape-prompt-modal:not(.hidden) {
-    z-index: 9999 !important;
+    z-index: 10001 !important;  /* Above loading screen (10000) to show during video playback */
     background: rgba(0, 0, 0, 0.95) !important;
     pointer-events: auto !important;  /* Ensure modal captures all clicks */
 }
