@@ -55,44 +55,97 @@ class MenuController {
     }
 
     /**
-     * Check initial orientation and only start loading if in landscape mode
+     * Check initial orientation and handle mobile splash screen
      */
     checkInitialOrientation() {
+        // Stricter mobile detection - only user agent, not touch capability
         const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
-                        (window.matchMedia && window.matchMedia('(max-width: 768px)').matches) ||
-                        ('ontouchstart' in window);
+                        (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1); // iPad
         const isPortraitMode = window.matchMedia('(orientation: portrait)').matches;
+        const isStandaloneMode = window.navigator.standalone === true ||
+                                  window.matchMedia('(display-mode: standalone)').matches;
 
-        if (isMobile && isPortraitMode) {
-            // Hide loading modal and show landscape prompt
+        // Check if we should show mobile splash screen
+        // Disabled for testing - enable on real mobile devices
+        const showSplash = false; // TODO: Re-enable with proper detection
+        if (showSplash && isMobile && !isStandaloneMode) {
+            // Show splash screen first, hide loading modal
             this.loadingModal.classList.add('hidden');
-            const landscapeModal = document.getElementById('landscape-prompt-modal');
-            if (landscapeModal) {
-                landscapeModal.classList.remove('hidden');
+            const splashModal = document.getElementById('mobile-start-modal');
+            if (splashModal) {
+                splashModal.classList.remove('hidden');
             }
 
-            // Wait for orientation change to landscape before starting
-            const orientationHandler = () => {
-                const stillPortrait = window.matchMedia('(orientation: portrait)').matches;
-                if (!stillPortrait) {
-                    // Now in landscape, show loading and start preloading
-                    this.loadingModal.classList.remove('hidden');
-                    if (landscapeModal) {
-                        landscapeModal.classList.add('hidden');
-                    }
-                    this.preloadAssets();
-                    // Remove listeners as we only need this once
-                    window.removeEventListener('orientationchange', orientationHandler);
-                    window.removeEventListener('resize', orientationHandler);
+            // Set up handler for when splash is dismissed (via start button in main.js)
+            const checkSplashDismissed = () => {
+                const splashHidden = splashModal && splashModal.classList.contains('hidden');
+                if (splashHidden) {
+                    // Splash was dismissed, now handle orientation
+                    this.handleOrientationAndStartLoading();
+                    // Remove the observer
+                    clearInterval(splashCheck);
                 }
             };
 
-            window.addEventListener('orientationchange', orientationHandler);
-            window.addEventListener('resize', orientationHandler);
+            // Check periodically if splash is hidden (dismissed by user tap)
+            const splashCheck = setInterval(checkSplashDismissed, 100);
+
+            return; // Don't proceed with loading yet
+        }
+
+        // For standalone mode or desktop, handle orientation normally
+        if (isMobile && isPortraitMode) {
+            this.handlePortraitModeWait();
         } else {
             // Not mobile or already in landscape, start normally
             this.preloadAssets();
         }
+    }
+
+    /**
+     * Handle waiting for landscape mode before starting
+     */
+    handleOrientationAndStartLoading() {
+        const isPortraitMode = window.matchMedia('(orientation: portrait)').matches;
+
+        if (isPortraitMode) {
+            this.handlePortraitModeWait();
+        } else {
+            // Already in landscape, start loading
+            this.loadingModal.classList.remove('hidden');
+            this.preloadAssets();
+        }
+    }
+
+    /**
+     * Wait for user to rotate to landscape mode
+     */
+    handlePortraitModeWait() {
+        // Hide loading modal and show landscape prompt
+        this.loadingModal.classList.add('hidden');
+        const landscapeModal = document.getElementById('landscape-prompt-modal');
+        if (landscapeModal) {
+            landscapeModal.classList.remove('hidden');
+        }
+
+        // Wait for orientation change to landscape before starting
+        const orientationHandler = () => {
+            const stillPortrait = window.matchMedia('(orientation: portrait)').matches;
+            if (!stillPortrait) {
+                // Now in landscape, show loading and start preloading
+                this.loadingModal.classList.remove('hidden');
+                if (landscapeModal) {
+                    landscapeModal.classList.add('hidden');
+                }
+                this.preloadAssets();
+                // Remove listeners as we only need this once
+                window.removeEventListener('orientationchange', orientationHandler);
+                window.removeEventListener('resize', orientationHandler);
+            }
+        };
+
+        window.addEventListener('orientationchange', orientationHandler);
+        window.addEventListener('resize', orientationHandler);
     }
 
     /**
@@ -263,68 +316,23 @@ class MenuController {
      * Preload all game assets
      */
     async preloadAssets() {
-        const imagesToLoad = [
-            // Core game images
-            'resources/other/gold.png',
-            'resources/other/Land.png',
-            'resources/other/Cultivated_Land.png',
-            'resources/other/Treasure.png',
-            'resources/other/Treasure_1VP.png',
-            'resources/other/Treasure_2VP.png',
-            'resources/other/Inn.png',
-            'resources/other/Destroyed_Inn.png',
-            'resources/other/Wealth_3coins.png',
-            'resources/other/Wealth_4coins.png',
-            'resources/other/Event_Back.png',
-            'resources/other/Badge.png',
-            'resources/other/bronze.png',
-            'resources/other/silver.png',
+        // Ensure loading modal is visible
+        if (this.loadingModal) {
+            this.loadingModal.classList.remove('hidden');
+        }
 
-            // Characters (all 12)
-            'resources/characters/Archbishop.png',
-            'resources/characters/Artisan.png',
-            'resources/characters/Governor.png',
-            'resources/characters/Healer.png',
-            'resources/characters/Innkeeper.png',
-            'resources/characters/Master_Builder.png',
-            'resources/characters/Mercenary.png',
-            'resources/characters/Merchant.png',
-            'resources/characters/Peasant.png',
-            'resources/characters/Pirate.png',
-            'resources/characters/Shopkeeper.png',
-            'resources/characters/Stowaway.png',
+        // Use shared asset configuration (with fallback)
+        let imagesToLoad;
+        try {
+            imagesToLoad = (typeof getPreloadImages === 'function')
+                ? getPreloadImages()
+                : this.getFallbackImages();
+        } catch (e) {
+            console.error('Error getting image list:', e);
+            imagesToLoad = this.getFallbackImages();
+        }
 
-            // Guild cards (all 11)
-            'resources/guilds/Blacksmith.png',
-            'resources/guilds/Church.png',
-            'resources/guilds/Farm.png',
-            'resources/guilds/Jewelers.png',
-            'resources/guilds/Market.png',
-            'resources/guilds/Monastery.png',
-            'resources/guilds/Port.png',
-            'resources/guilds/Quarry.png',
-            'resources/guilds/Sawmill.png',
-            'resources/guilds/Tavern.png',
-            'resources/guilds/Expedition.png',
-
-            // Action event cards (9)
-            'resources/action_events/bad_harvest.png',
-            'resources/action_events/bankruptcy.png',
-            'resources/action_events/expedition.png',
-            'resources/action_events/expropriation.png',
-            'resources/action_events/good_harvest.png',
-            'resources/action_events/invasion.png',
-            'resources/action_events/mutiny.png',
-            'resources/action_events/prosperity.png',
-            'resources/action_events/tax_collection.png',
-
-            // Blocking event cards (5)
-            'resources/blocking_events/Famine.png',
-            'resources/blocking_events/MineCollapse.png',
-            'resources/blocking_events/Plague.png',
-            'resources/blocking_events/ResourcesOutage.png',
-            'resources/blocking_events/TradeBlock.png'
-        ];
+        console.log('Preloading', imagesToLoad.length, 'images');
 
         const totalAssets = imagesToLoad.length;
         let loadedAssets = 0;
@@ -412,6 +420,65 @@ class MenuController {
             this.canSkip = true;
             this.skipButton.classList.remove('hidden');
         }
+    }
+
+    /**
+     * Fallback image list if assets.js is not loaded
+     */
+    getFallbackImages() {
+        return [
+            'resources/other/gold.png',
+            'resources/other/Land.png',
+            'resources/other/Cultivated_Land.png',
+            'resources/other/Treasure.png',
+            'resources/other/Treasure_1VP.png',
+            'resources/other/Treasure_2VP.png',
+            'resources/other/Inn.png',
+            'resources/other/Destroyed_Inn.png',
+            'resources/other/Wealth_3coins.png',
+            'resources/other/Wealth_4coins.png',
+            'resources/other/Event_Back.png',
+            'resources/other/Badge.png',
+            'resources/other/bronze.png',
+            'resources/other/silver.png',
+            'resources/characters/Archbishop.png',
+            'resources/characters/Artisan.png',
+            'resources/characters/Governor.png',
+            'resources/characters/Healer.png',
+            'resources/characters/Innkeeper.png',
+            'resources/characters/Master_Builder.png',
+            'resources/characters/Mercenary.png',
+            'resources/characters/Merchant.png',
+            'resources/characters/Peasant.png',
+            'resources/characters/Pirate.png',
+            'resources/characters/Shopkeeper.png',
+            'resources/characters/Stowaway.png',
+            'resources/guilds/Blacksmith.png',
+            'resources/guilds/Church.png',
+            'resources/guilds/Farm.png',
+            'resources/guilds/Jewelers.png',
+            'resources/guilds/Market.png',
+            'resources/guilds/Monastery.png',
+            'resources/guilds/Port.png',
+            'resources/guilds/Quarry.png',
+            'resources/guilds/Sawmill.png',
+            'resources/guilds/Tavern.png',
+            'resources/guilds/Expedition.png',
+            'resources/action_events/bad_harvest.png',
+            'resources/action_events/bankruptcy.png',
+            'resources/action_events/expedition.png',
+            'resources/action_events/expropriation.png',
+            'resources/action_events/good_harvest.png',
+            'resources/action_events/invasion.png',
+            'resources/action_events/mutiny.png',
+            'resources/action_events/prosperity.png',
+            'resources/action_events/tax_collection.png',
+            'resources/blocking_events/Famine.png',
+            'resources/blocking_events/MineCollapse.png',
+            'resources/blocking_events/Plague.png',
+            'resources/blocking_events/ResourcesOutage.png',
+            'resources/blocking_events/TradeBlock.png'
+        ];
     }
 
     /**

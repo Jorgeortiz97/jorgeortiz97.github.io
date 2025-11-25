@@ -12,6 +12,31 @@ let gameTimerInterval = null;
 // Track if auto-fullscreen has been attempted
 let autoFullscreenAttempted = false;
 
+// Store the PWA install prompt event (for Android)
+let deferredInstallPrompt = null;
+
+// Capture the beforeinstallprompt event for Android PWA installation
+window.addEventListener('beforeinstallprompt', (e) => {
+    // Prevent the mini-infobar from appearing
+    e.preventDefault();
+    // Store the event for later use
+    deferredInstallPrompt = e;
+    console.log('PWA install prompt captured and deferred');
+    // Update install button visibility if splash is shown
+    updateInstallButtonVisibility();
+});
+
+// Track when PWA is installed
+window.addEventListener('appinstalled', () => {
+    console.log('PWA was installed');
+    deferredInstallPrompt = null;
+    // Hide the install section if splash is visible
+    const installSection = document.querySelector('.splash-install-section');
+    if (installSection) {
+        installSection.style.display = 'none';
+    }
+});
+
 // Minimum resolution requirements (width x height)
 // Adjusted for mobile landscape gaming (iPhone and Android phones)
 const MIN_RESOLUTION = {
@@ -45,6 +70,85 @@ function isIOS() {
 function isStandalone() {
     return window.navigator.standalone === true || // iOS
            window.matchMedia('(display-mode: standalone)').matches; // Android/Other
+}
+
+// ============================================
+// MOBILE SPLASH SCREEN
+// ============================================
+
+// Show the mobile start splash screen
+function showMobileSplash() {
+    const modal = document.getElementById('mobile-start-modal');
+    if (modal) {
+        modal.classList.remove('hidden');
+    }
+}
+
+// Hide the mobile start splash screen
+function hideMobileSplash() {
+    const modal = document.getElementById('mobile-start-modal');
+    if (modal) {
+        modal.classList.add('hidden');
+    }
+}
+
+// Update install button visibility based on platform
+function updateInstallButtonVisibility() {
+    const installBtn = document.getElementById('splash-install-btn');
+    if (installBtn) {
+        // Show install button only if we have a deferred prompt (Android) and not in standalone
+        if (deferredInstallPrompt && !isStandalone()) {
+            installBtn.style.display = 'inline-block';
+        } else {
+            installBtn.style.display = 'none';
+        }
+    }
+}
+
+// Trigger the native PWA install prompt (Android)
+async function triggerPWAInstall() {
+    if (!deferredInstallPrompt) {
+        console.log('No install prompt available');
+        return;
+    }
+
+    // Show the install prompt
+    deferredInstallPrompt.prompt();
+
+    // Wait for the user's response
+    const { outcome } = await deferredInstallPrompt.userChoice;
+    console.log(`PWA install prompt outcome: ${outcome}`);
+
+    // Clear the deferred prompt
+    deferredInstallPrompt = null;
+}
+
+// Determine if we should show the mobile splash screen
+function shouldShowMobileSplash() {
+    // Only show on mobile devices
+    if (!isMobileDevice()) {
+        return false;
+    }
+
+    // Don't show if already installed (standalone mode)
+    if (isStandalone()) {
+        return false;
+    }
+
+    return true;
+}
+
+// Setup body classes for CSS targeting
+function setupBodyClasses() {
+    // iOS device class
+    if (isIOS()) {
+        document.body.classList.add('ios-device');
+    }
+
+    // Standalone mode class
+    if (isStandalone()) {
+        document.body.classList.add('standalone-mode');
+    }
 }
 
 // Check if device is in portrait orientation
@@ -490,20 +594,43 @@ function setupKeyboardShortcuts() {
 document.addEventListener('DOMContentLoaded', () => {
 
     // Register Service Worker for PWA
-    // TEMPORARILY DISABLED DURING DEVELOPMENT TO AVOID CACHE ISSUES
-    /*
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
             navigator.serviceWorker.register('/sw.js')
                 .then(registration => {
-                    console.log('✅ Service Worker registered successfully:', registration.scope);
+                    console.log('PWA: Service Worker registered successfully:', registration.scope);
                 })
                 .catch(error => {
-                    console.log('❌ Service Worker registration failed:', error);
+                    console.log('PWA: Service Worker registration failed:', error);
                 });
         });
     }
-    */
+
+    // Setup body classes for CSS targeting (iOS, standalone mode)
+    setupBodyClasses();
+
+    // Setup mobile splash screen
+    const splashStartBtn = document.getElementById('splash-start-btn');
+    const splashInstallBtn = document.getElementById('splash-install-btn');
+
+    if (splashStartBtn) {
+        splashStartBtn.addEventListener('click', async () => {
+            // Try to enter fullscreen and landscape mode
+            await enterFullscreenLandscape();
+            // Hide splash screen
+            hideMobileSplash();
+            // Continue with normal loading flow - MenuController will handle the rest
+        });
+    }
+
+    if (splashInstallBtn) {
+        splashInstallBtn.addEventListener('click', () => {
+            triggerPWAInstall();
+        });
+    }
+
+    // Update install button visibility (hide if no prompt available)
+    updateInstallButtonVisibility()
 
     // Setup fullscreen button
     const fullscreenBtn = document.getElementById('fullscreen-btn');

@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Gremios - Juego de Cartas</title>
 
     <!-- PWA Meta Tags -->
@@ -210,6 +210,23 @@
                 <div id="log-messages"></div>
             </div>
         </aside>
+
+        <!-- Mobile Start Splash Screen (shown on mobile before loading) -->
+        <div id="mobile-start-modal" class="modal hidden">
+            <div class="splash-content">
+                <h1 class="splash-title">GREMIOS</h1>
+                <p class="splash-subtitle">Juego de Cartas Estratégico</p>
+                <button id="splash-start-btn" class="splash-start-btn">Tocar para Iniciar</button>
+
+                <div class="splash-install-section">
+                    <p class="splash-install-title">Mejor experiencia sin barras del navegador</p>
+                    <button id="splash-install-btn" class="splash-install-btn">Instalar App</button>
+                    <p class="splash-ios-hint">
+                        En iPhone: toca <strong>Compartir</strong> y luego <strong>Añadir a Inicio</strong>
+                    </p>
+                </div>
+            </div>
+        </div>
 
         <!-- Loading Screen Modal -->
         <div id="loading-screen-modal" class="modal">
@@ -558,6 +575,7 @@
     </div>
 
     <!-- JavaScript Files -->
+    <script src="js/assets.js"></script>
     <script src="js/config.js"></script>
     <script src="js/cards.js"></script>
     <script src="js/characters.js"></script>

@@ -1,55 +1,11 @@
 // Service Worker for Gremios PWA
-const CACHE_NAME = 'gremios-v24';
-const urlsToCache = [
-  '/index.html',
-  '/css/styles.css',
-  '/js/config.js',
-  '/js/cards.js',
-  '/js/characters.js',
-  '/js/player.js',
-  '/js/events.js',
-  '/js/ai.js',
-  '/js/ui.js',
-  '/js/game.js',
-  '/js/main.js',
-  '/js/menu.js',
-  '/manifest.json',
-  // Video for loading screen
-  '/resources/other/Intro.mp4',
-  // PWA Icons
-  '/resources/icons/icon-192x192.png',
-  '/resources/icons/icon-512x512.png',
-  // PWA Screenshots
-  '/resources/screenshots/1920x1080_desktop_03_game_board.png',
-  '/resources/screenshots/portrait_game_board.png',
-  '/resources/other/gold.png',
-  '/resources/other/bronze.png',
-  '/resources/other/silver.png',
-  '/resources/other/Badge.png',
-  '/resources/other/Land.png',
-  '/resources/other/Cultivated_Land.png',
-  '/resources/other/Inn.png',
-  '/resources/other/Destroyed_Inn.png',
-  '/resources/other/Treasure.png',
-  '/resources/other/Treasure_1VP.png',
-  '/resources/other/Treasure_2VP.png',
-  '/resources/other/Wealth_3coins.png',
-  '/resources/other/Wealth_4coins.png',
-  '/resources/other/Event_Back.png',
-  // Character images
-  '/resources/characters/Archbishop.png',
-  '/resources/characters/Artisan.png',
-  '/resources/characters/Governor.png',
-  '/resources/characters/Healer.png',
-  '/resources/characters/Innkeeper.png',
-  '/resources/characters/Master_Builder.png',
-  '/resources/characters/Mercenary.png',
-  '/resources/characters/Merchant.png',
-  '/resources/characters/Peasant.png',
-  '/resources/characters/Pirate.png',
-  '/resources/characters/Shopkeeper.png',
-  '/resources/characters/Stowaway.png'
-];
+const CACHE_NAME = 'gremios-v25';
+
+// Import shared asset configuration
+importScripts('/js/assets.js');
+
+// Get all URLs to cache from shared config
+const urlsToCache = getCacheAssets();
 
 // Install event - cache files
 self.addEventListener('install', event => {
