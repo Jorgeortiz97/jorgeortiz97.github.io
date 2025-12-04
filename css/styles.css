@@ -31,7 +31,7 @@
     /* Component Dimensions */
     --player-zone-min-height: clamp(150px, 25vh, 400px);
     --guild-grid-min-height: clamp(200px, 40vh, 450px);
-    --action-button-height: clamp(24px, 4vh, 48px);  /* Responsive sizing - shrinks to fit viewport */
+    --action-button-height: clamp(14px, 2.5vh, 32px);  /* Compact sizing for small screens */
 
     /* Board-relative sizing - scales with the board, not the viewport */
     --board-scale-factor: 1; /* Default scale factor */
@@ -173,7 +173,7 @@
     /* === ACTION BUTTONS === */
     /* Reduce button size to fit in narrower column */
     .action-btn {
-        font-size: clamp(9px, 1.6vmin, 14px) !important;
+        font-size: clamp(7px, 1.3vmin, 11px) !important;
         padding: clamp(0.25em, 0.8vmin, 0.6em) !important;
         min-height: clamp(32px, 5vh, 48px) !important;
         display: flex !important;
@@ -199,9 +199,16 @@
         flex-direction: column !important;
     }
 
-    /* CRITICAL: Ensure End Turn button is always visible */
-    #end-turn-btn,
-    .btn-end-turn {
+    /* Hide during character selection */
+    body.character-selection-phase .actions-grid,
+    body.character-selection-phase .btn-end-turn,
+    body.character-selection-phase .resource-hud {
+        display: none !important;
+    }
+
+    /* CRITICAL: Ensure End Turn button is always visible (except during character selection) */
+    body:not(.character-selection-phase) #end-turn-btn,
+    body:not(.character-selection-phase) .btn-end-turn {
         display: flex !important;
         visibility: visible !important;
         opacity: 1 !important;
@@ -2211,7 +2218,7 @@ body:not(.character-selection-phase) #ai-players-column .character-info {
 }
 
 .vp-count {
-    color: #ffffff; /* White text for VP */
+    color: var(--color-antique-gold); /* Gold text for VP */
     font-size: clamp(18px, 2.5vmin, 36px);
     font-weight: bold;
 }
@@ -2456,20 +2463,19 @@ body:has(#character-selection-view[style*="display: block"]) .player-actions-sec
     background: linear-gradient(135deg, var(--color-forest-moss) 0%, var(--color-illuminated-blue) 100%);
     border: var(--border-width) solid var(--color-monastery-stone);
     border-radius: var(--border-radius-sm);
-    padding: clamp(0.3em, 1vmin, 0.8em);  /* Reduced padding for more space */
+    padding: clamp(2px, 0.5vmin, 6px);  /* Compact padding for small screens */
     color: var(--color-text-light);
     cursor: pointer;
-    font-size: clamp(10px, 1.8vmin, 16px);  /* Smaller, responsive font size */
+    font-size: clamp(6px, 1.2vmin, 12px);  /* Smaller font for portrait */
     transition: all 0.2s;
-    min-height: var(--action-button-height);
+    min-height: clamp(16px, 3vh, 32px);  /* Reduced min-height */
     display: flex;
     align-items: center;
     justify-content: center;
-    white-space: normal; /* Allow text to wrap into multiple lines */
-    text-align: center; /* Center multi-line text */
-    line-height: 1.2; /* Comfortable line spacing for wrapped text */
-    word-break: break-word;  /* Break long words if needed */
-    overflow: hidden;  /* Prevent overflow */
+    white-space: nowrap; /* Prevent text wrapping */
+    text-align: center;
+    line-height: 1;
+    overflow: hidden;
 }
 
 .action-btn:hover:not(:disabled) {
@@ -2519,7 +2525,9 @@ body:not(.character-selection-phase) .action-text {
     background: linear-gradient(135deg, var(--color-warning-amber) 0%, var(--color-wax-seal-red) 100%);
     border-color: var(--color-burgundy);
     font-weight: bold;
-    font-size: 1.2em;
+    font-size: clamp(6px, 1.5vw, 12px);  /* Smaller font for portrait */
+    padding: clamp(2px, 0.5vh, 6px) clamp(4px, 1vw, 10px);  /* Compact padding */
+    min-height: clamp(14px, 2.5vh, 28px);  /* Reduced min-height */
 }
 
 /* Utility buttons (fullscreen, help) */
@@ -5627,16 +5635,17 @@ body.low-resolution-blocked #difficulty-modal {
         padding: 10px !important;
     }
 
-    /* Better button sizes for touch */
+    /* Compact button sizes for narrow screens */
     .action-btn {
-        min-height: 52px !important;
-        padding: 12px 8px !important;
+        min-height: clamp(16px, 3vh, 32px) !important;
+        padding: clamp(2px, 0.5vh, 6px) clamp(2px, 0.5vw, 6px) !important;
+        font-size: clamp(5px, 1.2vw, 10px) !important;
     }
 
     .btn-end-turn {
-        min-height: 56px !important;
-        padding: 16px 14px !important;
-        font-size: clamp(17px, 3.6vmin, 24px) !important;
+        min-height: clamp(14px, 2.5vh, 28px) !important;
+        padding: clamp(2px, 0.4vh, 5px) clamp(4px, 1vw, 8px) !important;
+        font-size: clamp(6px, 1.5vw, 10px) !important;
     }
 
     /* Guild cards more visible */
@@ -5676,9 +5685,32 @@ body.low-resolution-blocked #difficulty-modal {
         font-size: clamp(12px, 2.8vmin, 17px) !important;
     }
 
-    /* Improve actions grid spacing */
-    .actions-grid {
-        gap: 10px !important;
+    /* Hide action buttons during character selection */
+    body.character-selection-phase .actions-grid,
+    body.character-selection-phase .btn-end-turn,
+    body.character-selection-phase .resource-hud {
+        display: none !important;
+    }
+
+    /* Compact actions grid for narrow screens - flexbox for centered rows */
+    body:not(.character-selection-phase) .actions-grid {
+        display: flex !important;
+        flex-wrap: wrap !important;
+        justify-content: center !important;
+        gap: 2px !important;
+        height: auto !important;
+    }
+
+    body:not(.character-selection-phase) .actions-grid .action-btn {
+        width: 23% !important;
+        flex: 0 0 23% !important;
+    }
+
+    body:not(.character-selection-phase) .btn-end-turn {
+        width: 60% !important;
+        max-width: 150px !important;
+        margin: 2px auto 0 !important;
+        display: block !important;
     }
 
     .player-actions-section {
@@ -5774,25 +5806,27 @@ body.low-resolution-blocked #difficulty-modal {
     }
 
     /* ========================================
-       ACTION BUTTONS - MAKE TEXT MUCH BIGGER
+       ACTION BUTTONS - Compact for narrow screens
        ======================================== */
     .action-btn {
-        font-size: 1.5em !important;  /* Base size for scaling */
-        padding: 12px 8px !important;
-        flex-direction: column !important;
-        gap: 6px !important;
-        line-height: 1.1 !important;
-        min-height: auto !important;
+        font-size: clamp(5px, 1.2vw, 10px) !important;
+        padding: clamp(2px, 0.5vh, 6px) clamp(2px, 0.5vw, 6px) !important;
+        flex-direction: row !important;
+        gap: 2px !important;
+        line-height: 1 !important;
+        min-height: clamp(16px, 3vh, 32px) !important;
     }
 
     .action-text {
-        font-weight: 700 !important;
-        font-size: 0.8em !important;
+        font-weight: 600 !important;
+        font-size: clamp(5px, 1.2vw, 9px) !important;
     }
 
     .btn-end-turn {
-        font-size: 22px !important;
+        font-size: clamp(6px, 1.5vw, 10px) !important;
         font-weight: 700 !important;
+        min-height: clamp(14px, 2.5vh, 28px) !important;
+        padding: clamp(2px, 0.4vh, 5px) clamp(4px, 1vw, 8px) !important;
     }
 
     /* ========================================
@@ -6477,9 +6511,35 @@ body.menu-active #game-log-section {
     display: none;
 }
 
+/* Resolution Warning Modal */
+#resolution-warning-modal {
+    z-index: 20000;
+    background: rgba(0, 0, 0, 0.95);
+}
+
+.resolution-warning-content {
+    text-align: center;
+    padding: 30px;
+    max-width: 280px;
+}
+
+.resolution-warning-content h2 {
+    color: #ff6b6b;
+    margin-bottom: 20px;
+    font-size: 1.3em;
+}
+
+.resolution-warning-content p {
+    color: #ccc;
+    margin-bottom: 15px;
+    font-size: 0.95em;
+    line-height: 1.5;
+}
+
 /* Loading Screen */
 #loading-screen-modal {
     z-index: 10000;
+    background: #000;
 }
 
 .loading-screen-content {
@@ -6509,12 +6569,7 @@ body.menu-active #game-log-section {
     left: 0;
     width: 100%;
     height: 100%;
-    background: linear-gradient(
-        to bottom,
-        rgba(0, 0, 0, 0.6) 0%,
-        rgba(0, 0, 0, 0.4) 50%,
-        rgba(0, 0, 0, 0.7) 100%
-    );
+    background: transparent;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -6524,15 +6579,15 @@ body.menu-active #game-log-section {
 }
 
 .game-title {
-    font-size: clamp(48px, 8vw, 96px);
+    font-size: clamp(28px, 12vw, 96px);
     font-weight: bold;
     color: var(--gold-primary);
     text-shadow:
         0 0 10px rgba(201, 169, 97, 0.5),
         2px 2px 4px rgba(0, 0, 0, 0.8),
         0 0 30px rgba(201, 169, 97, 0.3);
-    margin-bottom: 60px;
-    letter-spacing: 8px;
+    margin-bottom: clamp(20px, 8vh, 60px);
+    letter-spacing: clamp(2px, 1.5vw, 8px);
     animation: titlePulse var(--animation-duration) ease-in-out infinite alternate;
     transition: opacity 0.3s ease-out;
 }
@@ -6562,25 +6617,45 @@ body.menu-active #game-log-section {
 .loading-bar {
     width: 100%;
     height: 30px;
-    background: rgba(0, 0, 0, 0.5);
+    background: rgba(0, 0, 0, 0.85);
     border: 2px solid var(--gold-primary);
     border-radius: 15px;
     overflow: hidden;
     box-shadow:
-        0 0 10px rgba(201, 169, 97, 0.3),
-        inset 0 2px 4px rgba(0, 0, 0, 0.5);
+        0 0 15px rgba(201, 169, 97, 0.5),
+        inset 0 2px 8px rgba(0, 0, 0, 0.9);
 }
 
 .loading-progress {
     height: 100%;
     width: 0%;
-    background: linear-gradient(90deg,
-        var(--gold-primary) 0%,
-        #dac272 50%,
-        var(--gold-primary) 100%
+    background: linear-gradient(180deg,
+        #ffd700 0%,
+        #daa520 50%,
+        #b8860b 100%
     );
+    border-radius: 12px;
     transition: width var(--transition-duration) ease-out;
-    box-shadow: 0 0 15px rgba(201, 169, 97, 0.6);
+    box-shadow:
+        0 0 25px rgba(255, 215, 0, 0.9),
+        0 0 10px rgba(255, 215, 0, 0.7),
+        inset 0 2px 4px rgba(255, 255, 255, 0.5),
+        inset 0 -2px 4px rgba(0, 0, 0, 0.3);
+    position: relative;
+}
+
+.loading-progress::after {
+    content: '';
+    position: absolute;
+    top: 3px;
+    left: 6px;
+    right: 6px;
+    height: 8px;
+    background: linear-gradient(180deg,
+        rgba(255, 255, 255, 0.5) 0%,
+        rgba(255, 255, 255, 0.1) 100%
+    );
+    border-radius: 6px;
 }
 
 .loading-text {
@@ -6608,19 +6683,20 @@ body.menu-active #game-log-section {
 /* Menu Modal Content */
 .menu-modal-content {
     text-align: center;
-    padding: 40px;
-    min-width: 400px;
+    padding: clamp(15px, 5vw, 40px);
+    min-width: 0;
     max-width: 600px;
+    width: 90%;
 }
 
 .main-menu-title {
-    font-size: clamp(42px, 6vw, 72px);
+    font-size: clamp(24px, 10vw, 72px);
     color: var(--gold-primary);
-    margin-bottom: 50px;
+    margin-bottom: clamp(20px, 6vh, 50px);
     text-shadow:
         2px 2px 4px rgba(0, 0, 0, 0.8),
         0 0 20px rgba(201, 169, 97, 0.3);
-    letter-spacing: 6px;
+    letter-spacing: clamp(2px, 1vw, 6px);
 }
 
 .menu-buttons-container {
@@ -6797,6 +6873,18 @@ body.menu-active #game-log-section {
     color: #dac272;
     border-bottom-color: #dac272;
     text-shadow: 0 0 8px rgba(201, 169, 97, 0.5);
+}
+
+.gold-link {
+    color: var(--gold-primary) !important;
+    text-shadow: 0 0 10px rgba(201, 169, 97, 0.6);
+    border-bottom: 2px solid var(--gold-primary) !important;
+}
+
+.gold-link:hover {
+    color: #f0d890 !important;
+    text-shadow: 0 0 15px rgba(201, 169, 97, 0.8);
+    border-bottom-color: #f0d890 !important;
 }
 
 /* Responsive adjustments for menu system */

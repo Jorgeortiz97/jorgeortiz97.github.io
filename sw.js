@@ -1,5 +1,5 @@
 // Service Worker for Gremios PWA
-const CACHE_NAME = 'gremios-v28';
+const CACHE_NAME = 'gremios-v42';
 
 // Import shared asset configuration
 importScripts('./js/assets.js');
@@ -50,6 +50,11 @@ self.addEventListener('activate', event => {
 
 // Fetch event - serve from cache, fallback to network
 self.addEventListener('fetch', event => {
+  // Skip non-GET requests
+  if (event.request.method !== 'GET') {
+    return;
+  }
+
   event.respondWith(
     caches.match(event.request)
       .then(response => {
@@ -77,10 +82,15 @@ self.addEventListener('fetch', event => {
             });
 
           return response;
-        }).catch(() => {
-          // If both cache and network fail, return offline page
-          console.log('[Service Worker] Fetch failed for:', event.request.url);
-          // You could return a custom offline page here
+        }).catch(error => {
+          // If both cache and network fail, return a proper error response
+          console.log('[Service Worker] Fetch failed for:', event.request.url, error);
+
+          // Return a simple error response to prevent "unexpected error" messages
+          return new Response('', {
+            status: 503,
+            statusText: 'Service Unavailable'
+          });
         });
       })
   );
