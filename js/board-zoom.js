@@ -98,8 +98,16 @@ class BoardZoomController {
      * Handle touch start
      */
     handleTouchStart(e) {
-        // Always prevent default to disable browser double-tap zoom
-        e.preventDefault();
+        // Check if touch target is an interactive element (guild card or expedition)
+        const target = e.target;
+        const isInteractiveElement = target.closest('.guild-card') ||
+                                      target.closest('#expedition-card');
+
+        // Only prevent default if NOT touching an interactive element
+        // This allows click events to be generated for guild/expedition taps
+        if (!isInteractiveElement) {
+            e.preventDefault();
+        }
 
         // Stop any ongoing momentum animation
         this.stopMomentum();

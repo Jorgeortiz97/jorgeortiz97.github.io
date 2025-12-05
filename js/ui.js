@@ -5,10 +5,24 @@ class UIController {
         this.game = game;
         game.ui = this;
 
+        // Initialize UI helper modules
+        if (typeof UIModals !== 'undefined') {
+            UIModals.init(this);
+        }
+        if (typeof UIBoard !== 'undefined') {
+            UIBoard.init(this);
+        }
+        if (typeof UIPlayers !== 'undefined') {
+            UIPlayers.init(this);
+        }
+        if (typeof UIActions !== 'undefined') {
+            UIActions.init(this);
+        }
+
         // Double-tap tracking
         this.lastTapTime = 0;
         this.lastTapTarget = null;
-        this.doubleTapDelay = 300; // milliseconds
+        this.doubleTapDelay = GAME_CONSTANTS?.DOUBLE_TAP_DELAY || 300;
 
         // Cache DOM elements
         this.elements = {
@@ -42,43 +56,33 @@ class UIController {
     }
 
     bindEvents() {
-        // Only bind events once to avoid duplicates
         if (this.eventsBound) return;
         this.eventsBound = true;
 
-        // Action buttons - use event delegation to avoid multiple listeners
-        // Listen on the parent section to catch all action buttons
         const humanSection = document.getElementById('human-column');
         humanSection.addEventListener('click', (e) => {
-            // Use closest() to handle clicks on child elements (like spans inside buttons)
             const actionBtn = e.target.closest('.action-btn');
             if (actionBtn) {
-                // Create a new event object with the button as the target
                 const buttonEvent = { ...e, target: actionBtn };
                 this.handleActionClick(buttonEvent);
             }
         });
 
-        // Character selection
         this.elements.selectCharacterBtn.addEventListener('click', () => {
             this.showCharacterSelection();
         });
 
-        // New game
         this.elements.newGameBtn.addEventListener('click', () => {
             window.location.reload();
         });
 
-        // Cancel guild selection
         this.elements.cancelGuildBtn.addEventListener('click', () => {
             this.hideGuildModal();
         });
 
-        // Toggle game log
         this.elements.toggleLogBtn.addEventListener('click', () => {
             this.toggleGameLog();
         });
-
     }
 
     toggleGameLog() {

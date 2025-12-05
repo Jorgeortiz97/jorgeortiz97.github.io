@@ -13,17 +13,12 @@ function checkResolution() {
     const width = window.innerWidth;
     const height = window.innerHeight;
     const isPortrait = height > width;
-
-    // Portrait mode: check width, Landscape mode: check height
     const isTooSmall = isPortrait ? (width < MIN_RESOLUTION) : (height < MIN_RESOLUTION);
 
-    const modal = document.getElementById('resolution-warning-modal');
-    if (modal) {
-        if (isTooSmall) {
-            modal.classList.remove('hidden');
-        } else {
-            modal.classList.add('hidden');
-        }
+    if (isTooSmall) {
+        ModalManager.show('resolution-warning-modal');
+    } else {
+        ModalManager.hide('resolution-warning-modal');
     }
 
     return !isTooSmall;
@@ -108,18 +103,12 @@ function isStandalone() {
 
 // Show the mobile start splash screen
 function showMobileSplash() {
-    const modal = document.getElementById('mobile-start-modal');
-    if (modal) {
-        modal.classList.remove('hidden');
-    }
+    ModalManager.show('mobile-start-modal');
 }
 
 // Hide the mobile start splash screen
 function hideMobileSplash() {
-    const modal = document.getElementById('mobile-start-modal');
-    if (modal) {
-        modal.classList.add('hidden');
-    }
+    ModalManager.hide('mobile-start-modal');
 }
 
 // Update install button visibility based on platform
@@ -202,18 +191,12 @@ async function enterFullscreen() {
 
 // Show iOS Add to Home Screen instructions
 function showIOSInstructions() {
-    const modal = document.getElementById('ios-instructions-modal');
-    if (modal) {
-        modal.classList.remove('hidden');
-    }
+    ModalManager.show('ios-instructions-modal');
 }
 
 // Hide iOS Add to Home Screen instructions
 function hideIOSInstructions() {
-    const modal = document.getElementById('ios-instructions-modal');
-    if (modal) {
-        modal.classList.add('hidden');
-    }
+    ModalManager.hide('ios-instructions-modal');
 }
 
 // Fullscreen toggle function

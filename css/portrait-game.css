@@ -21,9 +21,9 @@ body.character-selection-phase .resource-hud {
 
 :root {
     /* Pane Heights */
-    --user-pane-height: 30%;
-    --board-pane-height: 45%;
-    --opponents-pane-height: 20%;
+    --user-pane-height: 23%;
+    --board-pane-height: 57%;
+    --opponents-pane-height: 15%;
     --buttons-pane-height: 5%;
 
     /* Typography - clamp(min, preferred, max) */
@@ -85,6 +85,23 @@ body.character-selection-phase .resource-hud {
     /* Safe area insets */
     --safe-area-inset-top: env(safe-area-inset-top, 0px);
     --safe-area-inset-bottom: env(safe-area-inset-bottom, 0px);
+
+    /* Neumorphic Shadow Variables */
+    --shadow-bronze-light: rgba(175, 114, 76, 0.5);
+    --shadow-bronze-dark: rgba(70, 45, 30, 0.8);
+    --shadow-burgundy-light: rgba(175, 85, 105, 0.5);
+    --shadow-burgundy-dark: rgba(70, 27, 35, 0.8);
+    --shadow-stone-light: rgba(140, 130, 112, 0.5);
+    --shadow-stone-dark: rgba(55, 51, 44, 0.8);
+    --shadow-forest-light: rgba(114, 149, 102, 0.5);
+    --shadow-forest-dark: rgba(45, 59, 40, 0.8);
+    --border-radius-neumorphic: 8px;
+
+    /* Unified player UI sizes (human & AI) */
+    --player-name-size: clamp(8px, 2.5vw, 14px);
+    --character-name-size: clamp(6px, 2vw, 10px);
+    --vp-display-size: clamp(8px, 2.5vw, 14px);
+    --coins-display-size: clamp(7px, 2.2vw, 12px);
 }
 
 /* ===========================
@@ -355,27 +372,50 @@ body.menu-active.character-selection-phase #board-pane {
 }
 
 .character-modal-btn {
-    padding: 10px 24px;
+    padding: 12px 28px;
     font-size: var(--font-body);
     font-weight: bold;
-    border: 2px solid var(--color-antique-gold);
-    border-radius: var(--border-radius-md);
+    border: none;
+    border-radius: 10px;
     cursor: pointer;
-    transition: transform 0.2s, box-shadow 0.2s;
+    transition: box-shadow 0.2s, transform 0.2s, background 0.2s;
+    min-height: 44px;
 }
 
 .character-modal-btn.select-btn {
-    background: linear-gradient(180deg, var(--color-forest-moss) 0%, #3a5530 100%);
+    background: linear-gradient(145deg, #6a8560 0%, #4a6540 100%);
     color: var(--color-text-light);
+    box-shadow:
+        4px 4px 8px var(--shadow-forest-dark),
+        -2px -2px 6px var(--shadow-forest-light),
+        inset 0 1px 0 rgba(255, 255, 255, 0.15);
 }
 
 .character-modal-btn.cancel-btn {
-    background: linear-gradient(180deg, var(--color-weathered-bronze) 0%, #5a3d2a 100%);
+    background: linear-gradient(145deg, #966243 0%, #7a4d35 100%);
     color: var(--color-text-light);
+    box-shadow:
+        4px 4px 8px var(--shadow-bronze-dark),
+        -2px -2px 6px var(--shadow-bronze-light),
+        inset 0 1px 0 rgba(255, 255, 255, 0.15);
 }
 
 .character-modal-btn:active {
     transform: scale(0.95);
+}
+
+.character-modal-btn.select-btn:active {
+    box-shadow:
+        inset 3px 3px 6px var(--shadow-forest-dark),
+        inset -2px -2px 4px var(--shadow-forest-light);
+    background: linear-gradient(145deg, #4a6540 0%, #6a8560 100%);
+}
+
+.character-modal-btn.cancel-btn:active {
+    box-shadow:
+        inset 3px 3px 6px var(--shadow-bronze-dark),
+        inset -2px -2px 4px var(--shadow-bronze-light);
+    background: linear-gradient(145deg, #7a4d35 0%, #966243 100%);
 }
 
 /* ===========================
@@ -403,7 +443,7 @@ body.menu-active.character-selection-phase #board-pane {
 }
 
 .player-name-badge {
-    font-size: var(--font-medium);
+    font-size: var(--player-name-size);
     font-weight: bold;
     color: var(--color-text-light);
     text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
@@ -428,7 +468,7 @@ body.menu-active.character-selection-phase #board-pane {
     display: flex;
     align-items: center;
     gap: var(--spacing-xs);
-    font-size: var(--font-medium);
+    font-size: var(--vp-display-size);
     color: var(--color-antique-gold);
     font-weight: bold;
     order: 3;
@@ -436,8 +476,8 @@ body.menu-active.character-selection-phase #board-pane {
 }
 
 .vp-icon {
-    width: clamp(14px, 3.5vw, 20px);
-    height: clamp(14px, 3.5vw, 20px);
+    width: clamp(10px, 2.5vw, 14px);
+    height: clamp(10px, 2.5vw, 14px);
 }
 
 /* Row 2: Character name, Coins */
@@ -450,7 +490,7 @@ body.menu-active.character-selection-phase #board-pane {
 }
 
 .character-name {
-    font-size: var(--font-small);
+    font-size: var(--character-name-size);
     color: var(--color-text-muted);
     font-style: italic;
 }
@@ -459,14 +499,14 @@ body.menu-active.character-selection-phase #board-pane {
     display: flex;
     align-items: center;
     gap: var(--spacing-xs);
-    font-size: var(--font-body);
+    font-size: var(--coins-display-size);
     font-weight: bold;
     color: var(--color-antique-gold);
 }
 
 .coin-icon {
-    width: clamp(14px, 3.5vw, 20px);
-    height: clamp(14px, 3.5vw, 20px);
+    width: clamp(10px, 2.5vw, 14px);
+    height: clamp(10px, 2.5vw, 14px);
 }
 
 .reserve-display {
@@ -496,49 +536,53 @@ body.menu-active.character-selection-phase #board-pane {
     color: var(--color-antique-gold);
 }
 
-/* Resource HUD (single row, full width) */
+/* Resource HUD (single row, full width) - compact for small screens */
 .resource-hud {
     display: flex;
     flex-direction: row;
-    justify-content: space-around;
+    justify-content: center;
     align-items: center;
     gap: 2px;
-    padding: 2px 0;
-    background: rgba(0, 0, 0, 0.2);
-    border-radius: 2px;
+    padding: 2px 2px;
+    background: rgba(0, 0, 0, 0.25);
+    border-radius: 4px;
     flex-shrink: 0;
+}
+
+.no-resources {
+    font-size: var(--font-tiny);
+    color: var(--color-text-muted);
+    font-style: italic;
+    padding: 4px;
 }
 
 .resource-item {
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 1px;
-    background: rgba(0, 0, 0, 0.3);
-    border-radius: var(--border-radius-sm);
-    padding: clamp(1px, 0.3vw, 3px);
+    gap: 0px;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 3px;
+    padding: 1px 2px;
     min-width: 0;
     min-height: 0;
     overflow: visible;
 }
 
 .resource-item.treasure-cell {
-    cursor: pointer;
-    transition: background-color 0.2s;
-}
-
-.resource-item.treasure-cell:hover {
-    background: rgba(201, 169, 97, 0.3);
-}
-
-.resource-item.treasure-cell.disabled {
     cursor: default;
-    opacity: 0.6;
+    transition: background-color 0.2s, transform 0.15s;
 }
 
-.resource-item.treasure-cell.disabled:hover {
-    background: rgba(0, 0, 0, 0.3);
+.resource-item.treasure-cell.sellable {
+    cursor: pointer;
+    box-shadow: 0 0 6px rgba(230, 200, 112, 0.6);
+}
+
+.resource-item.treasure-cell.sellable:hover {
+    background: rgba(201, 169, 97, 0.3);
+    transform: scale(1.05);
 }
 
 .treasure-label {
@@ -550,23 +594,34 @@ body.menu-active.character-selection-phase #board-pane {
 }
 
 .coin-icon-tiny {
-    width: 12px;
-    height: 12px;
+    width: 14px;
+    height: 14px;
 }
 
 .resource-icon {
-    width: clamp(8px, 2vw, 14px);
-    height: clamp(8px, 2vw, 14px);
-    min-width: clamp(8px, 2vw, 14px);
-    min-height: clamp(8px, 2vw, 14px);
+    width: clamp(12px, 3vw, 18px);
+    height: clamp(12px, 3vw, 18px);
+    min-width: clamp(12px, 3vw, 18px);
+    min-height: clamp(12px, 3vw, 18px);
     object-fit: contain;
     flex-shrink: 0;
+    filter: drop-shadow(1px 1px 2px rgba(0, 0, 0, 0.4));
 }
 
 .resource-count {
     font-size: clamp(6px, 1.5vw, 10px);
-    font-weight: bold;
-    color: var(--color-text-light);
+    font-weight: 600;
+    color: var(--color-text-muted);
+    line-height: 1;
+    text-align: center;
+}
+
+.resource-count.text-green {
+    color: var(--color-success-green);
+}
+
+.resource-count.text-red {
+    color: var(--color-danger-crimson);
 }
 
 .resource-label {
@@ -581,13 +636,14 @@ body.menu-active.character-selection-phase #board-pane {
 
 /* Actions Grid (flexbox for centered partial rows) */
 .actions-grid {
-    display: flex;
+    display: flex !important;
     flex-wrap: wrap;
     justify-content: center;
     align-items: center;
-    gap: 2px;
+    gap: 2px !important;
     flex: 0 0 auto;
     width: 100%;
+    height: auto !important;
 }
 
 .action-btn {
@@ -595,29 +651,41 @@ body.menu-active.character-selection-phase #board-pane {
     flex-direction: row;
     align-items: center;
     justify-content: center;
-    background: linear-gradient(180deg, var(--color-weathered-bronze) 0%, #5a3d2a 100%);
-    border: 1px solid var(--color-antique-gold);
-    border-radius: 2px;
+    background: linear-gradient(145deg, #966243 0%, #7a4d35 100%);
+    border: none;
+    border-radius: var(--border-radius-neumorphic);
     color: var(--color-text-light);
-    padding: 2px 3px;
+    padding: 3px 4px !important;
     cursor: pointer;
-    transition: transform 0.15s, opacity 0.15s;
-    min-height: 0;
+    transition: box-shadow 0.2s, transform 0.15s, background 0.2s;
+    min-height: 0 !important;
     overflow: hidden;
     text-align: center;
     line-height: 1;
     width: 23%;
     flex: 0 0 23%;
     height: auto;
+    font-size: clamp(5px, 1.5vw, 8px) !important;
+    box-shadow:
+        4px 4px 8px var(--shadow-bronze-dark),
+        -2px -2px 6px var(--shadow-bronze-light),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 
-.action-btn:active {
-    transform: scale(0.95);
+.action-btn:active:not(:disabled) {
+    box-shadow:
+        inset 3px 3px 6px var(--shadow-bronze-dark),
+        inset -2px -2px 4px var(--shadow-bronze-light);
+    transform: scale(0.98);
+    background: linear-gradient(145deg, #7a4d35 0%, #966243 100%);
 }
 
 .action-btn:disabled {
     opacity: 0.4;
     cursor: not-allowed;
+    box-shadow:
+        2px 2px 4px var(--shadow-bronze-dark),
+        -1px -1px 3px var(--shadow-bronze-light);
 }
 
 .action-btn .action-icon {
@@ -640,18 +708,23 @@ body.portrait-mode .action-btn .action-text {
 .btn-end-turn {
     width: 60%;
     max-width: 150px;
-    margin: 2px auto 0;
-    background: linear-gradient(180deg, var(--color-burgundy) 0%, #5a2530 100%);
-    border: 1px solid var(--color-antique-gold);
-    border-radius: 2px;
+    margin: auto auto 4px; /* margin-top: auto pushes to bottom of flex container */
+    background: linear-gradient(145deg, #9c3d4f 0%, #7a2d3d 100%);
+    border: none;
+    border-radius: var(--border-radius-neumorphic);
     color: var(--color-text-light);
-    font-size: clamp(6px, 1.5vw, 9px);
+    font-size: clamp(6px, 1.5vw, 9px) !important;
     font-weight: bold;
-    padding: 3px 4px;
+    padding: 4px 6px !important;
+    min-height: 0 !important;
     cursor: pointer;
-    transition: transform 0.15s, opacity 0.15s;
+    transition: box-shadow 0.2s, transform 0.15s, background 0.2s;
     flex-shrink: 0;
     display: block;
+    box-shadow:
+        4px 4px 10px var(--shadow-burgundy-dark),
+        -2px -2px 6px var(--shadow-burgundy-light),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 
 .btn-end-turn:disabled {
@@ -661,7 +734,10 @@ body.portrait-mode .action-btn .action-text {
 
 .btn-end-turn:not(:disabled):active {
     transform: scale(0.98);
-    background: linear-gradient(180deg, #a04050 0%, var(--color-burgundy) 100%);
+    box-shadow:
+        inset 3px 3px 6px var(--shadow-burgundy-dark),
+        inset -2px -2px 4px var(--shadow-burgundy-light);
+    background: linear-gradient(145deg, #7a2d3d 0%, #9c3d4f 100%);
 }
 
 /* ===========================
@@ -1126,15 +1202,15 @@ body.portrait-mode .action-btn .action-text {
     align-items: center;
     justify-content: space-between;
     gap: var(--spacing-xs);
-    background: linear-gradient(180deg, rgba(139, 90, 43, 0.6) 0%, rgba(100, 60, 30, 0.5) 100%);
+    background: rgba(110, 70, 35, 0.5);
     padding: var(--spacing-xs) var(--spacing-sm);
     margin: calc(-1 * var(--spacing-sm));
-    margin-bottom: 0;
+    margin-bottom: calc(-1 * var(--spacing-xs));
     border-radius: var(--border-radius-md) var(--border-radius-md) 0 0;
 }
 
 .opponent-name {
-    font-size: var(--font-small);
+    font-size: var(--player-name-size);
     font-weight: bold;
     color: var(--color-text-light);
     white-space: nowrap;
@@ -1156,7 +1232,7 @@ body.portrait-mode .action-btn .action-text {
 }
 
 .opponent-vp {
-    font-size: var(--font-small);
+    font-size: var(--vp-display-size);
     font-weight: bold;
     color: var(--color-antique-gold);
     white-space: nowrap;
@@ -1167,14 +1243,14 @@ body.portrait-mode .action-btn .action-text {
     align-items: center;
     justify-content: space-between;
     gap: var(--spacing-xs);
-    background: linear-gradient(180deg, rgba(100, 60, 30, 0.5) 0%, rgba(80, 50, 25, 0.3) 100%);
+    background: rgba(110, 70, 35, 0.5);
     padding: var(--spacing-xs) var(--spacing-sm);
     margin: 0 calc(-1 * var(--spacing-sm));
-    margin-bottom: var(--spacing-xs);
+    margin-bottom: 0;
 }
 
 .opponent-character {
-    font-size: var(--font-tiny);
+    font-size: var(--character-name-size);
     color: var(--color-text-muted);
     font-style: italic;
     white-space: nowrap;
@@ -1187,14 +1263,14 @@ body.portrait-mode .action-btn .action-text {
     display: flex;
     align-items: center;
     gap: var(--spacing-xs);
-    font-size: var(--font-tiny);
+    font-size: var(--coins-display-size);
     font-weight: bold;
     color: var(--color-antique-gold);
 }
 
 .coin-icon-small {
-    width: clamp(10px, 2.5vw, 14px);
-    height: clamp(10px, 2.5vw, 14px);
+    width: clamp(8px, 2vw, 12px);
+    height: clamp(8px, 2vw, 12px);
 }
 
 .opponent-resources {
@@ -1212,43 +1288,44 @@ body.portrait-mode .action-btn .action-text {
 
 .opponent-resources-grid {
     display: grid;
-    grid-template-columns: repeat(3, auto);
-    grid-template-rows: repeat(2, auto);
-    gap: 2px 8px;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2px 4px;
     font-size: clamp(10px, 3vw, 14px);
     flex: 1;
-    padding: var(--spacing-xs) 0;
+    padding: 2px 0;
     align-content: center;
-    justify-content: center;
+    justify-items: center;
 }
 
-/* Row 2 items (Inns, Destroyed) centered */
-.opponent-resources-grid .opp-resource-item:nth-child(4) {
-    grid-column: 1 / 2;
-    justify-self: end;
+.opponent-resources-grid.cols-2 {
+    grid-template-columns: repeat(2, 1fr);
 }
 
-.opponent-resources-grid .opp-resource-item:nth-child(5) {
-    grid-column: 2 / 4;
-    justify-self: start;
+.opponent-resources-grid.cols-3 {
+    grid-template-columns: repeat(3, 1fr);
 }
 
 .opp-resource-item {
     display: flex;
+    flex-direction: column;
     align-items: center;
-    gap: 3px;
-    color: var(--color-text-light);
-    font-weight: 500;
+    gap: 1px;
+    color: var(--color-text-muted);
+    font-weight: 600;
+    font-size: clamp(6px, 1.5vw, 10px);
+    line-height: 1;
+    text-align: center;
 }
 
 .opp-coin-value {
-    color: #e8a845;
+    color: var(--color-antique-gold);
 }
 
 .resource-icon-tiny {
-    width: clamp(14px, 4vw, 22px);
-    height: clamp(14px, 4vw, 22px);
-    vertical-align: middle;
+    width: clamp(18px, 5vw, 26px);
+    height: clamp(18px, 5vw, 26px);
+    object-fit: contain;
+    filter: drop-shadow(1px 1px 2px rgba(0, 0, 0, 0.4));
 }
 
 /* Opponent turn indicator */
@@ -1277,20 +1354,28 @@ body.portrait-mode .action-btn .action-text {
     align-items: center;
     justify-content: center;
     gap: 4px;
-    background: linear-gradient(180deg, var(--color-monastery-stone) 0%, #4a4540 100%);
-    border: var(--border-width) solid var(--color-illuminated-blue);
-    border-radius: var(--border-radius-sm);
+    background: linear-gradient(145deg, #7a7568 0%, #5f5b50 100%);
+    border: none;
+    border-radius: var(--border-radius-neumorphic);
     color: var(--color-text-light);
     font-size: clamp(6px, 2vw, 10px);
     padding: var(--spacing-xs) var(--spacing-sm);
     min-width: clamp(50px, 15vw, 70px);
+    min-height: 36px;
     cursor: pointer;
-    transition: transform 0.15s, box-shadow 0.15s;
+    transition: box-shadow 0.2s, transform 0.15s, background 0.2s;
+    box-shadow:
+        4px 4px 8px var(--shadow-stone-dark),
+        -2px -2px 6px var(--shadow-stone-light),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 
 .bottom-btn:active {
     transform: scale(0.95);
-    box-shadow: 0 0 10px rgba(74, 122, 160, 0.5);
+    box-shadow:
+        inset 3px 3px 6px var(--shadow-stone-dark),
+        inset -2px -2px 4px var(--shadow-stone-light);
+    background: linear-gradient(145deg, #5f5b50 0%, #7a7568 100%);
 }
 
 .bottom-btn .btn-icon {

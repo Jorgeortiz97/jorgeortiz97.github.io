@@ -68,9 +68,19 @@ class PortraitUIController {
         if (this.eventsBound) return;
         this.eventsBound = true;
 
-        // Action buttons - event delegation
+        // Action buttons - event delegation with touch support
         const actionsGrid = document.querySelector('.actions-grid');
         if (actionsGrid) {
+            // Use touchend for immediate response on mobile
+            actionsGrid.addEventListener('touchend', (e) => {
+                const actionBtn = e.target.closest('.action-btn');
+                if (actionBtn && !actionBtn.disabled) {
+                    e.preventDefault(); // Prevent ghost click
+                    this.handleActionClick({ target: actionBtn });
+                }
+            }, { passive: false });
+
+            // Keep click for desktop/fallback
             actionsGrid.addEventListener('click', (e) => {
                 const actionBtn = e.target.closest('.action-btn');
                 if (actionBtn && !actionBtn.disabled) {
@@ -79,14 +89,45 @@ class PortraitUIController {
             });
         }
 
-        // Bottom buttons
+        // End turn button (outside actions-grid) with touch support
+        const endTurnBtn = document.querySelector('.btn-end-turn');
+        if (endTurnBtn) {
+            // Use touchend for immediate response on mobile
+            endTurnBtn.addEventListener('touchend', (e) => {
+                if (!endTurnBtn.disabled) {
+                    e.preventDefault(); // Prevent ghost click
+                    this.handleActionClick({ target: endTurnBtn });
+                }
+            }, { passive: false });
+
+            // Keep click for desktop/fallback
+            endTurnBtn.addEventListener('click', () => {
+                if (!endTurnBtn.disabled) {
+                    this.handleActionClick({ target: endTurnBtn });
+                }
+            });
+        }
+
+        // Bottom buttons with touch support
         if (this.elements.fullscreenBtn) {
+            this.elements.fullscreenBtn.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                this.toggleFullscreen();
+            }, { passive: false });
             this.elements.fullscreenBtn.addEventListener('click', () => this.toggleFullscreen());
         }
         if (this.elements.helpBtn) {
+            this.elements.helpBtn.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                this.showHelpModal();
+            }, { passive: false });
             this.elements.helpBtn.addEventListener('click', () => this.showHelpModal());
         }
         if (this.elements.exitBtn) {
+            this.elements.exitBtn.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                this.exitGame();
+            }, { passive: false });
             this.elements.exitBtn.addEventListener('click', () => this.exitGame());
         }
 
@@ -415,6 +456,12 @@ class PortraitUIController {
         const resourceHud = document.querySelector('.resource-hud');
         if (!resourceHud) return;
 
+        // Get all resource counts
+        const landsCount = player.getUncultivatedLandsCount();
+        const cultivatedCount = player.getCultivatedLandsCount();
+        const innsCount = player.getActiveInnsCount();
+        const destroyedCount = player.getDestroyedInnsCount();
+
         // Count treasures by type
         const treasures = player.treasures || [];
         const vp1Count = treasures.filter(t => t.vp === 1).length;
@@ -427,48 +474,75 @@ class PortraitUIController {
                        this.game.phase === 'action' &&
                        player.character?.id === 'artisan';
 
-        // Single row HUD: Lands, CLands, Inns, DInns, 1VP, 2VP, 3Coin, 4Coin
-        resourceHud.innerHTML = `
-            <div class="resource-item" title="Tierras">
+        // Build resource items dynamically - only show if count > 0
+        // Order: lands, cultivated, inns, destroyed, vp1, vp2, coin3, coin4
+        const items = [];
+
+        if (landsCount > 0) {
+            items.push(`<div class="resource-item" title="Tierras">
                 <img src="resources/other/Land.png" class="resource-icon" alt="Lands">
-                <span class="resource-count">${player.getUncultivatedLandsCount()}</span>
-            </div>
-            <div class="resource-item" title="Tierras Cultivadas">
+                <span class="resource-count">${landsCount}</span>
+            </div>`);
+        }
+
+        if (cultivatedCount > 0) {
+            items.push(`<div class="resource-item" title="Tierras Cultivadas">
                 <img src="resources/other/Cultivated_Land.png" class="resource-icon" alt="Cultivated">
-                <span class="resource-count ${player.getCultivatedLandsCount() > 0 ? 'text-green' : ''}">${player.getCultivatedLandsCount()}</span>
-            </div>
-            <div class="resource-item" title="Posadas">
+                <span class="resource-count text-green">${cultivatedCount}</span>
+            </div>`);
+        }
+
+        if (innsCount > 0) {
+            items.push(`<div class="resource-item" title="Posadas">
                 <img src="resources/other/Inn.png" class="resource-icon" alt="Inns">
-                <span class="resource-count">${player.getActiveInnsCount()}</span>
-            </div>
-            <div class="resource-item" title="Posadas Destruidas">
+                <span class="resource-count">${innsCount}</span>
+            </div>`);
+        }
+
+        if (destroyedCount > 0) {
+            items.push(`<div class="resource-item" title="Posadas Destruidas">
                 <img src="resources/other/Destroyed_Inn.png" class="resource-icon" alt="Destroyed">
-                <span class="resource-count ${player.getDestroyedInnsCount() > 0 ? 'text-red' : ''}">${player.getDestroyedInnsCount()}</span>
-            </div>
-            <div class="resource-item treasure-cell ${vp1Count === 0 || !canSell ? 'disabled' : ''}"
+                <span class="resource-count text-red">${destroyedCount}</span>
+            </div>`);
+        }
+
+        if (vp1Count > 0) {
+            items.push(`<div class="resource-item treasure-cell ${canSell ? 'sellable' : ''}"
                  data-treasure-type="vp1" title="Tesoros 1 VP">
                 <img src="resources/other/Treasure_1VP.png" class="resource-icon" alt="1VP">
                 <span class="resource-count">${vp1Count}</span>
-            </div>
-            <div class="resource-item treasure-cell ${vp2Count === 0 || !canSell ? 'disabled' : ''}"
+            </div>`);
+        }
+
+        if (vp2Count > 0) {
+            items.push(`<div class="resource-item treasure-cell ${canSell ? 'sellable' : ''}"
                  data-treasure-type="vp2" title="Tesoros 2 VP">
                 <img src="resources/other/Treasure_2VP.png" class="resource-icon" alt="2VP">
                 <span class="resource-count">${vp2Count}</span>
-            </div>
-            <div class="resource-item treasure-cell ${coin3Count === 0 || !canSell ? 'disabled' : ''}"
+            </div>`);
+        }
+
+        if (coin3Count > 0) {
+            items.push(`<div class="resource-item treasure-cell ${canSell ? 'sellable' : ''}"
                  data-treasure-type="coin3" title="Tesoros 3 monedas">
                 <img src="resources/other/Wealth_3coins.png" class="resource-icon" alt="3 Coins">
                 <span class="resource-count">${coin3Count}</span>
-            </div>
-            <div class="resource-item treasure-cell ${coin4Count === 0 || !canSell ? 'disabled' : ''}"
+            </div>`);
+        }
+
+        if (coin4Count > 0) {
+            items.push(`<div class="resource-item treasure-cell ${canSell ? 'sellable' : ''}"
                  data-treasure-type="coin4" title="Tesoros 4 monedas">
                 <img src="resources/other/Wealth_4coins.png" class="resource-icon" alt="4 Coins">
                 <span class="resource-count">${coin4Count}</span>
-            </div>
-        `;
+            </div>`);
+        }
 
-        // Add click handlers for treasure cells
-        resourceHud.querySelectorAll('.treasure-cell:not(.disabled)').forEach(cell => {
+        // If no resources, show empty message
+        resourceHud.innerHTML = items.length > 0 ? items.join('') : '<span class="no-resources">Sin recursos</span>';
+
+        // Add click handlers only for sellable treasure cells (Artisan ability)
+        resourceHud.querySelectorAll('.treasure-cell.sellable').forEach(cell => {
             cell.addEventListener('click', () => this.handleTreasureSellClick(cell.dataset.treasureType));
         });
     }
@@ -560,6 +634,49 @@ class PortraitUIController {
         const playerConfig = typeof getPlayerConfig === 'function' ? getPlayerConfig(player.id) : null;
         const coinImage = playerConfig?.coinImage || 'resources/other/gold.png';
 
+        // Build resource items dynamically - only show if count > 0
+        // Order: lands, cultivated, inns, destroyed, treasures
+        const resourceItems = [];
+
+        if (landsCount > 0) {
+            resourceItems.push(`<div class="opp-resource-item" title="Tierras">
+                <img src="resources/other/Land.png" class="resource-icon-tiny">
+                <span>${landsCount}</span>
+            </div>`);
+        }
+
+        if (cultivatedCount > 0) {
+            resourceItems.push(`<div class="opp-resource-item" title="Cultivadas">
+                <img src="resources/other/Cultivated_Land.png" class="resource-icon-tiny">
+                <span>${cultivatedCount}</span>
+            </div>`);
+        }
+
+        if (innsCount > 0) {
+            resourceItems.push(`<div class="opp-resource-item" title="Posadas">
+                <img src="resources/other/Inn.png" class="resource-icon-tiny">
+                <span>${innsCount}</span>
+            </div>`);
+        }
+
+        if (destroyedInnsCount > 0) {
+            resourceItems.push(`<div class="opp-resource-item" title="Destruidas">
+                <img src="resources/other/Destroyed_Inn.png" class="resource-icon-tiny">
+                <span>${destroyedInnsCount}</span>
+            </div>`);
+        }
+
+        if (treasuresCount > 0) {
+            resourceItems.push(`<div class="opp-resource-item" title="Tesoros">
+                <img src="resources/other/Treasure.png" class="resource-icon-tiny">
+                <span>${treasuresCount}</span>
+            </div>`);
+        }
+
+        // Determine grid columns based on item count for best layout
+        const itemCount = resourceItems.length;
+        const gridClass = itemCount <= 2 ? 'cols-2' : itemCount <= 3 ? 'cols-3' : 'cols-3';
+
         panel.innerHTML = `
             <div class="opponent-header">
                 <span class="opponent-name">${player.name}</span>
@@ -573,29 +690,8 @@ class PortraitUIController {
                     <img src="${coinImage}" class="coin-icon-small" alt="coins">
                 </span>
             </div>
-            <div class="opponent-resources-grid">
-                <!-- Row 1: Lands, Cultivated, Treasures -->
-                <div class="opp-resource-item">
-                    <img src="resources/other/Land.png" class="resource-icon-tiny">
-                    <span>${landsCount}</span>
-                </div>
-                <div class="opp-resource-item">
-                    <img src="resources/other/Cultivated_Land.png" class="resource-icon-tiny">
-                    <span>${cultivatedCount}</span>
-                </div>
-                <div class="opp-resource-item">
-                    <img src="resources/other/Treasure.png" class="resource-icon-tiny">
-                    <span>${treasuresCount}</span>
-                </div>
-                <!-- Row 2: Inns, Destroyed (centered) -->
-                <div class="opp-resource-item">
-                    <img src="resources/other/Inn.png" class="resource-icon-tiny">
-                    <span>${innsCount}</span>
-                </div>
-                <div class="opp-resource-item">
-                    <img src="resources/other/Destroyed_Inn.png" class="resource-icon-tiny">
-                    <span>${destroyedInnsCount}</span>
-                </div>
+            <div class="opponent-resources-grid ${gridClass}">
+                ${resourceItems.length > 0 ? resourceItems.join('') : '<span class="no-resources">Sin recursos</span>'}
             </div>
         `;
     }

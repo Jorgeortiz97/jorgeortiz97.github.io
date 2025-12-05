@@ -57,6 +57,12 @@
     --investment-slot-size: clamp(12px, 2vmin, 26px);
     --guild-number-size: clamp(12px, 2.2vmin, 30px);
 
+    /* Unified player UI sizes (human & AI) */
+    --player-name-size: clamp(8px, 2.5vw, 14px);
+    --character-name-size: clamp(6px, 2vw, 10px);
+    --vp-display-size: clamp(8px, 2.5vw, 14px);
+    --coins-display-size: clamp(7px, 2.2vw, 12px);
+
     /* Game log */
     --log-max-height: clamp(100px, 15vh, 200px);
 
@@ -97,6 +103,15 @@
     --color-overlay-dark: rgba(26, 21, 16, 0.95);    /* Darker overlay */
     --color-overlay-medium: rgba(26, 21, 16, 0.90);  /* Medium overlay */
     --color-overlay-light: rgba(26, 21, 16, 0.80);   /* Light overlay */
+
+    /* Additional utility colors */
+    --color-bright-gold: #ffd700;            /* Bright gold for highlights */
+    --color-cultivated-green: #4ade80;       /* Green for cultivated lands */
+    --color-destroyed-red: #f87171;          /* Red for destroyed items */
+    --color-error-red: #ff6b6b;              /* Error/warning red */
+    --color-gray-muted: #666666;             /* Muted gray */
+    --color-gray-light: #cccccc;             /* Light gray */
+    --color-black: #000000;                  /* Pure black */
 
     /* Safe area insets for notched devices */
     --safe-area-inset-top: env(safe-area-inset-top, 0px);
@@ -378,7 +393,7 @@
     }
 
     .character-name {
-        font-size: clamp(10px, 1.7vmin, 20px) !important;
+        font-size: var(--character-name-size) !important;
         margin-bottom: 8px !important;
         white-space: nowrap !important;
         line-height: 1.1;
@@ -449,7 +464,7 @@
     }
 
     .character-info .character-name:hover {
-        color: #ffd700 !important;
+        color: var(--color-bright-gold) !important;
     }
 
     /* Player panel improvements */
@@ -488,11 +503,11 @@
 
     /* Color coding for resource counts */
     .resource-count-green {
-        color: #4ade80 !important; /* Bright green for cultivated lands */
+        color: var(--color-cultivated-green) !important;
     }
 
     .resource-count-red {
-        color: #f87171 !important; /* Bright red for destroyed inns */
+        color: var(--color-destroyed-red) !important;
     }
 
     .lands-count,
@@ -559,10 +574,10 @@
 
     /* Coin icons in UI */
     .coin-icon {
-        width: 20px !important;
-        height: 20px !important;
-        min-width: 20px !important;
-        min-height: 20px !important;
+        width: clamp(10px, 2.5vw, 14px) !important;
+        height: clamp(10px, 2.5vw, 14px) !important;
+        min-width: 10px !important;
+        min-height: 10px !important;
     }
 
     /* Fullscreen button */
@@ -1099,10 +1114,10 @@ body:not(.character-selection-phase) .player-character-compact {
 }
 
 .player-character-compact .character-info {
-    background: transparent !important;
-    border: none !important;
-    padding: clamp(2px, 0.4vmin, 4px) 0 !important;
-    margin: 0 !important;
+    background: transparent;
+    border: none;
+    padding: clamp(2px, 0.4vmin, 4px) 0;
+    margin: 0;
 }
 
 .player-character-compact .character-name {
@@ -1793,11 +1808,11 @@ body:not(.character-selection-phase) #ai-players-column .character-info {
 /* AI resources grid - 3 columns, 2 rows */
 #ai-player-1 .ai-resources-grid,
 #ai-player-2 .ai-resources-grid {
-    display: grid !important;
-    grid-template-columns: repeat(3, 1fr) !important;
-    grid-template-rows: auto auto !important;
-    gap: clamp(4px, 0.8vmin, 8px) !important;
-    padding: clamp(4px, 0.8vmin, 8px) !important;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: auto auto;
+    gap: clamp(4px, 0.8vmin, 8px);
+    padding: clamp(4px, 0.8vmin, 8px);
     align-items: center;
     justify-items: center;
 }
@@ -1863,16 +1878,16 @@ body:not(.character-selection-phase) #ai-players-column .character-info {
 }
 
 #ai-players-column .character-info {
-    padding: 0 !important;  /* NO padding */
+    padding: 0;
     font-size: clamp(8px, 1.2vmin, 16px);
-    margin: 0 !important;  /* NO margin */
+    margin: 0;
     height: auto;
-    border: none !important;  /* NO border */
+    border: none;
 }
 
 #ai-players-column .character-name {
     font-size: clamp(9px, 1.4vmin, 16px);
-    margin: 0 !important;  /* NO margin at all */
+    margin: 0;
     white-space: nowrap;
     line-height: 1.1;
     width: 100%;
@@ -1882,8 +1897,8 @@ body:not(.character-selection-phase) #ai-players-column .character-info {
 
 /* Remove margin from player-character in AI sections */
 #ai-players-column .player-character {
-    margin: 0 !important;  /* NO margin */
-    padding: 0 !important;  /* NO padding */
+    margin: 0;
+    padding: 0;
 }
 
 /* Remove character image margin in AI sections */
@@ -1894,11 +1909,11 @@ body:not(.character-selection-phase) #ai-players-column .character-info {
 
 /* Reduce resources spacing in AI sections */
 #ai-players-column .player-resources:not(.ai-resources-grid) {
-    display: flex !important;
-    flex-direction: column !important;
-    gap: clamp(4px, 0.8vmin, 8px) !important;  /* Small gap between resource rows */
-    padding: 2px 4px;  /* Minimal padding */
-    margin: 0 !important;  /* NO margin */
+    display: flex;
+    flex-direction: column;
+    gap: clamp(4px, 0.8vmin, 8px);
+    padding: 2px 4px;
+    margin: 0;
 }
 
 .player-header {
@@ -1919,19 +1934,19 @@ body:not(.character-selection-phase) #ai-players-column .character-info {
 
 /* Remove spacing from .player-header inside AI player headers */
 .ai-player-header .player-header {
-    margin-bottom: 0 !important;  /* No margin in AI headers */
-    padding-bottom: 0 !important;  /* No padding in AI headers */
-    padding: 0 !important;  /* No padding at all */
-    border-bottom: none !important;  /* No border needed */
-    gap: 0 !important;  /* No gap between flex items */
-    min-height: 0;  /* Allow it to shrink */
-    height: auto;  /* Auto height */
+    margin-bottom: 0;
+    padding-bottom: 0;
+    padding: 0;
+    border-bottom: none;
+    gap: 0;
+    min-height: 0;
+    height: auto;
 }
 
 /* Remove margin from player name in AI headers */
 #ai-players-column .ai-player-header .player-name {
-    margin-bottom: 0 !important;  /* No margin below name */
-    margin: 0 !important;  /* No margin at all */
+    margin-bottom: 0;
+    margin: 0;
 }
 
 .player-name {
@@ -1959,20 +1974,20 @@ body:not(.character-selection-phase) #ai-players-column .character-info {
 
 .coin-count {
     color: var(--color-antique-gold);
-    font-size: clamp(18px, 2.5vmin, 36px);
+    font-size: inherit; /* Inherit from parent .coins-display */
     font-weight: bold;
 }
 
 .coin-icon {
-    font-size: clamp(20px, 2.8vmin, 40px);
+    font-size: clamp(10px, 2.5vw, 14px);
     display: inline-block;
     vertical-align: middle;
 }
 
 /* Coin icon images for AI players */
 .coin-icon.coin-image {
-    width: clamp(20px, 2.8vmin, 40px);
-    height: clamp(20px, 2.8vmin, 40px);
+    width: clamp(10px, 2.5vw, 14px);
+    height: clamp(10px, 2.5vw, 14px);
     transition: transform 0.2s ease, opacity 0.2s ease;
 }
 
@@ -2219,7 +2234,7 @@ body:not(.character-selection-phase) #ai-players-column .character-info {
 
 .vp-count {
     color: var(--color-antique-gold); /* Gold text for VP */
-    font-size: clamp(18px, 2.5vmin, 36px);
+    font-size: inherit; /* Inherit from parent .vp-display */
     font-weight: bold;
 }
 
@@ -2502,7 +2517,7 @@ body:not(.character-selection-phase) .player-actions-section.player-zone {
 
 /* Larger action text after character selection */
 body:not(.character-selection-phase) .action-text {
-    font-size: 0.8em !important;  /* Strengthen with !important */
+    font-size: 0.8em;
 }
 
 /* Utility buttons container - always visible at bottom */
@@ -5579,10 +5594,15 @@ body.low-resolution-blocked #difficulty-modal {
         margin-bottom: 14px !important;
     }
 
-    .character-name {
+    .character-option .character-name {
         font-size: clamp(17px, 3.8vmin, 24px) !important;
         margin-bottom: 10px !important;
         font-weight: 700 !important;
+    }
+
+    /* In-game character name uses unified variable */
+    .character-info .character-name {
+        font-size: var(--character-name-size) !important;
     }
 
     /* Enhanced clickable character info indication */
@@ -5663,10 +5683,10 @@ body.low-resolution-blocked #difficulty-modal {
 
     /* Better coin display */
     .coin-icon {
-        width: 22px !important;
-        height: 22px !important;
-        min-width: 22px !important;
-        min-height: 22px !important;
+        width: clamp(10px, 2.5vw, 14px) !important;
+        height: clamp(10px, 2.5vw, 14px) !important;
+        min-width: 10px !important;
+        min-height: 10px !important;
     }
 
     /* AI players section improvements */
@@ -5893,8 +5913,8 @@ body.low-resolution-blocked #difficulty-modal {
     }
 
     .coin-icon {
-        width: 18px !important;
-        height: 18px !important;
+        width: clamp(10px, 2.5vw, 14px) !important;
+        height: clamp(10px, 2.5vw, 14px) !important;
     }
 
     .player-actions-section h4 {
@@ -6318,8 +6338,8 @@ body.low-resolution-blocked #difficulty-modal {
     }
 
     .coin-icon.coin-image {
-        width: clamp(12px, 1.6vmin, 18px) !important;
-        height: clamp(12px, 1.6vmin, 18px) !important;
+        width: clamp(8px, 2vw, 12px) !important;
+        height: clamp(8px, 2vw, 12px) !important;
     }
 
     /* Unified player-coins and player-vp for ALL players */
