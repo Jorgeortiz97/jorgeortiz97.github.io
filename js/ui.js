@@ -947,6 +947,16 @@ class UIController {
 
         if (guild.blocked) {
             div.classList.add('blocked');
+
+            // Determine block level visual indicator
+            const blockInfo = this.getGuildBlockInfo(guild.number);
+            if (blockInfo.isPlagueAffected) {
+                div.classList.add('plague-affected');
+            } else if (blockInfo.maxEventCount >= 2) {
+                div.classList.add('double-block');
+            } else if (blockInfo.maxEventCount === 1) {
+                div.classList.add('single-block');
+            }
         }
 
         // Max investor indicator
@@ -1017,9 +1027,11 @@ class UIController {
                 uniqueEvents.forEach(eventId => {
                     const event = eventsHere.find(e => e.id === eventId);
                     const count = eventCounts[eventId];
+                    // Determine block level class: single (1 event) or double (2+ events)
+                    const blockLevelClass = count >= 2 ? 'double-block' : 'single-block';
 
                     eventsHTML += `
-                        <div class="blocking-event-card stacked-event" data-event-id="${eventId}">
+                        <div class="blocking-event-card stacked-event ${blockLevelClass}" data-event-id="${eventId}">
                             <div class="event-name">${event.name}</div>
                             <div class="event-count">${count > 1 ? `x${count}` : ''}</div>
                         </div>
@@ -1031,6 +1043,52 @@ class UIController {
 
             this.elements.guildsGrid.appendChild(div);
         }
+    }
+
+    // Helper function to get blocking event info for a specific guild
+    getGuildBlockInfo(guildNumber) {
+        const result = {
+            isPlagueAffected: false,
+            maxEventCount: 0
+        };
+
+        // Define which blocking events affect which guilds
+        const eventGuildMapping = {
+            'mine_collapse': [3, 11],
+            'material_shortage': [4, 10],
+            'trade_blockade': [5, 9],
+            'famine': [6, 8],
+            'plague': 'all'
+        };
+
+        // Immune guilds for Plague
+        const plagueImmuneGuilds = [2, 12];
+
+        // Count events affecting this guild
+        const eventCounts = {};
+
+        for (const event of this.game.activeTemporaryEvents) {
+            const affectedGuilds = eventGuildMapping[event.id];
+
+            if (event.id === 'plague') {
+                // Plague affects all except immune guilds
+                if (!plagueImmuneGuilds.includes(guildNumber)) {
+                    result.isPlagueAffected = true;
+                }
+            } else if (Array.isArray(affectedGuilds) && affectedGuilds.includes(guildNumber)) {
+                // Count this event type
+                eventCounts[event.id] = (eventCounts[event.id] || 0) + 1;
+            }
+        }
+
+        // Find max event count for this guild
+        for (const count of Object.values(eventCounts)) {
+            if (count > result.maxEventCount) {
+                result.maxEventCount = count;
+            }
+        }
+
+        return result;
     }
 
     updateExpeditionDisplay() {

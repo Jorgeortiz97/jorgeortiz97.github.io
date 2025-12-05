@@ -60,13 +60,13 @@ const EVENT_DEFINITIONS = {
     // Temporary Events (with quantities)
     TEMPORARY_EVENTS: [
         { type: EVENT_TYPES.TEMPORARY, id: 'mine_collapse', name: 'Derrumbamiento de Minas',
-          affectedGuilds: [6, 11], description: 'Bloquea Granja y Joyería', count: 2 },
+          affectedGuilds: [3, 11], description: 'Bloquea Herrería y Joyería', count: 2 },
         { type: EVENT_TYPES.TEMPORARY, id: 'material_shortage', name: 'Escasez de Materiales',
           affectedGuilds: [4, 10], description: 'Bloquea Cantera y Serrería', count: 3 },
         { type: EVENT_TYPES.TEMPORARY, id: 'trade_blockade', name: 'Bloqueo Comercial',
           affectedGuilds: [5, 9], description: 'Bloquea Puerto y Mercado', count: 3 },
         { type: EVENT_TYPES.TEMPORARY, id: 'famine', name: 'Hambruna',
-          affectedGuilds: [8, 3], description: 'Bloquea Taberna y Herrería', count: 3 },
+          affectedGuilds: [6, 8], description: 'Bloquea Granja y Taberna', count: 3 },
         { type: EVENT_TYPES.TEMPORARY, id: 'plague', name: 'Peste',
           affectedGuilds: 'all', immuneGuilds: [2, 12],
           description: 'Solo Iglesia y Monasterio generan recursos', count: 1 }

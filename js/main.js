@@ -404,6 +404,47 @@ function startGameWithDifficulty(difficulty) {
         return;
     }
 
+    // Show fullscreen prompt before starting the game
+    showFullscreenPrompt(difficulty);
+}
+
+// Show fullscreen prompt and start game when user responds
+function showFullscreenPrompt(difficulty) {
+    const fullscreenModal = document.getElementById('fullscreen-prompt-modal');
+    const acceptBtn = document.getElementById('fullscreen-accept-btn');
+    const declineBtn = document.getElementById('fullscreen-decline-btn');
+
+    // Show the modal
+    fullscreenModal.classList.remove('hidden');
+
+    // Handle accept - enter fullscreen and start game
+    const handleAccept = async () => {
+        cleanup();
+        fullscreenModal.classList.add('hidden');
+        await enterFullscreenLandscape();
+        initializeAndStartGame(difficulty);
+    };
+
+    // Handle decline - just start game without fullscreen
+    const handleDecline = () => {
+        cleanup();
+        fullscreenModal.classList.add('hidden');
+        initializeAndStartGame(difficulty);
+    };
+
+    // Cleanup event listeners
+    const cleanup = () => {
+        acceptBtn.removeEventListener('click', handleAccept);
+        declineBtn.removeEventListener('click', handleDecline);
+    };
+
+    // Add event listeners
+    acceptBtn.addEventListener('click', handleAccept);
+    declineBtn.addEventListener('click', handleDecline);
+}
+
+// Initialize and start the game (extracted from startGameWithDifficulty)
+function initializeAndStartGame(difficulty) {
     // Create game instance
     const game = new GremiosGame();
 

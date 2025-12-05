@@ -1548,6 +1548,41 @@ body:not(.character-selection-phase) #ai-players-column .character-info {
     transform: translateY(-5px) translateZ(0);
 }
 
+/* Single blocking event - yellow border */
+.guild-card.single-block,
+.blocking-event-card.single-block {
+    border: 3px solid #f0c040;
+    box-shadow: 0 0 12px rgba(240, 192, 64, 0.6), 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.guild-card.single-block:hover {
+    box-shadow: 0 0 18px rgba(240, 192, 64, 0.8), 0 6px 12px rgba(0, 0, 0, 0.4);
+    transform: translateY(-5px) translateZ(0);
+}
+
+/* Double blocking event - red border */
+.guild-card.double-block,
+.blocking-event-card.double-block {
+    border: 3px solid #c04040;
+    box-shadow: 0 0 15px rgba(192, 64, 64, 0.7), 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.guild-card.double-block:hover {
+    box-shadow: 0 0 20px rgba(192, 64, 64, 0.9), 0 6px 12px rgba(0, 0, 0, 0.4);
+    transform: translateY(-5px) translateZ(0);
+}
+
+/* Plague state - red border for all affected guilds */
+.guild-card.plague-affected {
+    border: 3px solid #c04040;
+    box-shadow: 0 0 15px rgba(192, 64, 64, 0.7), 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.guild-card.plague-affected:hover {
+    box-shadow: 0 0 20px rgba(192, 64, 64, 0.9), 0 6px 12px rgba(0, 0, 0, 0.4);
+    transform: translateY(-5px) translateZ(0);
+}
+
 .guild-card.drag-over {
     /* Gold glow for drag target */
     box-shadow: 0 0 20px rgba(201, 169, 97, 0.7), 0 4px 8px rgba(0, 0, 0, 0.3);
@@ -6611,6 +6646,17 @@ body.menu-active #game-log-section {
     padding: 40px;
     min-width: 400px;
     max-width: 600px;
+}
+
+.fullscreen-prompt-text {
+    color: var(--color-cream);
+    font-size: var(--font-base);
+    margin-bottom: 30px;
+    line-height: 1.5;
+}
+
+.fullscreen-prompt-buttons {
+    gap: 15px;
 }
 
 .main-menu-title {

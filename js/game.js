@@ -26,6 +26,7 @@ class GremiosGame {
         this.nextRollBankruptcy = false;
         this.nextRollMutiny = false;
         this.pendingExpedition = false;
+        this.expeditionResolvingFromFull = false; // Flag to prevent turn ending during expedition resolution
         this.currentEvent = null;
         this.lastDiceRoll = null;
         // Removed: this.pendingLandExpropriation (land loss is now automatic)
@@ -682,9 +683,15 @@ class GremiosGame {
 
         // Check if expedition is full (4th investment triggers immediate resolution)
         if (this.expedition.investments.length === this.expedition.maxSlots) {
+            // Set flag to prevent turn from ending during resolution
+            this.expeditionResolvingFromFull = true;
             setTimeout(() => {
                 this.log('La expedición está completa, se resuelve ahora', 'event');
                 this.resolveExpedition();
+                // Wait for player to see the result before allowing turn to end
+                setTimeout(() => {
+                    this.expeditionResolvingFromFull = false;
+                }, 2500); // 2.5 seconds to view the expedition result
             }, 1000);
         }
 
@@ -1045,6 +1052,12 @@ class GremiosGame {
     }
 
     endTurn() {
+        // Wait if expedition is being resolved from becoming full
+        if (this.expeditionResolvingFromFull) {
+            setTimeout(() => this.endTurn(), 500);
+            return;
+        }
+
         const currentPlayer = this.players[this.currentPlayerIndex];
         this.log(`${currentPlayer.name} termina su turno`, 'info');
 
