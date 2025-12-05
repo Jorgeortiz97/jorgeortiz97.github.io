@@ -48,6 +48,43 @@ class GremiosGame {
         this.usedNames = [];
     }
 
+    // Helper: Get max investments per turn for a player
+    getMaxInvestmentsPerTurn(player) {
+        return player.hasAdditionalInvestment() ? 3 : 2;
+    }
+
+    // Helper: Check if player has reached total investment limit
+    hasReachedInvestmentLimit(player) {
+        return player.investmentsThisTurn >= this.getMaxInvestmentsPerTurn(player);
+    }
+
+    // Helper: Check if player can make another investment of a specific type
+    canInvestInType(player, type) {
+        if (this.hasReachedInvestmentLimit(player)) {
+            return { allowed: false, reason: 'Has alcanzado el límite de inversiones este turno' };
+        }
+
+        const hasAdditionalInvestment = player.hasAdditionalInvestment();
+
+        if (type === 'guild') {
+            if (player.guildInvestmentsThisTurn >= 2) {
+                return { allowed: false, reason: 'Has alcanzado el límite de inversiones en gremios este turno' };
+            }
+            if (player.investedInGuildThisTurn && !hasAdditionalInvestment) {
+                return { allowed: false, reason: 'Ya has invertido en un gremio este turno' };
+            }
+        } else if (type === 'expedition') {
+            if (player.expeditionInvestmentsThisTurn >= 2) {
+                return { allowed: false, reason: 'Has alcanzado el límite de inversiones en expedición este turno' };
+            }
+            if (player.investedInExpeditionThisTurn && !hasAdditionalInvestment) {
+                return { allowed: false, reason: 'Ya has invertido en la expedición este turno' };
+            }
+        }
+
+        return { allowed: true };
+    }
+
     initialize(numPlayers, difficulty = 'medium') {
         this.numPlayers = numPlayers;
         this.aiDifficulty = difficulty;
@@ -497,40 +534,21 @@ class GremiosGame {
             return false;
         }
 
-        // Check if guild already has 4 investments (maximum)
         if (guild.investments.length >= 4) {
             this.log(`${guild.name} ya tiene el máximo de 4 inversiones`);
             return false;
         }
 
-        // Note: Blocked guilds can still receive investments, they just don't generate resources
-
-        // Check investment limits
-        const maxInvestments = (player.character && player.character.additionalInvestment) ? 3 : 2;
-        if (player.investmentsThisTurn >= maxInvestments) {
-            this.log('Has alcanzado el límite de inversiones este turno');
+        const investCheck = this.canInvestInType(player, 'guild');
+        if (!investCheck.allowed) {
+            this.log(investCheck.reason);
             return false;
         }
 
-        // Check guild investment limit (max 2 per turn)
-        if (player.guildInvestmentsThisTurn >= 2) {
-            this.log('Has alcanzado el límite de inversiones en gremios este turno');
-            return false;
-        }
-
-        // Check if already invested in a guild this turn (unless merchant with additional investment)
-        if (player.investedInGuildThisTurn && !(player.character && player.character.additionalInvestment)) {
-            this.log('Ya has invertido en un gremio este turno');
-            return false;
-        }
-
-        // Check for free investment (Artisan in Blacksmith/Jewelry)
-        const isFree = player.character && player.character.firstInvestmentFree &&
-                       player.character.firstInvestmentFree.includes(guildNumber) &&
+        const isFree = player.hasFirstInvestmentFree(guildNumber) &&
                        guild.investments.filter(inv => inv.playerId === player.id).length === 0;
 
         if (isFree) {
-            // Use reserve coin
             if (player.reserve < 1) {
                 this.log('No hay monedas en reserva');
                 return false;
@@ -546,34 +564,25 @@ class GremiosGame {
             player.addToReserve(1);
         }
 
-        // Add investment
         guild.investments.push({ playerId: player.id, color: player.color });
         player.investedInGuildThisTurn = true;
         player.investmentsThisTurn++;
         player.guildInvestmentsThisTurn++;
 
-        // Update max investor
         this.updateMaxInvestor(guild);
-
         this.log(`${player.name} invierte en ${guild.name}`, 'action');
-
-        // Trigger character abilities
         this.triggerInvestmentAbilities(player, guild);
-
-        // Check for victory after VP change
         this.checkVictory();
 
         return true;
     }
 
     updateMaxInvestor(guild) {
-        // If no investments, no max investor
         if (guild.investments.length === 0) {
             guild.maxInvestor = null;
             return;
         }
 
-        // Store current max investor before recalculating
         const currentMaxInvestor = guild.maxInvestor;
 
         const investmentCounts = {};
@@ -636,22 +645,9 @@ class GremiosGame {
     }
 
     investInExpedition(player) {
-        // Check investment limits
-        const maxInvestments = (player.character && player.character.additionalInvestment) ? 3 : 2;
-        if (player.investmentsThisTurn >= maxInvestments) {
-            this.log('Has alcanzado el límite de inversiones este turno');
-            return false;
-        }
-
-        // Check expedition investment limit (max 2 per turn)
-        if (player.expeditionInvestmentsThisTurn >= 2) {
-            this.log('Has alcanzado el límite de inversiones en expedición este turno');
-            return false;
-        }
-
-        // Check if already invested in expedition this turn (unless merchant with additional investment)
-        if (player.investedInExpeditionThisTurn && !(player.character && player.character.additionalInvestment)) {
-            this.log('Ya has invertido en la expedición este turno');
+        const investCheck = this.canInvestInType(player, 'expedition');
+        if (!investCheck.allowed) {
+            this.log(investCheck.reason);
             return false;
         }
 
@@ -660,8 +656,7 @@ class GremiosGame {
             return false;
         }
 
-        // Check for free investment (Stowaway): truly free if expedition is empty
-        const isFree = player.character && player.character.freeExpeditionInvestment &&
+        const isFree = player.hasFreeExpeditionInvestment() &&
                        this.expedition.investments.length === 0;
 
         if (!isFree) {
@@ -672,7 +667,6 @@ class GremiosGame {
             player.removeCoins(2);
             player.addToReserve(1);
         }
-        // If free, no cost at all
 
         this.expedition.investments.push({ playerId: player.id, color: player.color });
         player.investedInExpeditionThisTurn = true;
@@ -680,8 +674,6 @@ class GremiosGame {
         player.expeditionInvestmentsThisTurn++;
 
         this.log(`${player.name} invierte en la expedición`, 'action');
-
-        // Check if expedition is full (4th investment triggers immediate resolution)
         if (this.expedition.investments.length === this.expedition.maxSlots) {
             // Set flag to prevent turn from ending during resolution
             this.expeditionResolvingFromFull = true;
@@ -910,8 +902,7 @@ class GremiosGame {
     }
 
     causeMutiny(player, guildNumber) {
-        // Check if player is Mercenary
-        if (!player.character || player.character.id !== 'mercenary') {
+        if (!player.isMercenary()) {
             this.log('Solo el Mercenario puede causar motines');
             return false;
         }
@@ -957,8 +948,7 @@ class GremiosGame {
     }
 
     buyTreasureArtisan(player) {
-        // Check if player is Artisan
-        if (!player.character || player.character.id !== 'artisan') {
+        if (!player.isArtisan()) {
             this.log('Solo el Artesano puede comprar tesoros');
             return false;
         }
@@ -1000,8 +990,7 @@ class GremiosGame {
     }
 
     sellTreasureArtisan(player, treasureIndex) {
-        // Check if player is Artisan
-        if (!player.character || player.character.id !== 'artisan') {
+        if (!player.isArtisan()) {
             this.log('Solo el Artesano puede vender tesoros');
             return false;
         }

@@ -38,6 +38,45 @@ class Player {
         }
     }
 
+    // Character ability helpers
+    isCharacter(characterId) {
+        return this.character && this.character.id === characterId;
+    }
+
+    isMercenary() {
+        return this.isCharacter('mercenary');
+    }
+
+    isArtisan() {
+        return this.isCharacter('artisan');
+    }
+
+    hasAdditionalInvestment() {
+        return this.character && this.character.additionalInvestment;
+    }
+
+    hasFreeExpeditionInvestment() {
+        return this.character && this.character.freeExpeditionInvestment;
+    }
+
+    hasFreeCultivatePerTurn() {
+        return this.character && this.character.freeCultivatePerTurn;
+    }
+
+    hasFreeRepairPerTurn() {
+        return this.character && this.character.freeRepairPerTurn;
+    }
+
+    getInnCost() {
+        return this.character && this.character.innCost ? this.character.innCost : 6;
+    }
+
+    hasFirstInvestmentFree(guildNumber) {
+        return this.character &&
+               this.character.firstInvestmentFree &&
+               this.character.firstInvestmentFree.includes(guildNumber);
+    }
+
     setColor(color) {
         this.color = color;
     }
@@ -105,10 +144,10 @@ class Player {
     }
 
     buildInn(landIndex) {
-        const cost = this.character && this.character.innCost ? this.character.innCost : 6;
+        const cost = this.getInnCost();
 
         if (landIndex >= 0 && landIndex < this.lands.length && this.removeCoins(cost)) {
-            this.lands.splice(landIndex, 1); // Remove the land
+            this.lands.splice(landIndex, 1);
             this.inns.push(new ResourceCard('inn', false, false));
             return true;
         }

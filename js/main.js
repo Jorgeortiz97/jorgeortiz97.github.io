@@ -5,6 +5,40 @@ window.gameInstance = null;
 window.uiInstance = null;
 window.menuInstance = null;
 
+// Minimum resolution constants
+const MIN_RESOLUTION = 300;
+
+// Check if screen resolution is too low
+function checkResolution() {
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+    const isPortrait = height > width;
+    const isTooSmall = isPortrait ? (width < MIN_RESOLUTION) : (height < MIN_RESOLUTION);
+
+    if (isTooSmall) {
+        ModalManager.show('resolution-warning-modal');
+    } else {
+        ModalManager.hide('resolution-warning-modal');
+    }
+
+    return !isTooSmall;
+}
+
+// Initialize resolution check
+function initResolutionCheck() {
+    // Check on load
+    checkResolution();
+
+    // Check on resize
+    window.addEventListener('resize', checkResolution);
+
+    // Check on orientation change
+    window.addEventListener('orientationchange', () => {
+        // Delay to allow the browser to update dimensions
+        setTimeout(checkResolution, 100);
+    });
+}
+
 // Game timer
 let gameStartTime = null;
 let gameTimerInterval = null;
@@ -37,15 +71,6 @@ window.addEventListener('appinstalled', () => {
     }
 });
 
-// Minimum resolution requirements (width x height)
-// Adjusted for mobile landscape gaming (iPhone and Android phones)
-const MIN_RESOLUTION = {
-    width: 480,
-    height: 270
-};
-
-// Recommended minimum for portrait mode
-const MIN_PORTRAIT_WIDTH = 400;
 
 // ============================================
 // MOBILE & ORIENTATION DETECTION
@@ -78,18 +103,12 @@ function isStandalone() {
 
 // Show the mobile start splash screen
 function showMobileSplash() {
-    const modal = document.getElementById('mobile-start-modal');
-    if (modal) {
-        modal.classList.remove('hidden');
-    }
+    ModalManager.show('mobile-start-modal');
 }
 
 // Hide the mobile start splash screen
 function hideMobileSplash() {
-    const modal = document.getElementById('mobile-start-modal');
-    if (modal) {
-        modal.classList.add('hidden');
-    }
+    ModalManager.hide('mobile-start-modal');
 }
 
 // Update install button visibility based on platform
@@ -151,153 +170,10 @@ function setupBodyClasses() {
     }
 }
 
-// Check if device is in portrait orientation
-function isPortrait() {
-    return window.matchMedia('(orientation: portrait)').matches;
-}
 
-// Show landscape prompt modal
-function showLandscapePrompt() {
-    const modal = document.getElementById('landscape-prompt-modal');
-    if (modal) {
-        modal.classList.remove('hidden');
-    }
-}
-
-// Hide landscape prompt modal
-function hideLandscapePrompt() {
-    const modal = document.getElementById('landscape-prompt-modal');
-    if (modal) {
-        modal.classList.add('hidden');
-    }
-}
-
-// Check if resolution meets minimum requirements
-function checkResolution() {
-    const width = window.innerWidth;
-    const height = window.innerHeight;
-
-    if (width < MIN_RESOLUTION.width || height < MIN_RESOLUTION.height) {
-        return false;
-    }
-    return true;
-}
-
-// Show low resolution blocking modal
-function showLowResolutionModal() {
-    const modal = document.getElementById('low-resolution-modal');
-    if (modal) {
-        modal.classList.remove('hidden');
-        document.body.classList.add('low-resolution-blocked');
-        // Hide menu modals if they're showing (but keep loading screen during video)
-        if (window.menuInstance) {
-            if (window.menuInstance.currentScreen === 'loading') {
-                window.menuInstance.hideMenuModalsOnly();
-            } else {
-                window.menuInstance.hideAllModals();
-            }
-        }
-    } else {
-        console.error('Modal element not found!');
-    }
-}
-
-// Hide low resolution blocking modal
-function hideLowResolutionModal() {
-    const modal = document.getElementById('low-resolution-modal');
-    if (modal) {
-        modal.classList.add('hidden');
-        document.body.classList.remove('low-resolution-blocked');
-    }
-}
-
-// Check if screen resolution is adequate and show appropriate modals
-function checkScreenRequirements() {
-    const width = window.innerWidth;
-    const height = window.innerHeight;
-
-    // First check if resolution is sufficient
-    if (!checkResolution()) {
-        // In portrait mode with very low width, show landscape prompt instead
-        if (isPortrait() && width < MIN_PORTRAIT_WIDTH) {
-            showLandscapePrompt();
-            hideLowResolutionModal();
-            return false;
-        } else {
-            showLowResolutionModal();
-            hideLandscapePrompt();
-            return false;
-        }
-    } else {
-        hideLowResolutionModal();
-        // If resolution is OK, then check orientation
-        checkOrientation();
-        return true;
-    }
-}
-
-// Check if landscape prompt should be shown
-function checkOrientation() {
-    const gameBoard = document.getElementById('game-board');
-    const menuController = window.menuInstance;
-
-    if (isMobileDevice()) {
-        if (isPortrait()) {
-            // In portrait mode - BLOCK the game completely
-            showLandscapePrompt();
-
-            // Hide menu modals in portrait mode if game hasn't started
-            // Keep the loading screen visible during video playback
-            if (menuController && !window.gameInstance) {
-                if (menuController.currentScreen === 'loading') {
-                    menuController.hideMenuModalsOnly();
-                } else {
-                    menuController.hideAllModals();
-                }
-            }
-
-            // Hide game board if game has started
-            if (gameBoard && window.gameInstance) {
-                gameBoard.style.pointerEvents = 'none';
-                gameBoard.style.opacity = '0.3';
-            }
-
-            autoFullscreenAttempted = false; // Reset the flag
-        } else {
-            // In landscape mode - allow game to proceed
-            hideLandscapePrompt();
-
-            // Restore current menu screen after returning from portrait
-            if (menuController && !window.gameInstance) {
-                menuController.restoreCurrentScreen();
-            }
-
-            // Restore game board if game has started
-            if (gameBoard && window.gameInstance) {
-                gameBoard.style.pointerEvents = 'auto';
-                gameBoard.style.opacity = '1';
-            }
-
-            // Auto-enter fullscreen only once
-            if (!document.fullscreenElement && !autoFullscreenAttempted) {
-                autoFullscreenAttempted = true;
-                enterFullscreenLandscape();
-            }
-        }
-    } else {
-        // Desktop - allow everything
-        hideLandscapePrompt();
-        if (gameBoard && window.gameInstance) {
-            gameBoard.style.pointerEvents = 'auto';
-            gameBoard.style.opacity = '1';
-        }
-    }
-}
-
-// Fullscreen with orientation lock (mobile-optimized)
-async function enterFullscreenLandscape() {
+// Enter fullscreen mode
+async function enterFullscreen() {
     try {
-        // Enter fullscreen first
         const elem = document.documentElement;
         if (elem.requestFullscreen) {
             await elem.requestFullscreen();
@@ -308,42 +184,19 @@ async function enterFullscreenLandscape() {
         } else if (elem.msRequestFullscreen) {
             await elem.msRequestFullscreen();
         }
-
-        // Try to lock orientation to landscape (if supported)
-        if (screen.orientation && screen.orientation.lock) {
-            try {
-                await screen.orientation.lock('landscape');
-            } catch (err) {
-                console.warn('Orientation lock not supported or failed:', err.message);
-            }
-        }
-
-        // Don't hide the landscape prompt here - let checkOrientation() handle it
-        // based on actual device orientation after fullscreen completes
-        setTimeout(() => checkOrientation(), 300);
     } catch (err) {
-        // Fullscreen failed - this is OK, we just need landscape mode
-        // The orientation check will handle blocking portrait mode
-        console.log('Fullscreen not available or denied. Please rotate to landscape mode.');
-        // Recheck orientation after a brief delay
-        setTimeout(() => checkOrientation(), 300);
+        console.log('Fullscreen not available or denied.');
     }
 }
 
 // Show iOS Add to Home Screen instructions
 function showIOSInstructions() {
-    const modal = document.getElementById('ios-instructions-modal');
-    if (modal) {
-        modal.classList.remove('hidden');
-    }
+    ModalManager.show('ios-instructions-modal');
 }
 
 // Hide iOS Add to Home Screen instructions
 function hideIOSInstructions() {
-    const modal = document.getElementById('ios-instructions-modal');
-    if (modal) {
-        modal.classList.add('hidden');
-    }
+    ModalManager.hide('ios-instructions-modal');
 }
 
 // Fullscreen toggle function
@@ -355,22 +208,8 @@ function toggleFullscreen() {
     }
 
     if (!document.fullscreenElement && !document.webkitFullscreenElement && !document.mozFullScreenElement) {
-        // If mobile device, use enhanced fullscreen with orientation lock
-        if (isMobileDevice()) {
-            enterFullscreenLandscape();
-        } else {
-            // Desktop: standard fullscreen
-            const elem = document.documentElement;
-            if (elem.requestFullscreen) {
-                elem.requestFullscreen();
-            } else if (elem.webkitRequestFullscreen) { // Safari
-                elem.webkitRequestFullscreen();
-            } else if (elem.mozRequestFullScreen) { // Firefox
-                elem.mozRequestFullScreen();
-            } else if (elem.msRequestFullscreen) { // IE/Edge
-                elem.msRequestFullscreen();
-            }
-        }
+        // Enter fullscreen
+        enterFullscreen();
     } else {
         // Exit fullscreen
         if (document.exitFullscreen) {
@@ -381,15 +220,6 @@ function toggleFullscreen() {
             document.mozCancelFullScreen();
         } else if (document.msExitFullscreen) { // IE/Edge
             document.msExitFullscreen();
-        }
-
-        // Unlock orientation when exiting fullscreen
-        if (screen.orientation && screen.orientation.unlock) {
-            try {
-                screen.orientation.unlock();
-            } catch (err) {
-                console.warn('Orientation unlock failed:', err.message);
-            }
         }
     }
 }
@@ -448,8 +278,8 @@ function initializeAndStartGame(difficulty) {
     // Create game instance
     const game = new GremiosGame();
 
-    // Create UI controller
-    const ui = new UIController(game);
+    // Always use portrait UI
+    const ui = new PortraitUI(game);
 
     // Store references globally for debugging
     window.gameInstance = game;
@@ -634,6 +464,9 @@ function setupKeyboardShortcuts() {
 // Wait for DOM to load
 document.addEventListener('DOMContentLoaded', () => {
 
+    // Initialize resolution check first
+    initResolutionCheck();
+
     // Register Service Worker for PWA
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
@@ -656,8 +489,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (splashStartBtn) {
         splashStartBtn.addEventListener('click', async () => {
-            // Try to enter fullscreen and landscape mode
-            await enterFullscreenLandscape();
+            // Try to enter fullscreen
+            await enterFullscreen();
             // Hide splash screen
             hideMobileSplash();
             // Continue with normal loading flow - MenuController will handle the rest
@@ -733,52 +566,6 @@ document.addEventListener('DOMContentLoaded', () => {
         fullscreenBtn.title = 'Instrucciones para pantalla completa';
     }
 
-    // Setup landscape prompt modal button
-    const enterFullscreenLandscapeBtn = document.getElementById('enter-fullscreen-landscape-btn');
-
-    if (enterFullscreenLandscapeBtn) {
-        enterFullscreenLandscapeBtn.addEventListener('click', () => {
-            enterFullscreenLandscape();
-        });
-    }
-
-    // Setup low resolution modal button
-    const tryFullscreenLowResBtn = document.getElementById('try-fullscreen-low-res-btn');
-
-    if (tryFullscreenLowResBtn) {
-        tryFullscreenLowResBtn.addEventListener('click', async () => {
-            await enterFullscreenLandscape();
-            // Recheck after a short delay to see if fullscreen helped
-            setTimeout(() => {
-                checkScreenRequirements();
-            }, 500);
-        });
-    }
-
-    // Monitor orientation and resolution changes
-    window.addEventListener('orientationchange', () => {
-        setTimeout(checkScreenRequirements, 300); // Small delay to ensure orientation has changed
-    });
-
-    window.addEventListener('resize', () => {
-        checkScreenRequirements();
-    });
-
-    // Listen for fullscreen changes to hide/show prompts
-    const handleFullscreenChange = () => {
-        checkScreenRequirements();
-    };
-
-    document.addEventListener('fullscreenchange', handleFullscreenChange);
-    document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
-    document.addEventListener('mozfullscreenchange', handleFullscreenChange);
-    document.addEventListener('MSFullscreenChange', handleFullscreenChange);
-
-    // Initial screen requirements check - run immediately and also after delay
-    checkScreenRequirements();
-    setTimeout(() => {
-        checkScreenRequirements();
-    }, 500); // Delay to let page fully load
 
     // Initialize MenuController
     // The loading screen will be shown automatically by the MenuController

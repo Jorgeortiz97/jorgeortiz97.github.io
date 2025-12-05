@@ -56,97 +56,11 @@ class MenuController {
     }
 
     /**
-     * Check initial orientation and handle mobile splash screen
+     * Initialize loading and start preloading assets
      */
     checkInitialOrientation() {
-        // Stricter mobile detection - only user agent, not touch capability
-        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
-                        (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1); // iPad
-        const isPortraitMode = window.matchMedia('(orientation: portrait)').matches;
-        const isStandaloneMode = window.navigator.standalone === true ||
-                                  window.matchMedia('(display-mode: standalone)').matches;
-
-        // Check if we should show mobile splash screen
-        // Disabled for testing - enable on real mobile devices
-        const showSplash = false; // TODO: Re-enable with proper detection
-        if (showSplash && isMobile && !isStandaloneMode) {
-            // Show splash screen first, hide loading modal
-            this.loadingModal.classList.add('hidden');
-            const splashModal = document.getElementById('mobile-start-modal');
-            if (splashModal) {
-                splashModal.classList.remove('hidden');
-            }
-
-            // Set up handler for when splash is dismissed (via start button in main.js)
-            const checkSplashDismissed = () => {
-                const splashHidden = splashModal && splashModal.classList.contains('hidden');
-                if (splashHidden) {
-                    // Splash was dismissed, now handle orientation
-                    this.handleOrientationAndStartLoading();
-                    // Remove the observer
-                    clearInterval(splashCheck);
-                }
-            };
-
-            // Check periodically if splash is hidden (dismissed by user tap)
-            const splashCheck = setInterval(checkSplashDismissed, 100);
-
-            return; // Don't proceed with loading yet
-        }
-
-        // For standalone mode or desktop, handle orientation normally
-        if (isMobile && isPortraitMode) {
-            this.handlePortraitModeWait();
-        } else {
-            // Not mobile or already in landscape, start normally
-            this.preloadAssets();
-        }
-    }
-
-    /**
-     * Handle waiting for landscape mode before starting
-     */
-    handleOrientationAndStartLoading() {
-        const isPortraitMode = window.matchMedia('(orientation: portrait)').matches;
-
-        if (isPortraitMode) {
-            this.handlePortraitModeWait();
-        } else {
-            // Already in landscape, start loading
-            this.loadingModal.classList.remove('hidden');
-            this.preloadAssets();
-        }
-    }
-
-    /**
-     * Wait for user to rotate to landscape mode
-     */
-    handlePortraitModeWait() {
-        // Hide loading modal and show landscape prompt
-        this.loadingModal.classList.add('hidden');
-        const landscapeModal = document.getElementById('landscape-prompt-modal');
-        if (landscapeModal) {
-            landscapeModal.classList.remove('hidden');
-        }
-
-        // Wait for orientation change to landscape before starting
-        const orientationHandler = () => {
-            const stillPortrait = window.matchMedia('(orientation: portrait)').matches;
-            if (!stillPortrait) {
-                // Now in landscape, show loading and start preloading
-                this.loadingModal.classList.remove('hidden');
-                if (landscapeModal) {
-                    landscapeModal.classList.add('hidden');
-                }
-                this.preloadAssets();
-                // Remove listeners as we only need this once
-                window.removeEventListener('orientationchange', orientationHandler);
-                window.removeEventListener('resize', orientationHandler);
-            }
-        };
-
-        window.addEventListener('orientationchange', orientationHandler);
-        window.addEventListener('resize', orientationHandler);
+        // Start loading assets immediately (portrait-only mode)
+        this.preloadAssets();
     }
 
     /**
@@ -641,15 +555,13 @@ class MenuController {
 
     /**
      * Restore the loading screen visibility
-     * Used when returning to landscape during video playback
      */
     showLoadingScreen() {
         this.loadingModal.classList.remove('hidden');
     }
 
     /**
-     * Restore the current menu screen visibility after orientation change
-     * Used when returning to landscape from portrait mode
+     * Restore the current menu screen visibility
      */
     restoreCurrentScreen() {
         switch (this.currentScreen) {
