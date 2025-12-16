@@ -14,11 +14,18 @@ certs/
 
 # Debugging files
 debug_*.js
+debug-*.js
 debug_*.png
 *debug*.png
 screenshot*.png
 layout.png
 verify_*.js
+
+# Test files
+test-*.js
+quick-test.js
+diagnostic.js
+screenshots/
 
 # Node.js dependencies (if puppeteer or testing tools added)
 node_modules/
@@ -75,3 +82,6 @@ temp/
 # Git files
 *.orig
 *.rej
+
+# Game special files for development
+resources

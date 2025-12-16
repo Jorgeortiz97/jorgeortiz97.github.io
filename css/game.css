@@ -1,0 +1,76 @@
+/* Gremios - Phaser Game Styles */
+
+/* Medieval Fonts */
+@font-face {
+    font-family: 'MedievalSharp';
+    src: url('../assets/fonts/MedievalSharp-Regular.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Cinzel';
+    src: url('../assets/fonts/Cinzel-Regular.ttf') format('truetype');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Cinzel';
+    src: url('../assets/fonts/Cinzel-Bold.ttf') format('truetype');
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html, body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background-color: #000;
+    font-family: system-ui, -apple-system, sans-serif;
+}
+
+/* Game container - Phaser's Scale.CENTER_BOTH handles centering */
+#game-container {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    background-color: #000;
+}
+
+/* Phaser canvas styling */
+#game-container canvas {
+    display: block;
+    /* Phaser's Scale.FIT handles the canvas sizing automatically */
+}
+
+/* Hide scrollbars */
+::-webkit-scrollbar {
+    display: none;
+}
+
+/* Prevent text selection during gameplay */
+body {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+    -webkit-tap-highlight-color: transparent;
+}
+
+/* Prevent pull-to-refresh and overscroll */
+body {
+    overscroll-behavior: none;
+}

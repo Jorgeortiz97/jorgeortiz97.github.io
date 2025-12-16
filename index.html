@@ -2,480 +2,66 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no, maximum-scale=1.0">
-    <title>Gremios - Juego de Cartas</title>
-
-    <!-- PWA Meta Tags -->
-    <meta name="theme-color" content="#c9a961">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Gremios">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="description" content="Juego de cartas estratégico de gremios, expediciones y construcción">
-
-    <!-- Preload critical CSS to prevent layout flash -->
-    <link rel="preload" href="css/styles.css?v=7" as="style">
-    <link rel="preload" href="css/portrait-game.css?v=7" as="style">
-
-    <!-- Icons -->
-    <link rel="icon" href="resources/icons/icon-192x192.png" sizes="192x192" />
-    <link rel="icon" href="resources/icons/icon-512x512.png" sizes="512x512" />
-    <link rel="apple-touch-icon" href="resources/icons/icon-192x192.png" />
-
-    <!-- PWA Manifest -->
-    <link rel="manifest" href="manifest.json">
-
-    <link rel="stylesheet" href="css/styles.css?v=7">
-    <link rel="stylesheet" href="css/portrait-game.css?v=7">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Gremios</title>
+    <meta name="description" content="Juego de cartas estrategico de gremios medievales">
+    <link rel="stylesheet" href="css/game.css">
 </head>
-<body class="portrait-mode">
-    <div id="game-container">
-        <!-- Pane 1: User Player (30%) -->
-        <section id="user-pane" class="game-pane">
-            <!-- Row 1: Player name (left), VP (right) -->
-            <div class="user-header-row">
-                <span class="player-name-badge">Tú</span>
-                <span class="emblem-badge hidden"></span>
-                <span class="vp-display"><span class="vp-count">0</span> VP</span>
-            </div>
-            <!-- Row 2: Character name (center), coins (right) -->
-            <div class="user-character-row">
-                <span class="character-name">Sin personaje</span>
-                <span class="coins-display">
-                    <span class="coin-count">3</span>
-                    <img src="resources/other/gold.png" class="coin-icon" alt="coins">
-                </span>
-            </div>
-            <!-- Row 3: Resources HUD (single row, full width) -->
-            <div class="resource-hud">
-                <!-- Will be populated by JS -->
-            </div>
-            <!-- Row 4-5: Action buttons (4x2 grid, full width) -->
-            <div class="actions-grid">
-                <button class="action-btn" data-action="invest-guild" disabled>
-                    <span class="action-text">Invertir Gremio</span>
-                </button>
-                <button class="action-btn" data-action="invest-expedition" disabled>
-                    <span class="action-text">Invertir Exped.</span>
-                </button>
-                <button class="action-btn" data-action="buy-land" disabled>
-                    <span class="action-text">Comprar Tierra</span>
-                </button>
-                <button class="action-btn" data-action="cultivate-land" disabled>
-                    <span class="action-text">Cultivar</span>
-                </button>
-                <button class="action-btn" data-action="build-inn" disabled>
-                    <span class="action-text">Construir Posada</span>
-                </button>
-                <button class="action-btn" data-action="repair-inn" disabled>
-                    <span class="action-text">Reparar Posada</span>
-                </button>
-                <!-- Character ability slots -->
-                <button class="action-btn hidden" data-action="cause-mutiny" disabled>
-                    <span class="action-text">Motín</span>
-                </button>
-                <button class="action-btn hidden" data-action="buy-treasure" disabled>
-                    <span class="action-text">Comprar Tesoro</span>
-                </button>
-                <button class="action-btn hidden" data-action="sell-treasure-artisan" disabled>
-                    <span class="action-text">Vender Tesoro</span>
-                </button>
-            </div>
-            <!-- Row 6: End turn button (centered, full width) -->
-            <button class="btn-end-turn" data-action="end-turn" disabled>
-                <span class="action-text">TERMINAR TURNO</span>
-            </button>
-        </section>
+<body>
+    <div id="game-container"></div>
 
-        <!-- Pane 2: Game Board (40%) -->
-        <section id="board-pane" class="game-pane">
-            <div id="board-viewport">
-                <div id="guilds-grid-portrait">
-                    <!-- Event Cards -->
-                    <div id="current-event-card" class="event-card-on-board"></div>
-                    <div id="previous-event-card" class="event-card-on-board"></div>
+    <!-- Phaser 3 from CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.70.0/dist/phaser.min.js"></script>
 
-                    <!-- Expedition Card -->
-                    <div id="expedition-card">
-                        <div class="investment-slots">
-                            <div class="investment-slot"></div>
-                            <div class="investment-slot"></div>
-                            <div class="investment-slot"></div>
-                            <div class="investment-slot"></div>
-                        </div>
-                    </div>
+    <!-- Configuration -->
+    <script src="js/config/resolution-config.js"></script>
+    <script src="js/config/player-config.js"></script>
+    <script src="js/config/game-config.js"></script>
 
-                    <!-- Dice Area -->
-                    <div id="dice-area">
-                        <div id="dice-display">
-                            <div class="die-container" id="die1-container">
-                                <div class="die" id="die1">
-                                    <div class="die-face face-1">1</div>
-                                    <div class="die-face face-2">2</div>
-                                    <div class="die-face face-3">3</div>
-                                    <div class="die-face face-4">4</div>
-                                    <div class="die-face face-5">5</div>
-                                    <div class="die-face face-6">6</div>
-                                </div>
-                            </div>
-                            <div class="die-container" id="die2-container">
-                                <div class="die" id="die2">
-                                    <div class="die-face face-1">1</div>
-                                    <div class="die-face face-2">2</div>
-                                    <div class="die-face face-3">3</div>
-                                    <div class="die-face face-4">4</div>
-                                    <div class="die-face face-5">5</div>
-                                    <div class="die-face face-6">6</div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="dice-sum" id="dice-sum">-</div>
-                    </div>
+    <!-- Data -->
+    <script src="js/data/assets.js"></script>
+    <script src="js/data/cards.js"></script>
+    <script src="js/data/characters.js"></script>
 
-                    <!-- Guild cards will be rendered by JS -->
-                </div>
-            </div>
-        </section>
+    <!-- Utils -->
+    <script src="js/utils/constants.js"></script>
+    <script src="js/utils/helpers.js"></script>
+    <script src="js/utils/cheats.js"></script>
 
-        <!-- Pane 3: Opponents (20%) - Horizontal split -->
-        <section id="opponents-pane" class="game-pane">
-            <div class="opponent-panel" id="opponent-1">
-                <div class="opponent-header">
-                    <span class="opponent-name">IA 1</span>
-                    <span class="opponent-emblem hidden"></span>
-                    <span class="opponent-vp">0 VP</span>
-                </div>
-                <div class="opponent-info">
-                    <span class="opponent-character">???</span>
-                    <span class="opponent-coins">3 <img src="resources/other/bronze.png" class="coin-icon-small"></span>
-                </div>
-            </div>
-            <div class="opponent-panel" id="opponent-2">
-                <div class="opponent-header">
-                    <span class="opponent-name">IA 2</span>
-                    <span class="opponent-emblem hidden"></span>
-                    <span class="opponent-vp">0 VP</span>
-                </div>
-                <div class="opponent-info">
-                    <span class="opponent-character">???</span>
-                    <span class="opponent-coins">3 <img src="resources/other/silver.png" class="coin-icon-small"></span>
-                </div>
-            </div>
-        </section>
+    <!-- Game Logic -->
+    <script src="js/game/Player.js"></script>
+    <script src="js/game/AIPlayer.js"></script>
+    <script src="js/game/EventHandler.js"></script>
+    <script src="js/game/GremiosGame.js"></script>
 
-        <!-- Pane 4: Bottom Buttons (10%) -->
-        <section id="buttons-pane" class="game-pane">
-            <button id="fullscreen-btn" class="bottom-btn">
-                <span>Pantalla</span>
-            </button>
-            <button id="help-btn" class="bottom-btn">
-                <span>Ayuda</span>
-            </button>
-            <button id="exit-btn" class="bottom-btn">
-                <span>Salir</span>
-            </button>
-        </section>
+    <!-- UI Components -->
+    <script src="js/ui/PlayerHUD.js"></script>
+    <script src="js/ui/GuildCard.js"></script>
+    <script src="js/ui/ExpeditionCard.js"></script>
+    <script src="js/ui/EventDisplay.js"></script>
+    <script src="js/ui/BlockingEventDisplay.js"></script>
+    <script src="js/ui/DiceRoller.js"></script>
+    <script src="js/ui/ActionButtons.js"></script>
+    <script src="js/ui/ModalManager.js"></script>
 
-        <!-- Panoramic Menu Background (shown behind menu screens) -->
-        <div id="menu-panoramic-bg" class="hidden">
-            <div class="panoramic-image"></div>
-            <div class="fog-layer fog-layer-1"></div>
-            <div class="fog-layer fog-layer-2"></div>
-            <div class="fog-overlay"></div>
-        </div>
+    <!-- Scenes -->
+    <script src="js/scenes/BootScene.js"></script>
+    <script src="js/scenes/MenuScene.js"></script>
+    <script src="js/scenes/GameScene.js"></script>
+    <script src="js/scenes/GameOverScene.js"></script>
 
-        <!-- Resolution Warning Modal -->
-        <div id="resolution-warning-modal" class="modal hidden">
-            <div class="modal-content resolution-warning-content">
-                <h2>Pantalla Demasiado Pequeña</h2>
-                <p>La resolución de tu dispositivo es demasiado baja para jugar a Gremios.</p>
-                <p>Por favor, utiliza un dispositivo con una pantalla más grande.</p>
-            </div>
-        </div>
+    <!-- Entry Point -->
+    <script>
+        // Get saved or detect resolution
+        const savedResolution = localStorage.getItem('gremios-resolution');
+        const resolution = savedResolution || detectBestResolution();
 
-        <!-- Loading Screen Modal -->
-        <div id="loading-screen-modal" class="modal">
-            <div class="loading-screen-content">
-                <video id="intro-video" muted playsinline>
-                    <source src="resources/other/Intro.mp4" type="video/mp4">
-                </video>
-                <div class="loading-overlay">
-                    <h1 class="game-title">GREMIOS</h1>
-                    <div class="loading-bar-container">
-                        <div class="loading-bar">
-                            <div id="loading-progress" class="loading-progress"></div>
-                        </div>
-                        <div id="loading-text" class="loading-text">Cargando recursos... 0%</div>
-                    </div>
-                    <button id="skip-loading-btn" class="btn-secondary skip-btn hidden">Saltar</button>
-                </div>
-            </div>
-        </div>
+        // Create and start game
+        const config = createGameConfig(resolution);
+        const game = new Phaser.Game(config);
 
-        <!-- Main Menu Modal -->
-        <div id="main-menu-modal" class="modal hidden">
-            <div class="modal-content menu-modal-content">
-                <h1 class="main-menu-title">GREMIOS</h1>
-                <div class="menu-buttons-container">
-                    <button class="menu-btn btn-primary" data-menu-action="play">Jugar</button>
-                    <button class="menu-btn btn-primary" data-menu-action="settings">Configuración</button>
-                    <button class="menu-btn btn-primary" data-menu-action="credits">Créditos</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Play Menu Modal -->
-        <div id="play-menu-modal" class="modal hidden">
-            <div class="modal-content menu-modal-content">
-                <h2>Jugar</h2>
-                <div class="menu-buttons-container">
-                    <button class="menu-btn btn-primary" data-menu-action="tutorial">Tutorial</button>
-                    <button class="menu-btn btn-primary" data-menu-action="classic">Partida Clásica</button>
-                    <button class="menu-btn btn-secondary" data-menu-action="back-to-main">Atrás</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Settings Modal -->
-        <div id="settings-modal" class="modal hidden">
-            <div class="modal-content menu-modal-content">
-                <h2>Configuración</h2>
-                <div class="settings-panel">
-                    <div class="setting-item">
-                        <label for="transition-speed">Velocidad de Transiciones</label>
-                        <div class="custom-select-wrapper">
-                            <div id="transition-speed-display" class="custom-select-display">Normal</div>
-                            <div id="transition-speed-options" class="custom-select-options hidden">
-                                <div class="custom-option" data-value="fast">Rápida</div>
-                                <div class="custom-option selected" data-value="normal">Normal</div>
-                                <div class="custom-option" data-value="slow">Lenta</div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="setting-description">
-                        Controla la velocidad de las animaciones y transiciones durante el juego.
-                    </div>
-                </div>
-                <div class="menu-button-wrapper">
-                    <button class="menu-btn btn-secondary" data-menu-action="back-to-main">Atrás</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Credits Modal -->
-        <div id="credits-modal" class="modal hidden">
-            <div class="modal-content menu-modal-content">
-                <h2>Créditos</h2>
-                <div class="credits-content">
-                    <p class="credits-text">
-                        <strong>Gremios Mobile</strong> es una adaptación para navegadores del juego de mesa original <strong>Gremios</strong>,
-                        diseñado y desarrollado por <strong><a href="https://elenport.es/gremios" target="_blank" rel="noopener noreferrer" class="gold-link">Elenport</a></strong>.
-                    </p>
-                    <p class="credits-text">
-                        <strong>Gremios Mobile</strong> fue desarrollado por <strong>Jorge Ortiz</strong>.
-                    </p>
-                </div>
-                <div class="menu-button-wrapper">
-                    <button class="menu-btn btn-secondary" data-menu-action="back-to-main">Atrás</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Modal for Character Selection -->
-        <div id="character-modal" class="modal hidden">
-            <div class="modal-content">
-                <h2 class="character-selection-title">Selecciona tu Personaje</h2>
-                <div id="character-options"></div>
-            </div>
-        </div>
-
-        <!-- Modal for Guild Selection -->
-        <div id="guild-modal" class="modal hidden">
-            <div class="modal-content">
-                <h2>Selecciona un Gremio</h2>
-                <div id="guild-options"></div>
-                <button class="btn-secondary" id="cancel-guild-btn">Cancelar</button>
-            </div>
-        </div>
-
-        <!-- Difficulty Selection Modal -->
-        <div id="difficulty-modal" class="modal hidden">
-            <div class="modal-content menu-modal-content">
-                <h2>Selecciona Dificultad</h2>
-                <div class="menu-buttons-container">
-                    <button class="menu-btn btn-primary difficulty-option" data-difficulty="easy">Fácil</button>
-                    <button class="menu-btn btn-primary difficulty-option" data-difficulty="medium">Media</button>
-                    <button class="menu-btn btn-primary difficulty-option" data-difficulty="hard">Difícil</button>
-                    <button class="menu-btn btn-secondary" data-menu-action="back-to-play">Atrás</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Fullscreen Prompt Modal -->
-        <div id="fullscreen-prompt-modal" class="modal hidden">
-            <div class="modal-content menu-modal-content">
-                <h2>Pantalla Completa</h2>
-                <p class="fullscreen-prompt-text">Se recomienda jugar en pantalla completa para una mejor experiencia.</p>
-                <div class="menu-buttons-container fullscreen-prompt-buttons">
-                    <button class="menu-btn btn-primary" id="fullscreen-accept-btn">Pantalla Completa</button>
-                    <button class="menu-btn btn-secondary" id="fullscreen-decline-btn">Continuar</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Game Over Modal -->
-        <div id="game-over-modal" class="modal hidden">
-            <div class="modal-content">
-                <h2>¡Partida Terminada!</h2>
-                <div id="final-scores"></div>
-                <button class="btn-primary" id="new-game-btn">Nueva Partida</button>
-            </div>
-        </div>
-
-        <!-- Event Display Modal -->
-        <div id="event-modal" class="modal hidden">
-            <div class="modal-content event-modal-content">
-                <div id="event-modal-card" class="event-card-large">
-                    <div class="event-card-inner">
-                        <div class="event-card-back"></div>
-                        <div class="event-card-front"></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Reshuffle Animation Modal -->
-        <div id="reshuffle-modal" class="modal hidden">
-            <div class="modal-content reshuffle-modal-content">
-                <div class="reshuffle-decks-container">
-                    <div class="reshuffle-deck-area">
-                        <div class="reshuffle-deck-label">Mazo de Eventos</div>
-                        <div id="reshuffle-event-deck" class="reshuffle-deck">
-                            <div class="reshuffle-card-stack">
-                                <div class="reshuffle-card event-deck-card"></div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="reshuffle-deck-area">
-                        <div class="reshuffle-deck-label">Descartadas</div>
-                        <div id="reshuffle-discard-pile" class="reshuffle-deck">
-                            <div class="reshuffle-card-stack">
-                                <div class="reshuffle-card discard-pile-card"></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Character Info Modal -->
-        <div id="character-info-modal" class="modal hidden">
-            <div class="modal-content character-info-modal-content">
-                <h2 id="character-info-modal-title">Información del Personaje</h2>
-                <div id="character-info-modal-body"></div>
-            </div>
-        </div>
-
-        <!-- Character Detail Modal (for portrait mode) -->
-        <div id="character-detail-modal" class="modal-overlay hidden">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <span class="modal-title" id="char-detail-name"></span>
-                    <button class="modal-close">&times;</button>
-                </div>
-                <div class="modal-body">
-                    <img id="char-detail-image" class="character-detail-image" alt="Character">
-                    <p id="char-detail-ability"></p>
-                </div>
-            </div>
-        </div>
-
-        <!-- Help Modal -->
-        <div id="help-modal" class="modal hidden">
-            <div class="modal-content help-modal-content">
-                <button class="close-help-btn" id="close-help-btn">✕</button>
-                <h2>Ayuda - Gremios</h2>
-
-                <div class="help-section">
-                    <h3>🎯 Objetivo</h3>
-                    <p>Ser el primer jugador en alcanzar 10 Puntos de Victoria (VP) invirtiendo en gremios, construyendo posadas, cultivando tierras y encontrando tesoros.</p>
-                </div>
-
-                <div class="help-section">
-                    <h3>ℹ️ Información del Juego</h3>
-                    <div class="info-grid">
-                        <div class="info-row">
-                            <strong>Tiempo de juego:</strong>
-                            <span id="game-time">00:00</span>
-                        </div>
-                        <div class="info-row">
-                            <strong>Turno actual:</strong>
-                            <span id="current-turn">-</span>
-                        </div>
-                        <div class="info-row">
-                            <strong>Cartas restantes:</strong>
-                            <span id="cards-remaining">-</span>
-                        </div>
-                    </div>
-                </div>
-
-                <button class="btn-primary btn-modal-close" id="close-help-btn-bottom">Cerrar</button>
-            </div>
-        </div>
-
-        <!-- iOS Add to Home Screen Instructions Modal -->
-        <div id="ios-instructions-modal" class="modal hidden">
-            <div class="modal-content ios-instructions-content">
-                <h2>📱 Pantalla Completa en iPhone</h2>
-                <p class="ios-intro">iOS no permite pantalla completa en Safari. Para la mejor experiencia, añade Gremios a tu pantalla de inicio:</p>
-                <div class="ios-steps">
-                    <div class="ios-step">
-                        <div class="step-number">1</div>
-                        <div class="step-content">
-                            <p><strong>Toca el botón de compartir</strong></p>
-                            <p class="step-icon">📤</p>
-                        </div>
-                    </div>
-                    <div class="ios-step">
-                        <div class="step-number">2</div>
-                        <div class="step-content">
-                            <p><strong>Desplázate y toca "Añadir a pantalla de inicio"</strong></p>
-                            <p class="step-icon">➕ 🏠</p>
-                        </div>
-                    </div>
-                    <div class="ios-step">
-                        <div class="step-number">3</div>
-                        <div class="step-content">
-                            <p><strong>Toca "Añadir"</strong></p>
-                        </div>
-                    </div>
-                </div>
-                <button class="btn-primary" id="close-ios-instructions-btn">Entendido</button>
-                <p class="ios-note">También puedes jugar en Safari, pero la pantalla completa no estará disponible.</p>
-            </div>
-        </div>
-    </div>
-
-    <!-- JavaScript Files -->
-    <script src="js/constants.js"></script>
-    <script src="js/dom-cache.js"></script>
-    <script src="js/modal-manager.js"></script>
-    <script src="js/assets.js"></script>
-    <script src="js/config.js"></script>
-    <script src="js/cards.js"></script>
-    <script src="js/characters.js"></script>
-    <script src="js/player.js"></script>
-    <script src="js/events.js"></script>
-    <script src="js/ai.js"></script>
-    <script src="js/ui-modals.js"></script>
-    <script src="js/ui-board.js"></script>
-    <script src="js/ui-players.js"></script>
-    <script src="js/ui-actions.js"></script>
-    <script src="js/ui.js"></script>
-    <script src="js/board-zoom.js"></script>
-    <script src="js/portrait-ui.js"></script>
-    <script src="js/game.js"></script>
-    <script src="js/menu.js"></script>
-    <script src="js/main.js"></script>
+        // Expose game for testing
+        window.game = game;
+    </script>
 </body>
 </html>
