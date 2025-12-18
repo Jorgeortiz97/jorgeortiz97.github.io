@@ -94,52 +94,63 @@ class PlayerHUD extends Phaser.GameObjects.Container {
         }
 
         // === INFO AREA (ribbon) ===
-        // Ribbon: ~38% to ~98% horizontally, ~8% to ~40% vertically
-        // Center Y of ribbon: about -22% from HUD center
-        const ribbonStartX = -hudWidth / 2 + hudWidth * 0.40;
+        // Ribbon: ~40% to ~95% horizontally, center Y at -20% from HUD center
+        const ribbonStartX = -hudWidth / 2 + hudWidth * 0.41;
+        const ribbonEndX = hudWidth / 2 - hudWidth * 0.05;
         const infoY = -hudHeight * 0.20;
-        const elementSpacing = hudWidth * 0.14;
+        const iconSize = fontSm * 0.85;
+        const gap = 3; // Small gap between elements
+
+        // Layout: Name | Coin+Value | VP+Value | Badge
+        // Position from left to right with tight spacing
 
         // Name
         this.nameText = scene.add.text(ribbonStartX, infoY, player.name || 'Jugador', {
             fontFamily: 'Georgia, serif',
-            fontSize: fontMd + 'px',
+            fontSize: fontSm + 'px',
             color: '#1a1510',
             fontStyle: 'bold'
         }).setOrigin(0, 0.5);
         this.add(this.nameText);
 
-        // Coins (icon + text) - after name
-        const coinX = ribbonStartX + elementSpacing;
+        // Coins (icon + text) - positioned after name with dynamic spacing
         const coinType = getCoinTypeFromPlayerId(player.id);
+        const coinX = ribbonStartX + hudWidth * 0.12;
 
         this.coinIcon = scene.add.image(coinX, infoY, coinType);
-        this.fitImageToArea(this.coinIcon, fontMd, fontMd);
+        this.fitImageToArea(this.coinIcon, iconSize, iconSize);
         this.coinIcon.setOrigin(0, 0.5);
         this.add(this.coinIcon);
 
-        this.coinsText = scene.add.text(coinX + fontMd + 2, infoY, '3', {
+        this.coinsText = scene.add.text(coinX + iconSize + gap, infoY, '3', {
             fontFamily: 'Arial, sans-serif',
-            fontSize: fontMd + 'px',
+            fontSize: fontSm + 'px',
             color: '#1a1510',
             fontStyle: 'bold'
         }).setOrigin(0, 0.5);
         this.add(this.coinsText);
 
-        // VP - after coins
-        const vpX = coinX + elementSpacing;
-        this.vpText = scene.add.text(vpX, infoY, '0 VP', {
+        // VP (icon + text) - positioned after coins
+        const vpX = coinX + hudWidth * 0.10;
+
+        this.vpIcon = scene.add.image(vpX, infoY, 'vp_icon');
+        this.fitImageToArea(this.vpIcon, iconSize, iconSize);
+        this.vpIcon.setOrigin(0, 0.5);
+        this.add(this.vpIcon);
+
+        this.vpText = scene.add.text(vpX + iconSize + gap, infoY, '0', {
             fontFamily: 'Arial, sans-serif',
-            fontSize: fontMd + 'px',
+            fontSize: fontSm + 'px',
             color: '#8b3545',
             fontStyle: 'bold'
         }).setOrigin(0, 0.5);
         this.add(this.vpText);
 
-        // Treasure leader badge - after VP (hidden by default)
-        const badgeX = vpX + fontMd * 3.5;
+        // Treasure leader badge - at right edge (hidden by default)
+        const badgeSize = iconSize;
+        const badgeX = ribbonEndX - badgeSize / 2;
         this.treasureBadge = scene.add.image(badgeX, infoY, 'badge');
-        this.fitImageToArea(this.treasureBadge, fontMd * 1.2, fontMd * 1.2);
+        this.fitImageToArea(this.treasureBadge, badgeSize, badgeSize);
         this.treasureBadge.setVisible(false);
         this.add(this.treasureBadge);
 
@@ -269,7 +280,7 @@ class PlayerHUD extends Phaser.GameObjects.Container {
 
         // Update VP
         const vp = (player.getVictoryPoints && game) ? player.getVictoryPoints(game) : 0;
-        this.vpText.setText(`${vp} VP`);
+        this.vpText.setText(vp.toString());
 
         // Update treasure leader badge
         if (this.treasureBadge && game && game.players) {
@@ -365,7 +376,7 @@ class PlayerHUD extends Phaser.GameObjects.Container {
         // Hide coins
         if (this.coinsText) this.coinsText.setText('?');
         // Hide VP
-        if (this.vpText) this.vpText.setText('? VP');
+        if (this.vpText) this.vpText.setText('?');
         // Hide all resource counts
         Object.values(this.resourceTexts).forEach(text => {
             if (text) text.setText('?');
@@ -1404,20 +1415,6 @@ class PlayerHUD extends Phaser.GameObjects.Container {
             color: '#b8b0a0'
         }).setOrigin(0.5);
         modalContainer.add(costText);
-
-        // Cancel button
-        const cancelBtn = scene.add.rectangle(hudAreaWidth / 2, height - 40, 120, 35, 0x333333)
-            .setStrokeStyle(2, 0x666666)
-            .setInteractive({ useHandCursor: true });
-        const cancelLabel = scene.add.text(hudAreaWidth / 2, height - 40, 'Cancelar', {
-            fontFamily: 'Arial, sans-serif',
-            fontSize: L.fontSizeSmall + 'px',
-            color: '#888888'
-        }).setOrigin(0.5);
-        cancelBtn.on('pointerover', () => cancelBtn.setFillStyle(0x444444));
-        cancelBtn.on('pointerout', () => cancelBtn.setFillStyle(0x333333));
-        cancelBtn.on('pointerdown', () => this.cancelMutinySelection());
-        modalContainer.add([cancelBtn, cancelLabel]);
 
         // Fade in
         modalContainer.setAlpha(0);

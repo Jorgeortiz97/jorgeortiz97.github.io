@@ -158,10 +158,10 @@ class DiceRoller extends Phaser.GameObjects.Container {
         // Map die value to rotation angles (rotX, rotY) to show that face
         this.faceRotations = {
             1: { rotX: 0, rotY: 0 },
-            2: { rotX: -Math.PI / 2, rotY: 0 },
+            2: { rotX: Math.PI / 2, rotY: 0 },
             3: { rotX: 0, rotY: Math.PI / 2 },
             4: { rotX: 0, rotY: -Math.PI / 2 },
-            5: { rotX: Math.PI / 2, rotY: 0 },
+            5: { rotX: -Math.PI / 2, rotY: 0 },
             6: { rotX: Math.PI, rotY: 0 }
         };
     }

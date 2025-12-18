@@ -80,7 +80,8 @@ const ASSET_PATHS = {
         // Other UI
         badge: 'ui/Badge.png',
         event_back: 'ui/Event_Back.png',
-        player_hud: 'ui/player_hud.png'
+        player_hud: 'ui/player_hud.png',
+        vp_icon: 'ui/1VP.png'
     },
 
     // Backgrounds

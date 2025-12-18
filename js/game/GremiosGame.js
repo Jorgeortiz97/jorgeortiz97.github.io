@@ -93,6 +93,9 @@ class GremiosGame extends SimpleEventEmitter {
     }
 
     startGame() {
+        // Discard 3 random events at game start
+        this.discardRandomEvents(3);
+
         this.phase = 'event';
         this.round = 1;
         this.emit('gameStarted');
@@ -140,6 +143,15 @@ class GremiosGame extends SimpleEventEmitter {
         // Governor ability: draw 2 events, choose 1
         if (currentPlayer.character && currentPlayer.character.drawTwoEvents) {
             const event1 = this.eventDeck.pop();
+
+            // Handle case where no events are available
+            if (!event1) {
+                this.log('No hay eventos disponibles - saltando fase de evento', 'system');
+                this.phase = 'roll';
+                this.nextPhase();
+                return;
+            }
+
             const event2 = this.eventDeck.length > 0 ? this.eventDeck.pop() : null;
 
             if (event2) {
@@ -161,7 +173,13 @@ class GremiosGame extends SimpleEventEmitter {
         } else {
             // Normal flow: draw single event
             const event = this.eventDeck.pop();
-            if (!event) return;
+            if (!event) {
+                // No events available - skip event phase and go to roll
+                this.log('No hay eventos disponibles - saltando fase de evento', 'system');
+                this.phase = 'roll';
+                this.nextPhase();
+                return;
+            }
 
             this.currentEvent = event;
             this.emit('eventDrawn', event);
@@ -190,6 +208,12 @@ class GremiosGame extends SimpleEventEmitter {
         // Apply event effects after delay
         setTimeout(() => {
             this.eventHandler.handleEvent(this.currentEvent);
+
+            // Add event to discard pile (except permanent events like guild foundations)
+            if (this.currentEvent.type !== EVENT_TYPES.GUILD_FOUNDATION) {
+                this.eventDiscard.push(this.currentEvent);
+            }
+
             this.emit('stateChanged');
 
             // Move to roll phase
@@ -210,9 +234,27 @@ class GremiosGame extends SimpleEventEmitter {
             return true;
         });
 
-        this.eventDeck = shuffleArray(filteredDiscard);
-        this.eventDiscard = [];
+        // Shuffle the discard pile
+        const shuffled = shuffleArray(filteredDiscard);
+
+        // Discard 3 random cards (or fewer if not enough cards)
+        const cardsToDiscard = Math.min(3, shuffled.length);
+        this.eventDiscard = shuffled.splice(0, cardsToDiscard);
+
+        // Remaining cards form the new deck
+        this.eventDeck = shuffled;
         this.emit('deckReshuffled');
+    }
+
+    discardRandomEvents(count) {
+        // Discard random events from the deck at game start
+        const cardsToDiscard = Math.min(count, this.eventDeck.length);
+        for (let i = 0; i < cardsToDiscard; i++) {
+            const discarded = this.eventDeck.pop();
+            if (discarded) {
+                this.eventDiscard.push(discarded);
+            }
+        }
     }
 
     rollPhase() {
@@ -273,7 +315,15 @@ class GremiosGame extends SimpleEventEmitter {
 
     distributeGuildCoins(guildNumber) {
         const guild = this.activeGuilds.find(g => g.number === guildNumber);
-        if (!guild) return;
+        if (!guild) {
+            this.log(`Gremio ${guildNumber} no fundado - sin pagos`, 'system');
+            this.emit('guildPayment', { guildNumber, guildName: null, notFounded: true });
+            return;
+        }
+
+        // Debug logging for guild state
+        const activeEvents = this.activeTemporaryEvents.map(e => e.id).join(', ') || 'ninguno';
+        this.log(`Gremio ${guild.name} (${guildNumber}): bloqueado=${guild.blocked}, eventos=[${activeEvents}]`, 'system');
 
         for (let player of this.players) {
             const investments = guild.investments.filter(inv => inv.playerId === player.id).length;
@@ -294,12 +344,15 @@ class GremiosGame extends SimpleEventEmitter {
                         }
                     }
                     // Guild is blocked and player is not immune, skip
+                    this.log(`${player.name} no cobra de ${guild.name} (bloqueado)`, 'system');
                     continue;
                 }
                 player.addCoins(investments);
+                this.log(`${player.name} cobra ${investments} moneda${investments > 1 ? 's' : ''} de ${guild.name}`, 'system');
             }
         }
 
+        this.emit('guildPayment', { guildNumber, guildName: guild.name, blocked: guild.blocked });
         this.emit('guildUpdated');
     }
 
@@ -530,8 +583,10 @@ class GremiosGame extends SimpleEventEmitter {
         this.emit('playerUpdated', playerId);
         this.emit('stateChanged');
 
+        // When expedition is full, immediately roll dice and resolve (no guild payments)
         if (this.expedition.investments.length === this.expedition.maxSlots) {
-            setTimeout(() => this.resolveExpedition(), 1000);
+            this.log('La expedición está llena - tirando dados para resolución', 'expedition');
+            setTimeout(() => this.resolveExpedition(false), 500);
         }
 
         return { success: true, free: isFreeInvestment };

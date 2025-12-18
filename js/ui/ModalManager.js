@@ -87,15 +87,15 @@ class ModalManager {
         if (config.buttons) {
             const buttonY = cy + boxHeight / 2 - 50;
             const hasLargeButtons = config.buttons.some(b => b.large);
-            const buttonSpacing = hasLargeButtons ? 200 : 120;
+            const buttonSpacing = hasLargeButtons ? 240 : 120;
             const startX = cx - ((config.buttons.length - 1) * buttonSpacing) / 2;
 
             config.buttons.forEach((btnConfig, index) => {
                 const btnX = startX + index * buttonSpacing;
                 const isLarge = btnConfig.large;
-                const btnWidth = isLarge ? 160 : 100;
-                const btnHeight = isLarge ? 50 : 35;
-                const fontSize = isLarge ? '20px' : '14px';
+                const btnWidth = isLarge ? 200 : 100;
+                const btnHeight = isLarge ? 60 : 35;
+                const fontSize = isLarge ? '24px' : '14px';
 
                 const btn = this.scene.add.rectangle(btnX, buttonY, btnWidth, btnHeight,
                     btnConfig.primary ? 0x8b3545 : 0x333333)

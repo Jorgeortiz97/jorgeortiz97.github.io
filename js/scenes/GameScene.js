@@ -268,8 +268,8 @@ class GameScene extends Phaser.Scene {
 
         const btnX = padding + availableWidth / 2;
         const btnWidth = availableWidth * 0.6;
-        // Reduced button height (4% instead of 5.5%)
-        const btnHeight = Math.floor(height * 0.04);
+        // Increased button height for better visibility on mobile
+        const btnHeight = Math.floor(height * 0.055);
 
         // Calculate HUD dimensions (same as createHUDs)
         const activeScale = 1.8;
@@ -586,6 +586,44 @@ class GameScene extends Phaser.Scene {
         game.on('gameOver', (winner) => this.onGameOver(winner));
         game.on('stateChanged', () => this.updateAllUI());
         game.on('governorEventChoice', (data) => this.showGovernorEventChoice(data));
+        game.on('guildPayment', (data) => this.showGuildPaymentInfo(data));
+    }
+
+    showGuildPaymentInfo(data) {
+        const { width, height } = this.cameras.main;
+        const L = this.layout;
+
+        let message;
+        let color = '#e6c870';
+
+        if (data.notFounded) {
+            message = `Gremio ${data.guildNumber} no fundado`;
+            color = '#888888';
+        } else if (data.blocked) {
+            message = `${data.guildName} bloqueado`;
+            color = '#ff6666';
+        } else {
+            message = `Pagos de ${data.guildName}`;
+        }
+
+        // Show temporary message above the board
+        const boardCenterX = L.board.hudAreaWidth + (width - L.board.hudAreaWidth) / 2;
+        const toast = this.add.text(boardCenterX, height * 0.12, message, {
+            fontFamily: 'Georgia, serif',
+            fontSize: L.fontSizeSmall + 'px',
+            color: color,
+            backgroundColor: '#1a1510',
+            padding: { x: 10, y: 5 }
+        }).setOrigin(0.5).setDepth(500);
+
+        // Fade out after 2 seconds
+        this.tweens.add({
+            targets: toast,
+            alpha: 0,
+            delay: 2000,
+            duration: 500,
+            onComplete: () => toast.destroy()
+        });
     }
 
     onPhaseChanged(phase) {
@@ -613,10 +651,164 @@ class GameScene extends Phaser.Scene {
     }
 
     onGameOver(winner) {
-        this.time.delayedCall(1000, () => {
-            this.registry.set('winner', winner);
-            this.registry.set('players', this.game_instance.players);
-            this.scene.start('GameOverScene');
+        this.time.delayedCall(500, () => {
+            this.showGameOverModal(winner);
+        });
+    }
+
+    showGameOverModal(winner) {
+        const { width, height } = this.cameras.main;
+        const game = this.game_instance;
+        const L = this.layout;
+
+        // Sort players by VP descending
+        const sortedPlayers = [...game.players].sort((a, b) => {
+            return b.getVictoryPoints(game) - a.getVictoryPoints(game);
+        });
+
+        this.modalManager.show({
+            width: width * 0.75,
+            height: height * 0.85,
+            showClose: false,
+            dismissible: false,
+            content: (container, cx, cy, w, h) => {
+                // Winner section at top
+                const winnerY = cy - h * 0.32;
+
+                // Winner character image (large)
+                if (winner.character) {
+                    const charImg = this.make.image({
+                        x: cx, y: winnerY,
+                        key: winner.character.id
+                    });
+                    const imgScale = Math.min((w * 0.35) / charImg.width, (h * 0.4) / charImg.height);
+                    charImg.setScale(imgScale);
+                    container.add(charImg);
+
+                    // Golden glow effect behind winner
+                    const glow = this.make.graphics();
+                    glow.fillStyle(0xe6c870, 0.15);
+                    glow.fillCircle(cx, winnerY, charImg.displayWidth * 0.6);
+                    container.addAt(glow, 0);
+                }
+
+                // Victory banner
+                const bannerY = winnerY + h * 0.28;
+                const banner = this.make.graphics();
+                banner.fillStyle(0x8b3545, 1);
+                banner.fillRoundedRect(cx - w * 0.4, bannerY - 25, w * 0.8, 50, 8);
+                container.add(banner);
+
+                const victoryText = this.make.text({
+                    x: cx, y: bannerY,
+                    text: `¡${winner.name} es el vencedor!`,
+                    style: {
+                        fontFamily: 'Cinzel, Georgia, serif',
+                        fontSize: (L.fontSizeLarge + 4) + 'px',
+                        color: '#ffffff',
+                        fontStyle: 'bold'
+                    }
+                }).setOrigin(0.5);
+                container.add(victoryText);
+
+                // Scoreboard section
+                const scoreStartY = bannerY + 60;
+                const rowHeight = h * 0.105;
+
+                // Scoreboard header
+                const scoreHeader = this.make.text({
+                    x: cx, y: scoreStartY,
+                    text: 'Puntuación Final',
+                    style: {
+                        fontFamily: 'Georgia, serif',
+                        fontSize: L.fontSizeMedium + 'px',
+                        color: '#b8b0a0'
+                    }
+                }).setOrigin(0.5);
+                container.add(scoreHeader);
+
+                // Player rows
+                sortedPlayers.forEach((player, index) => {
+                    const rowY = scoreStartY + 40 + index * rowHeight;
+                    const isWinner = player.id === winner.id;
+                    const vp = player.getVictoryPoints(game);
+
+                    // Row background for winner
+                    if (isWinner) {
+                        const rowBg = this.make.graphics();
+                        rowBg.fillStyle(0xe6c870, 0.15);
+                        rowBg.fillRoundedRect(cx - w * 0.42, rowY - rowHeight * 0.4, w * 0.84, rowHeight * 0.8, 6);
+                        container.add(rowBg);
+                    }
+
+                    // Character portrait (small)
+                    if (player.character) {
+                        const portrait = this.make.image({
+                            x: cx - w * 0.35, y: rowY,
+                            key: player.character.id
+                        });
+                        const portScale = (rowHeight * 0.7) / portrait.height;
+                        portrait.setScale(portScale);
+                        container.add(portrait);
+                    }
+
+                    // Rank medal/number
+                    const rankColors = ['#ffd700', '#c0c0c0', '#cd7f32']; // Gold, Silver, Bronze
+                    const rankColor = index < 3 ? rankColors[index] : '#666666';
+                    const rankText = this.make.text({
+                        x: cx - w * 0.22, y: rowY,
+                        text: `${index + 1}º`,
+                        style: {
+                            fontFamily: 'Arial, sans-serif',
+                            fontSize: (L.fontSizeMedium + 2) + 'px',
+                            color: rankColor,
+                            fontStyle: 'bold'
+                        }
+                    }).setOrigin(0.5);
+                    container.add(rankText);
+
+                    // Player name
+                    const nameText = this.make.text({
+                        x: cx - w * 0.12, y: rowY,
+                        text: player.name,
+                        style: {
+                            fontFamily: 'Georgia, serif',
+                            fontSize: L.fontSizeMedium + 'px',
+                            color: isWinner ? '#e6c870' : '#ffffff',
+                            fontStyle: isWinner ? 'bold' : 'normal'
+                        }
+                    }).setOrigin(0, 0.5);
+                    container.add(nameText);
+
+                    // VP icon and score
+                    const vpIcon = this.make.image({ x: cx + w * 0.25, y: rowY, key: 'vp_icon' });
+                    const vpIconScale = (rowHeight * 0.5) / vpIcon.height;
+                    vpIcon.setScale(vpIconScale);
+                    container.add(vpIcon);
+
+                    const vpText = this.make.text({
+                        x: cx + w * 0.32, y: rowY,
+                        text: vp.toString(),
+                        style: {
+                            fontFamily: 'Arial, sans-serif',
+                            fontSize: (L.fontSizeLarge) + 'px',
+                            color: isWinner ? '#e6c870' : '#ffffff',
+                            fontStyle: 'bold'
+                        }
+                    }).setOrigin(0, 0.5);
+                    container.add(vpText);
+                });
+            },
+            buttons: [
+                {
+                    text: 'Menú Principal',
+                    large: true,
+                    onClick: () => {
+                        this.modalManager.close();
+                        this.scene.start('MenuScene');
+                    }
+                }
+            ]
         });
     }
 
@@ -1066,9 +1258,8 @@ class GameScene extends Phaser.Scene {
         // Execute mutiny
         player.removeCoins(1);
 
-        // Clear all investments from the guild (mutiny effect)
-        guild.investments = [];
-        guild.maxInvestor = null;
+        // Apply proper mutiny effect (removes last investment from players with 2+ investments)
+        game.eventHandler.applyMutiny(guild);
 
         player.usedMutinyAbility = true;
 
