@@ -12,6 +12,12 @@ class GameOverScene extends Phaser.Scene {
         const winner = this.registry.get('winner');
         const players = this.registry.get('players');
 
+        // Responsive font sizes
+        const titleSize = Math.floor(height * 0.10);
+        const subtitleSize = Math.floor(height * 0.05);
+        const textSize = Math.floor(height * 0.04);
+        const smallTextSize = Math.floor(height * 0.035);
+
         // Fade in
         this.cameras.main.fadeIn(300);
 
@@ -20,36 +26,38 @@ class GameOverScene extends Phaser.Scene {
 
         // Title
         const isHumanWinner = winner && winner.id === 0;
-        const titleText = isHumanWinner ? 'Victoria!' : 'Partida Terminada';
+        const titleText = isHumanWinner ? '¡Victoria!' : 'Partida Terminada';
         const titleColor = isHumanWinner ? '#e6c870' : '#b8b0a0';
 
-        this.add.text(width / 2, height * 0.15, titleText, {
-            fontFamily: 'Georgia, serif',
-            fontSize: Math.floor(height * 0.08) + 'px',
+        this.add.text(width / 2, height * 0.12, titleText, {
+            fontFamily: 'Cinzel, Georgia, serif',
+            fontSize: titleSize + 'px',
             color: titleColor,
             fontStyle: 'bold'
         }).setOrigin(0.5);
 
         // Winner announcement
         if (winner) {
-            this.add.text(width / 2, height * 0.25, `Ganador: ${winner.name}`, {
-                fontFamily: 'Arial, sans-serif',
-                fontSize: '24px',
+            this.add.text(width / 2, height * 0.22, `Ganador: ${winner.name}`, {
+                fontFamily: 'Georgia, serif',
+                fontSize: subtitleSize + 'px',
                 color: '#e6c870'
             }).setOrigin(0.5);
 
-            // Winner character
+            // Winner character image
             if (winner.character) {
-                this.add.image(width / 2, height * 0.45, winner.character.id)
-                    .setDisplaySize(150, 200);
+                const charImg = this.add.image(width / 2, height * 0.42, winner.character.id);
+                const imgScale = (height * 0.28) / charImg.height;
+                charImg.setScale(imgScale);
             }
         }
 
-        // Final scores
-        this.add.text(width / 2, height * 0.65, 'Puntuaciones Finales', {
-            fontFamily: 'Arial, sans-serif',
-            fontSize: '20px',
-            color: '#b8b0a0'
+        // Final scores header
+        this.add.text(width / 2, height * 0.62, 'Puntuaciones Finales', {
+            fontFamily: 'Georgia, serif',
+            fontSize: textSize + 'px',
+            color: '#b8b0a0',
+            fontStyle: 'bold'
         }).setOrigin(0.5);
 
         // Player scores
@@ -61,34 +69,39 @@ class GameOverScene extends Phaser.Scene {
                 return vpB - vpA;
             });
 
+            const rowSpacing = height * 0.055;
             sortedPlayers.forEach((player, index) => {
-                const y = height * 0.72 + index * 35;
+                const y = height * 0.69 + index * rowSpacing;
                 const vp = player.getVictoryPoints ? player.getVictoryPoints() : 0;
                 const isWinner = winner && player.id === winner.id;
+                const color = isWinner ? '#e6c870' : '#888888';
 
                 this.add.text(width * 0.35, y, player.name, {
                     fontFamily: 'Arial, sans-serif',
-                    fontSize: '18px',
-                    color: isWinner ? '#e6c870' : '#888888'
+                    fontSize: smallTextSize + 'px',
+                    color: color
                 }).setOrigin(0, 0.5);
 
                 this.add.text(width * 0.65, y, `${vp} VP`, {
                     fontFamily: 'Arial, sans-serif',
-                    fontSize: '18px',
-                    color: isWinner ? '#e6c870' : '#888888'
+                    fontSize: smallTextSize + 'px',
+                    color: color,
+                    fontStyle: 'bold'
                 }).setOrigin(1, 0.5);
             });
         }
 
-        // New game button
-        const btnY = height * 0.9;
-        const btn = this.add.rectangle(width / 2, btnY, 180, 45, 0x8b3545)
+        // Back to menu button
+        const btnWidth = Math.floor(width * 0.25);
+        const btnHeight = Math.floor(height * 0.07);
+        const btnY = height * 0.92;
+        const btn = this.add.rectangle(width / 2, btnY, btnWidth, btnHeight, 0x8b3545)
             .setStrokeStyle(2, 0xe6c870)
             .setInteractive({ useHandCursor: true });
 
-        this.add.text(width / 2, btnY, 'Nueva Partida', {
-            fontFamily: 'Arial, sans-serif',
-            fontSize: '18px',
+        this.add.text(width / 2, btnY, 'Volver al Menú', {
+            fontFamily: 'Georgia, serif',
+            fontSize: smallTextSize + 'px',
             color: '#ffffff'
         }).setOrigin(0.5);
 

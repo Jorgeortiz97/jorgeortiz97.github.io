@@ -297,9 +297,11 @@ class ModalManager {
             }
         };
 
-        // Listen for fullscreen changes (e.g., user presses Escape)
-        const fullscreenHandler = () => updateFullscreenButton(this.scene.scale.isFullscreen);
-        this.scene.scale.on('fullscreenchange', fullscreenHandler);
+        // Listen for fullscreen changes
+        const onEnterFs = () => updateFullscreenButton(true);
+        const onLeaveFs = () => updateFullscreenButton(false);
+        this.scene.scale.on('enterfullscreen', onEnterFs);
+        this.scene.scale.on('leavefullscreen', onLeaveFs);
 
         this.show({
             title: 'Ajustes',
@@ -424,7 +426,8 @@ class ModalManager {
                 container.add([backBtn, backText]);
             },
             onClose: () => {
-                this.scene.scale.off('fullscreenchange', fullscreenHandler);
+                this.scene.scale.off('enterfullscreen', onEnterFs);
+                this.scene.scale.off('leavefullscreen', onLeaveFs);
             }
         });
     }

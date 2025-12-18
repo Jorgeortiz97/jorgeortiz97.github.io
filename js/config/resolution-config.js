@@ -1,16 +1,10 @@
 // Resolution presets for the game (16:9 aspect ratio)
 const RESOLUTION_PRESETS = {
-    low: {
-        width: 640,
-        height: 360,
-        label: '640x360 (Bajo)',
-        description: 'Para dispositivos de baja potencia'
-    },
     mediumLow: {
         width: 854,
         height: 480,
-        label: '854x480 (Medio-Bajo)',
-        description: 'Para dispositivos de potencia media-baja'
+        label: '854x480 (Bajo)',
+        description: 'Para dispositivos de potencia baja'
     },
     reference: {
         width: 1280,
@@ -23,6 +17,12 @@ const RESOLUTION_PRESETS = {
         height: 1080,
         label: '1920x1080 (Full HD)',
         description: 'Para dispositivos de alta potencia'
+    },
+    ultraHigh: {
+        width: 2560,
+        height: 1440,
+        label: '2560x1440 (QHD)',
+        description: 'Para pantallas 2K/Retina'
     }
 };
 
@@ -33,14 +33,14 @@ function detectBestResolution() {
     const maxDimension = Math.max(screenWidth, screenHeight);
 
     // Select resolution based on available screen real estate
-    if (maxDimension >= 1920) {
+    if (maxDimension >= 2560) {
+        return 'ultraHigh';
+    } else if (maxDimension >= 1920) {
         return 'high';
     } else if (maxDimension >= 1280) {
         return 'reference';
-    } else if (maxDimension >= 854) {
-        return 'mediumLow';
     }
-    return 'low';
+    return 'mediumLow';
 }
 
 // Get current resolution preset

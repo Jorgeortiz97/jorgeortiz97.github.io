@@ -136,6 +136,13 @@ class PlayerHUD extends Phaser.GameObjects.Container {
         }).setOrigin(0, 0.5);
         this.add(this.vpText);
 
+        // Treasure leader badge - after VP (hidden by default)
+        const badgeX = vpX + fontMd * 3.5;
+        this.treasureBadge = scene.add.image(badgeX, infoY, 'badge');
+        this.fitImageToArea(this.treasureBadge, fontMd * 1.2, fontMd * 1.2);
+        this.treasureBadge.setVisible(false);
+        this.add(this.treasureBadge);
+
         // === RESOURCE SLOTS (5 slots in bottom tray) ===
         this.createResourceSlots(scene, hudWidth, hudHeight);
 
@@ -152,18 +159,14 @@ class PlayerHUD extends Phaser.GameObjects.Container {
     createResourceSlots(scene, hudWidth, hudHeight) {
         const L = this.layout;
 
-        // EXACT coordinates from player_hud.png (1150x600):
-        // User provided TOP-LEFT of each placeholder: (473,331), (564,331), (655,331), (745,331), (837,331)
-        // Slot size: 91x140px, Resource image size: 66x100px
-        // Position resources toward TOP-LEFT of slot (not centered)
-        // Top-left aligned with small padding: slot.x + 38, slot.y + 53 (instead of center at slot.x + 45.5, slot.y + 70)
-        // Percentages: Land=(473+38)/1150=44.43%, (331+53)/600=64.00%
-        const slotPositionsX = [0.4443, 0.5235, 0.6026, 0.6809, 0.7609];  // Shifted left ~0.7%
-        const slotCenterY = hudHeight * 0.14;  // 14% below center (64% from top, was 66.83%)
+        const slotPositionsX = [0.445, 0.545, 0.645, 0.745, 0.846];
+        const slotCenterY = hudHeight * 0.194;
+        const slotWidth = hudWidth * 0.0727;
+        const slotHeight = hudHeight * 0.2104;
 
-        // Resource image size: 66x100 in 1150x600 = 5.74% x 16.67%
-        const slotWidth = hudWidth * 0.0574;
-        const slotHeight = hudHeight * 0.1667;
+        // Store for repositioning count texts when active
+        this.slotCenterY = slotCenterY;
+        this.slotHeight = slotHeight;
 
         // 5 resources: land, cultivated land, inn, destroyed inn, treasure
         const resources = [
@@ -201,7 +204,7 @@ class PlayerHUD extends Phaser.GameObjects.Container {
             }
 
             // Count text below the resource icon (gold color)
-            const countY = slotCenterY + slotHeight / 2 + 30;
+            const countY = slotCenterY + slotHeight / 2 + 38;
             const countText = scene.add.text(slotX, countY, '0', {
                 fontFamily: 'Arial, sans-serif',
                 fontSize: L.fontSizeSmall + 'px',
@@ -268,6 +271,16 @@ class PlayerHUD extends Phaser.GameObjects.Container {
         const vp = (player.getVictoryPoints && game) ? player.getVictoryPoints(game) : 0;
         this.vpText.setText(`${vp} VP`);
 
+        // Update treasure leader badge
+        if (this.treasureBadge && game && game.players) {
+            const myTreasures = player.treasures ? player.treasures.length : 0;
+            const isLeader = myTreasures >= 2 && game.players.every(p => {
+                const otherTreasures = p.treasures ? p.treasures.length : 0;
+                return p.id === player.id || otherTreasures < myTreasures;
+            });
+            this.treasureBadge.setVisible(isLeader);
+        }
+
         // Update coins
         if (this.coinsText) {
             this.coinsText.setText(player.coins.toString());
@@ -323,6 +336,28 @@ class PlayerHUD extends Phaser.GameObjects.Container {
                 this.setY(newY);
             }
         }
+
+        // Reposition resource count texts based on active state
+        this.repositionResourceCounts(active);
+    }
+
+    repositionResourceCounts(active) {
+        if (!this.resourceTexts || !this.slotCenterY) return;
+
+        // Counts below icons for both states
+        const offset = active ? (this.slotHeight / 2 + 45) : (this.slotHeight / 2 + 38);
+        const targetY = this.slotCenterY + offset;
+
+        Object.values(this.resourceTexts).forEach(text => {
+            if (text && this.scene) {
+                this.scene.tweens.add({
+                    targets: text,
+                    y: targetY,
+                    duration: 200,
+                    ease: 'Power2'
+                });
+            }
+        });
     }
 
     hideResourceCounts() {

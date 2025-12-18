@@ -164,4 +164,9 @@ class SimpleEventEmitter {
         };
         return this.on(event, onceWrapper);
     }
+
+    removeAllListeners() {
+        this._events = {};
+        return this;
+    }
 }

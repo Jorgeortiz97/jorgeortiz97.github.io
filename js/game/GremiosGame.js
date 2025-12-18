@@ -541,13 +541,16 @@ class GremiosGame extends SimpleEventEmitter {
         let sum;
         if (useExistingRoll && this.lastDiceRoll) {
             sum = this.lastDiceRoll.sum;
+            this.log(`Expedition using existing roll: ${sum}`, 'expedition');
         } else {
             const dice = rollDice();
             sum = dice.sum;
             this.emit('diceRolled', dice);
+            this.log(`Expedition new roll: ${dice.die1} + ${dice.die2} = ${sum}`, 'expedition');
         }
 
         const success = sum >= 6 && sum <= 8;
+        this.log(`Expedition result: sum=${sum}, success=${success} (needs 6-8)`, 'expedition');
 
         if (success) {
             for (let investment of this.expedition.investments) {

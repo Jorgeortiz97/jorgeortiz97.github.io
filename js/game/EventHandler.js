@@ -30,6 +30,9 @@ class EventHandler {
         this.game.activeGuilds.push(guild);
         this.game.activeGuilds.sort((a, b) => a.number - b.number);
 
+        // Apply blocking from active temporary events to new guild
+        this.updateGuildBlocking();
+
         return `Se funda el gremio: ${guild.name} (${guild.number})`;
     }
 

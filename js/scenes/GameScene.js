@@ -9,6 +9,13 @@ class GameScene extends Phaser.Scene {
     create() {
         const { width, height } = this.cameras.main;
 
+        // Reset state for new game session
+        this.characterSelected = false;
+        if (this.game_instance) {
+            this.game_instance.removeAllListeners();
+            this.game_instance = null;
+        }
+
         // Get scaled layout values
         this.layout = getScaledLayout(width, height);
 
