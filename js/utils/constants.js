@@ -114,13 +114,13 @@ const BOARD = {
         3:  { x: 22.17, y: 27.23 },
         4:  { x: 41.83, y: 27.23 },
         5:  { x: 61.67, y: 27.23 },
-        8:  { x: 81.42, y: 27.23 },  // Tavern (swapped with Farm)
+        8:  { x: 81.42, y: 27.23 },  // Farm (Granja)
         // Bottom row (Y: 77.27%)
         12: { x: 2.50,  y: 77.27 },
         11: { x: 22.17, y: 77.27 },
         10: { x: 41.83, y: 77.27 },
         9:  { x: 61.67, y: 77.27 },
-        6:  { x: 81.42, y: 77.27 }   // Farm (swapped with Tavern)
+        6:  { x: 81.42, y: 77.27 }   // Tavern (Taberna)
     },
 
     // Blocking event positions (middle row, Y: 52.25%)

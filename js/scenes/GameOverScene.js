@@ -46,8 +46,13 @@ class GameOverScene extends Phaser.Scene {
 
             // Winner character image
             if (winner.character) {
-                const charImg = this.add.image(width / 2, height * 0.42, winner.character.id);
-                const imgScale = (height * 0.28) / charImg.height;
+                const charImg = this.add.image(width / 2, height * 0.40, winner.character.id);
+                // Constrain both dimensions to prevent overflow
+                const maxHeight = height * 0.22;
+                const maxWidth = width * 0.35;
+                const scaleByHeight = maxHeight / charImg.height;
+                const scaleByWidth = maxWidth / charImg.width;
+                const imgScale = Math.min(scaleByHeight, scaleByWidth);
                 charImg.setScale(imgScale);
             }
         }

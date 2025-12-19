@@ -1098,15 +1098,9 @@ class GameScene extends Phaser.Scene {
 
                     // Sell button only for wealth treasures
                     if (treasure.type === 'wealth') {
-                        const btn = this.make.rectangle({
-                            x: cx + w / 2 - 50,
-                            y: yPos,
-                            width: 70,
-                            height: 28,
-                            fillColor: 0x8b3545,
-                            add: false
-                        }).setStrokeStyle(2, 0xe6c870)
-                          .setInteractive({ useHandCursor: true });
+                        const btn = this.add.rectangle(cx + w / 2 - 50, yPos, 70, 28, 0x8b3545)
+                            .setStrokeStyle(2, 0xe6c870)
+                            .setInteractive({ useHandCursor: true });
 
                         btn.on('pointerover', () => btn.setFillStyle(0xa04555));
                         btn.on('pointerout', () => btn.setFillStyle(0x8b3545));
@@ -1116,16 +1110,10 @@ class GameScene extends Phaser.Scene {
                         });
                         container.add(btn);
 
-                        const btnText = this.make.text({
-                            x: cx + w / 2 - 50,
-                            y: yPos,
-                            text: 'Vender',
-                            style: {
-                                fontFamily: 'Georgia, serif',
-                                fontSize: L.fontSizeSmall + 'px',
-                                color: '#ffffff'
-                            },
-                            add: false
+                        const btnText = this.add.text(cx + w / 2 - 50, yPos, 'Vender', {
+                            fontFamily: 'Georgia, serif',
+                            fontSize: L.fontSizeSmall + 'px',
+                            color: '#ffffff'
                         }).setOrigin(0.5);
                         container.add(btnText);
                     }
