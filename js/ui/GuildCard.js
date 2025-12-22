@@ -105,19 +105,44 @@ class GuildCard extends Phaser.GameObjects.Container {
 
     onDoubleTap(scene) {
         // Blocking only affects resource generation, not investments
-        const result = scene.investInGuild(this.guild.number);
+        scene.investInGuild(this.guild.number);
+        // No animation for human player - animation triggered via event for AI only
+    }
 
-        if (result && result.success) {
-            scene.tweens.add({
-                targets: this.guildImage,
-                alpha: 0.6,
-                yoyo: true,
-                duration: 100
-            });
-        }
+    // Public method to trigger investment effect (for AI players only)
+    showInvestmentEffect(scene) {
+        // Kill any existing tweens on this object to avoid conflicts
+        scene.tweens.killTweensOf(this);
+        scene.tweens.killTweensOf(this.guildImage);
+
+        // Smooth, fluid pulse effect (respects animation speed)
+        const effectDuration = getAnimationDuration(180);
+        scene.tweens.add({
+            targets: this,
+            scaleX: 1.15,
+            scaleY: 1.15,
+            duration: effectDuration,
+            ease: 'Sine.easeOut',
+            yoyo: true,
+            onComplete: () => {
+                this.setScale(1);
+            }
+        });
+
+        // Subtle alpha pulse
+        scene.tweens.add({
+            targets: this.guildImage,
+            alpha: 0.7,
+            duration: effectDuration,
+            ease: 'Sine.easeInOut',
+            yoyo: true
+        });
     }
 
     updateInvestments() {
+        // Guard against destroyed card
+        if (!this.scene || !this.scene.sys) return;
+
         const guild = this.guild;
 
         // Update slots with player coins

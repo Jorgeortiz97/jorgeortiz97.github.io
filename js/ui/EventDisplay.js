@@ -67,11 +67,14 @@ class EventDisplay extends Phaser.GameObjects.Container {
         // Store base scale for animation
         const targetScale = baseScale;
 
-        // 3D flip animation using scaleX
+        // 3D flip animation using scaleX (respects animation speed setting)
+        const flipDuration = getAnimationDuration(300);
+        const holdDuration = getAnimationDuration(GAME_CONSTANTS.EVENT_DISPLAY_DURATION * 0.6);
+
         scene.tweens.add({
             targets: modalCard,
             scaleX: 0,
-            duration: 300,
+            duration: flipDuration,
             ease: 'Sine.easeIn',
             onComplete: () => {
                 // Swap texture at midpoint and recalculate scale for new image
@@ -86,7 +89,7 @@ class EventDisplay extends Phaser.GameObjects.Container {
                 scene.tweens.add({
                     targets: modalCard,
                     scaleX: newScale,
-                    duration: 300,
+                    duration: flipDuration,
                     ease: 'Sine.easeOut',
                     onComplete: () => {
                         // Only show revealed card in discard pile for ACTION events
@@ -101,11 +104,11 @@ class EventDisplay extends Phaser.GameObjects.Container {
                         // (showing previous action event or staying hidden if none drawn yet)
 
                         // Hold for a moment then fade out
-                        scene.time.delayedCall(GAME_CONSTANTS.EVENT_DISPLAY_DURATION * 0.6, () => {
+                        scene.time.delayedCall(holdDuration, () => {
                             scene.tweens.add({
                                 targets: modalContainer,
                                 alpha: 0,
-                                duration: 300,
+                                duration: flipDuration,
                                 onComplete: () => {
                                     modalContainer.destroy();
                                     if (callback) callback();

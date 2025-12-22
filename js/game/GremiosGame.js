@@ -205,7 +205,7 @@ class GremiosGame extends SimpleEventEmitter {
     }
 
     processCurrentEvent() {
-        // Apply event effects after delay
+        // Apply event effects after delay (respects animation speed setting)
         setTimeout(() => {
             this.eventHandler.handleEvent(this.currentEvent);
 
@@ -220,8 +220,8 @@ class GremiosGame extends SimpleEventEmitter {
             setTimeout(() => {
                 this.phase = 'roll';
                 this.nextPhase();
-            }, 500);
-        }, GAME_CONSTANTS.EVENT_DISPLAY_DURATION);
+            }, getAnimationDuration(500));
+        }, getAnimationDuration(GAME_CONSTANTS.EVENT_DISPLAY_DURATION));
     }
 
     reshuffleEventDeck() {
@@ -309,8 +309,8 @@ class GremiosGame extends SimpleEventEmitter {
             this.emit('stateChanged');
 
             this.phase = 'collection';
-            setTimeout(() => this.nextPhase(), GAME_CONSTANTS.PHASE_TRANSITION_DELAY);
-        }, GAME_CONSTANTS.DICE_ROLL_DURATION);
+            setTimeout(() => this.nextPhase(), getAnimationDuration(GAME_CONSTANTS.PHASE_TRANSITION_DELAY));
+        }, getAnimationDuration(GAME_CONSTANTS.DICE_ROLL_DURATION));
     }
 
     distributeGuildCoins(guildNumber) {
@@ -382,7 +382,7 @@ class GremiosGame extends SimpleEventEmitter {
         this.emit('stateChanged');
 
         this.phase = 'investment';
-        setTimeout(() => this.nextPhase(), GAME_CONSTANTS.PHASE_TRANSITION_DELAY);
+        setTimeout(() => this.nextPhase(), getAnimationDuration(GAME_CONSTANTS.PHASE_TRANSITION_DELAY));
     }
 
     investmentPhase() {
@@ -392,7 +392,7 @@ class GremiosGame extends SimpleEventEmitter {
         const currentPlayer = this.players[this.currentPlayerIndex];
 
         if (currentPlayer.isAI) {
-            setTimeout(() => this.executeAITurn(), GAME_CONSTANTS.AI_ACTION_BASE_DELAY);
+            setTimeout(() => this.executeAITurn(), getAnimationDuration(GAME_CONSTANTS.AI_ACTION_BASE_DELAY));
         }
     }
 
@@ -400,15 +400,16 @@ class GremiosGame extends SimpleEventEmitter {
         const currentPlayer = this.players[this.currentPlayerIndex];
         const decisions = currentPlayer.aiController.makeDecision(this, currentPlayer);
 
+        const stepDelay = getAnimationDuration(GAME_CONSTANTS.AI_ACTION_STEP_DELAY);
         let delay = 0;
         for (let decision of decisions) {
             setTimeout(() => {
                 this.executeAction(currentPlayer.id, decision);
             }, delay);
-            delay += GAME_CONSTANTS.AI_ACTION_STEP_DELAY;
+            delay += stepDelay;
         }
 
-        setTimeout(() => this.endTurn(), delay + GAME_CONSTANTS.AI_ACTION_BASE_DELAY);
+        setTimeout(() => this.endTurn(), delay + getAnimationDuration(GAME_CONSTANTS.AI_ACTION_BASE_DELAY));
     }
 
     executeAction(playerId, action) {
@@ -427,7 +428,35 @@ class GremiosGame extends SimpleEventEmitter {
                 return this.buildInn(playerId, action.landIndex);
             case 'repair-inn':
                 return this.repairInn(playerId, action.innIndex);
+            case 'sell-wealth':
+                return this.sellWealth(playerId, action.coinValue);
         }
+    }
+
+    sellWealth(playerId, coinValue) {
+        const player = this.players[playerId];
+        if (!player.treasures || player.treasures.length === 0) {
+            return { success: false, reason: 'No treasures' };
+        }
+
+        // Find wealth treasure with matching coin value
+        const wealthIndex = player.treasures.findIndex(t =>
+            t.type === 'wealth' && (t.coinValue || 3) === coinValue);
+
+        if (wealthIndex < 0) {
+            return { success: false, reason: 'No matching wealth treasure' };
+        }
+
+        const treasure = player.removeTreasure(wealthIndex);
+        if (treasure) {
+            player.addCoins(treasure.coinValue || 3);
+            this.treasureDeck.unshift(treasure);
+            this.log(`${player.name} vende tesoro de riqueza por ${treasure.coinValue || 3} monedas`, 'action');
+            this.emit('playerUpdated', playerId);
+            this.emit('stateChanged');
+            return { success: true, coins: treasure.coinValue || 3 };
+        }
+        return { success: false };
     }
 
     investInGuild(playerId, guildNumber) {
@@ -478,6 +507,7 @@ class GremiosGame extends SimpleEventEmitter {
         player.investmentsThisTurn++;
 
         this.updateMaxInvestor(guild);
+        this.emit('guildInvested', { guildNumber, playerId });
         this.emit('guildUpdated');
         this.emit('playerUpdated', playerId);
         this.emit('stateChanged');
@@ -580,13 +610,14 @@ class GremiosGame extends SimpleEventEmitter {
             this.log(`${player.name} (Polizón) invierte gratis en la expedición`, 'action');
         }
 
+        this.emit('expeditionInvested', { playerId });
         this.emit('playerUpdated', playerId);
         this.emit('stateChanged');
 
         // When expedition is full, immediately roll dice and resolve (no guild payments)
         if (this.expedition.investments.length === this.expedition.maxSlots) {
             this.log('La expedición está llena - tirando dados para resolución', 'expedition');
-            setTimeout(() => this.resolveExpedition(false), 500);
+            setTimeout(() => this.resolveExpedition(false), getAnimationDuration(500));
         }
 
         return { success: true, free: isFreeInvestment };
@@ -594,6 +625,8 @@ class GremiosGame extends SimpleEventEmitter {
 
     resolveExpedition(useExistingRoll = false) {
         let sum;
+        let needsAnimationWait = false;
+
         if (useExistingRoll && this.lastDiceRoll) {
             sum = this.lastDiceRoll.sum;
             this.log(`Expedition using existing roll: ${sum}`, 'expedition');
@@ -602,46 +635,58 @@ class GremiosGame extends SimpleEventEmitter {
             sum = dice.sum;
             this.emit('diceRolled', dice);
             this.log(`Expedition new roll: ${dice.die1} + ${dice.die2} = ${sum}`, 'expedition');
+            needsAnimationWait = true;
         }
 
-        const success = sum >= 6 && sum <= 8;
-        this.log(`Expedition result: sum=${sum}, success=${success} (needs 6-8)`, 'expedition');
+        // Continue with resolution after dice animation completes
+        const processResult = () => {
+            const success = sum >= 6 && sum <= 8;
+            this.log(`Expedition result: sum=${sum}, success=${success} (needs 6-8)`, 'expedition');
 
-        if (success) {
+            if (success) {
+                for (let investment of this.expedition.investments) {
+                    const player = this.players.find(p => p.id === investment.playerId);
+                    if (player && this.treasureDeck.length > 0) {
+                        const treasure = this.treasureDeck.pop();
+                        player.addTreasure(treasure);
+                    }
+                }
+                this.updateDiscovererEmblem();
+                this.checkVictory();
+            } else {
+                // Pirate ability: receives coins from failed expeditions
+                const pirate = this.players.find(p => p.character && p.character.onFailedExpedition);
+                if (pirate && this.expedition.investments.length > 0) {
+                    // Each investment represents 2 coins invested
+                    const coinsLost = this.expedition.investments.length * 2;
+                    const result = pirate.character.onFailedExpedition(this, pirate, coinsLost);
+                    if (result && result.coins > 0) {
+                        pirate.addCoins(result.coins);
+                        this.log(`${pirate.name} (Pirata) recibe ${result.coins} monedas de expedición fallida`, 'ability');
+                    }
+                }
+            }
+
+            // Return investments to reserves
             for (let investment of this.expedition.investments) {
                 const player = this.players.find(p => p.id === investment.playerId);
-                if (player && this.treasureDeck.length > 0) {
-                    const treasure = this.treasureDeck.pop();
-                    player.addTreasure(treasure);
+                if (player) {
+                    player.addToReserve(1);
                 }
             }
-            this.updateDiscovererEmblem();
-            this.checkVictory();
+
+            this.expedition.investments = [];
+            this.emit('expeditionResolved', { success, sum });
+            this.emit('stateChanged');
+        };
+
+        // Wait for dice animation plus a small buffer before processing result
+        if (needsAnimationWait) {
+            const animWait = getAnimationDuration(GAME_CONSTANTS.DICE_ROLL_DURATION) + getAnimationDuration(300);
+            setTimeout(processResult, animWait);
         } else {
-            // Pirate ability: receives coins from failed expeditions
-            const pirate = this.players.find(p => p.character && p.character.onFailedExpedition);
-            if (pirate && this.expedition.investments.length > 0) {
-                // Each investment represents 2 coins invested
-                const coinsLost = this.expedition.investments.length * 2;
-                const result = pirate.character.onFailedExpedition(this, pirate, coinsLost);
-                if (result && result.coins > 0) {
-                    pirate.addCoins(result.coins);
-                    this.log(`${pirate.name} (Pirata) recibe ${result.coins} monedas de expedición fallida`, 'ability');
-                }
-            }
+            processResult();
         }
-
-        // Return investments to reserves
-        for (let investment of this.expedition.investments) {
-            const player = this.players.find(p => p.id === investment.playerId);
-            if (player) {
-                player.addToReserve(1);
-            }
-        }
-
-        this.expedition.investments = [];
-        this.emit('expeditionResolved', { success, sum });
-        this.emit('stateChanged');
     }
 
     updateDiscovererEmblem() {
@@ -736,7 +781,7 @@ class GremiosGame extends SimpleEventEmitter {
         this.phase = 'event';
         this.emit('turnChanged', this.currentPlayerIndex);
         this.emit('stateChanged');
-        setTimeout(() => this.nextPhase(), GAME_CONSTANTS.PHASE_TRANSITION_DELAY);
+        setTimeout(() => this.nextPhase(), getAnimationDuration(GAME_CONSTANTS.PHASE_TRANSITION_DELAY));
     }
 
     endGame(winner) {

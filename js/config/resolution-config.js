@@ -27,17 +27,19 @@ const RESOLUTION_PRESETS = {
 };
 
 // Auto-detect the best resolution based on screen size
+// Prefers higher resolution (scale down) over lower resolution (scale up)
 function detectBestResolution() {
     const screenWidth = window.screen.width * (window.devicePixelRatio || 1);
     const screenHeight = window.screen.height * (window.devicePixelRatio || 1);
     const maxDimension = Math.max(screenWidth, screenHeight);
 
-    // Select resolution based on available screen real estate
-    if (maxDimension >= 2560) {
+    // Prefer higher resolution - use lower thresholds to pick higher presets
+    // This ensures we scale down rather than scale up for sharper graphics
+    if (maxDimension >= 2200) {
         return 'ultraHigh';
-    } else if (maxDimension >= 1920) {
+    } else if (maxDimension >= 1500) {
         return 'high';
-    } else if (maxDimension >= 1280) {
+    } else if (maxDimension >= 1000) {
         return 'reference';
     }
     return 'mediumLow';

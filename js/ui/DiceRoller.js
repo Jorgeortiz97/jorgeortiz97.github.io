@@ -194,8 +194,8 @@ class DiceRoller extends Phaser.GameObjects.Container {
         const die2Container = scene.add.container(die2X, centerY);
         modalContainer.add([die1Container, die2Container]);
 
-        // Animation parameters
-        const rollDuration = GAME_CONSTANTS.DICE_ROLL_DURATION;
+        // Animation parameters (respects animation speed setting)
+        const rollDuration = getAnimationDuration(GAME_CONSTANTS.DICE_ROLL_DURATION);
         const focalLength = dieSize * 8;
 
         // Starting rotations (random for variety)

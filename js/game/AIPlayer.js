@@ -88,12 +88,19 @@ class AIPlayer {
         }
 
         // 4. Build inn if profitable (has lands and enough coins)
+        // Conservative: sell wealth if needed for this high-value action (2 VP)
         const innCost = player.character && player.character.innCost ? player.character.innCost : 6;
-        if (player.coins >= innCost && player.getUncultivatedLandsCount() > 2) {
-            // Prioritize cultivated lands for inn
-            const cultivatedIndex = player.lands.findIndex(l => l.cultivated);
-            const landIndex = cultivatedIndex >= 0 ? cultivatedIndex : 0;
-            actions.push({ action: 'build-inn', landIndex });
+        if (player.getUncultivatedLandsCount() > 2) {
+            const wealthForInn = this.shouldSellWealthFor(player, innCost);
+            if (wealthForInn) {
+                actions.push({ action: 'sell-wealth', coinValue: wealthForInn.coinValue || 3 });
+            }
+            if (player.coins >= innCost || wealthForInn) {
+                // Prioritize cultivated lands for inn
+                const cultivatedIndex = player.lands.findIndex(l => l.cultivated);
+                const landIndex = cultivatedIndex >= 0 ? cultivatedIndex : 0;
+                actions.push({ action: 'build-inn', landIndex });
+            }
         }
 
         // 5. Cultivate lands for Good Harvest
@@ -153,11 +160,18 @@ class AIPlayer {
         }
 
         // 3. Build inns strategically
+        // Conservative: sell wealth if needed for this high-value action (2 VP)
         const innCost = player.character && player.character.innCost ? player.character.innCost : 6;
-        if (player.coins >= innCost + 2 && player.lands.length > 0) {
-            // Keep some coins for future investments
-            const landIndex = player.lands.findIndex(l => l.cultivated) || 0;
-            actions.push({ action: 'build-inn', landIndex });
+        if (player.lands.length > 0) {
+            const wealthForInn = this.shouldSellWealthFor(player, innCost + 2);
+            if (wealthForInn) {
+                actions.push({ action: 'sell-wealth', coinValue: wealthForInn.coinValue || 3 });
+            }
+            if (player.coins >= innCost + 2 || wealthForInn) {
+                // Keep some coins for future investments
+                const landIndex = player.lands.findIndex(l => l.cultivated) || 0;
+                actions.push({ action: 'build-inn', landIndex });
+            }
         }
 
         // 4. Economic engine: lands and cultivation
@@ -196,17 +210,31 @@ class AIPlayer {
         }
 
         // Priority 1: Repair inns (2 VP each)
-        if (player.coins >= 1 && player.getDestroyedInnIndices().length > 0) {
-            const indices = player.getDestroyedInnIndices();
-            for (let i = 0; i < Math.min(indices.length, Math.ceil(needed / 2)); i++) {
-                actions.push({ action: 'repair-inn', innIndex: indices[i] });
+        // Sell wealth if needed since we're close to winning
+        const destroyedIndices = player.getDestroyedInnIndices();
+        if (destroyedIndices.length > 0) {
+            const wealthForRepair = this.shouldSellWealthFor(player, 1);
+            if (wealthForRepair) {
+                actions.push({ action: 'sell-wealth', coinValue: wealthForRepair.coinValue || 3 });
+            }
+            if (player.coins >= 1 || wealthForRepair) {
+                for (let i = 0; i < Math.min(destroyedIndices.length, Math.ceil(needed / 2)); i++) {
+                    actions.push({ action: 'repair-inn', innIndex: destroyedIndices[i] });
+                }
             }
         }
 
         // Priority 2: Build inns (2 VP each)
+        // Sell wealth if needed since we're close to winning
         const innCost = player.character && player.character.innCost ? player.character.innCost : 6;
-        if (player.coins >= innCost && player.lands.length > 0) {
-            actions.push({ action: 'build-inn', landIndex: 0 });
+        if (player.lands.length > 0) {
+            const wealthForInn = this.shouldSellWealthFor(player, innCost);
+            if (wealthForInn) {
+                actions.push({ action: 'sell-wealth', coinValue: wealthForInn.coinValue || 3 });
+            }
+            if (player.coins >= innCost || wealthForInn) {
+                actions.push({ action: 'build-inn', landIndex: 0 });
+            }
         }
 
         // Priority 3: Secure max investor positions
@@ -227,6 +255,33 @@ class AIPlayer {
     }
 
     // Helper functions
+
+    // Find the best wealth treasure to sell (conservative: only for high-value actions)
+    findBestWealthToSell(player) {
+        if (!player.treasures || player.treasures.length === 0) return null;
+
+        const wealthTreasures = player.treasures.filter(t => t.type === 'wealth');
+        if (wealthTreasures.length === 0) return null;
+
+        // Return the highest value wealth treasure
+        return wealthTreasures.reduce((best, t) =>
+            (!best || (t.coinValue || 3) > (best.coinValue || 3)) ? t : best, null);
+    }
+
+    // Check if selling wealth would enable a high-value action
+    shouldSellWealthFor(player, actionCost) {
+        const wealth = this.findBestWealthToSell(player);
+        if (!wealth) return null;
+
+        const wealthValue = wealth.coinValue || 3;
+        const coinsAfterSell = player.coins + wealthValue;
+
+        // Only sell if we need the coins AND selling enables the action
+        if (player.coins < actionCost && coinsAfterSell >= actionCost) {
+            return wealth;
+        }
+        return null;
+    }
 
     findBestGuildToInvest(game, player) {
         const availableGuilds = game.activeGuilds; // Can invest in blocked guilds

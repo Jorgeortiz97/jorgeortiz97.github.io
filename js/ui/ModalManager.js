@@ -51,9 +51,11 @@ class ModalManager {
 
         // Title
         if (config.title) {
-            const title = this.scene.add.text(cx, cy - boxHeight / 2 + 30, config.title, {
+            const titleFontSize = Math.floor(height * 0.04);
+            const titleOffset = boxHeight * 0.08;
+            const title = this.scene.add.text(cx, cy - boxHeight / 2 + titleOffset, config.title, {
                 fontFamily: 'Cinzel, Georgia, serif',
-                fontSize: '24px',
+                fontSize: titleFontSize + 'px',
                 color: '#e6c870'
             }).setOrigin(0.5);
             this.modalContainer.add(title);
@@ -66,12 +68,13 @@ class ModalManager {
 
         // Close button
         if (config.showClose !== false) {
+            const closeFontSize = Math.floor(height * 0.035);
             const closeBtn = this.scene.add.text(
-                cx + boxWidth / 2 - 20,
-                cy - boxHeight / 2 + 15,
+                cx + boxWidth / 2 - boxWidth * 0.05,
+                cy - boxHeight / 2 + boxHeight * 0.05,
                 'X',
                 {
-                    fontSize: '20px',
+                    fontSize: closeFontSize + 'px',
                     color: '#888888'
                 }
             ).setOrigin(0.5).setInteractive({ useHandCursor: true });
@@ -85,17 +88,21 @@ class ModalManager {
 
         // Buttons
         if (config.buttons) {
-            const buttonY = cy + boxHeight / 2 - 50;
+            const { width: screenWidth, height: screenHeight } = this.scene.cameras.main;
+            const buttonY = cy + boxHeight / 2 - boxHeight * 0.15;
             const hasLargeButtons = config.buttons.some(b => b.large);
-            const buttonSpacing = hasLargeButtons ? 240 : 120;
+            // Responsive button spacing based on screen width
+            const buttonSpacing = hasLargeButtons ? Math.floor(screenWidth * 0.18) : Math.floor(screenWidth * 0.12);
             const startX = cx - ((config.buttons.length - 1) * buttonSpacing) / 2;
 
             config.buttons.forEach((btnConfig, index) => {
                 const btnX = startX + index * buttonSpacing;
                 const isLarge = btnConfig.large;
-                const btnWidth = isLarge ? 200 : 100;
-                const btnHeight = isLarge ? 60 : 35;
-                const fontSize = isLarge ? '24px' : '14px';
+                // Responsive button sizes based on screen dimensions
+                const btnWidth = isLarge ? Math.floor(screenWidth * 0.18) : Math.floor(screenWidth * 0.10);
+                const btnHeight = isLarge ? Math.floor(screenHeight * 0.10) : Math.floor(screenHeight * 0.065);
+                // Use responsive font sizes
+                const fontSize = isLarge ? Math.floor(screenHeight * 0.035) + 'px' : Math.floor(screenHeight * 0.025) + 'px';
 
                 const btn = this.scene.add.rectangle(btnX, buttonY, btnWidth, btnHeight,
                     btnConfig.primary ? 0x8b3545 : 0x333333)

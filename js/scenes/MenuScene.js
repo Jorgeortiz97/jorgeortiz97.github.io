@@ -386,40 +386,54 @@ class MenuScene extends Phaser.Scene {
     showRestartPrompt() {
         const { width, height } = this.cameras.main;
 
+        // Responsive sizes
+        const promptFontSize = Math.floor(height * 0.04);
+        const btnFontSize = Math.floor(height * 0.035);
+        const btnWidth = Math.floor(width * 0.15);
+        const btnHeight = Math.floor(height * 0.08);
+
         // Overlay
         const overlay = this.add.rectangle(width / 2, height / 2, width, height, 0x000000, 0.8);
 
         // Prompt box
-        const box = this.add.rectangle(width / 2, height / 2, width * 0.6, height * 0.3, 0x2a2015)
+        const box = this.add.rectangle(width / 2, height / 2, width * 0.6, height * 0.35, 0x2a2015)
             .setStrokeStyle(2, 0xe6c870);
 
-        const promptText = this.add.text(width / 2, height * 0.4,
+        const promptText = this.add.text(width / 2, height * 0.42,
             'Reiniciar para aplicar los cambios?', {
-            fontFamily: 'Arial, sans-serif',
-            fontSize: '18px',
+            fontFamily: 'Georgia, serif',
+            fontSize: promptFontSize + 'px',
             color: '#e6c870'
         }).setOrigin(0.5);
 
         // Yes button
-        const yesBtn = this.add.rectangle(width * 0.4, height * 0.55, 100, 40, 0x4a3520)
+        const yesBtn = this.add.rectangle(width * 0.4, height * 0.55, btnWidth, btnHeight, 0x8b3545)
             .setStrokeStyle(2, 0xe6c870)
             .setInteractive({ useHandCursor: true });
         const yesText = this.add.text(width * 0.4, height * 0.55, 'Si', {
-            fontSize: '16px', color: '#e6c870'
+            fontFamily: 'Georgia, serif',
+            fontSize: btnFontSize + 'px',
+            color: '#ffffff'
         }).setOrigin(0.5);
 
+        yesBtn.on('pointerover', () => yesBtn.setFillStyle(0xa04555));
+        yesBtn.on('pointerout', () => yesBtn.setFillStyle(0x8b3545));
         yesBtn.on('pointerdown', () => {
             window.location.reload();
         });
 
         // No button
-        const noBtn = this.add.rectangle(width * 0.6, height * 0.55, 100, 40, 0x2a2015)
+        const noBtn = this.add.rectangle(width * 0.6, height * 0.55, btnWidth, btnHeight, 0x333333)
             .setStrokeStyle(2, 0x666666)
             .setInteractive({ useHandCursor: true });
         const noText = this.add.text(width * 0.6, height * 0.55, 'No', {
-            fontSize: '16px', color: '#888888'
+            fontFamily: 'Georgia, serif',
+            fontSize: btnFontSize + 'px',
+            color: '#b8b0a0'
         }).setOrigin(0.5);
 
+        noBtn.on('pointerover', () => noBtn.setFillStyle(0x444444));
+        noBtn.on('pointerout', () => noBtn.setFillStyle(0x333333));
         noBtn.on('pointerdown', () => {
             overlay.destroy();
             box.destroy();

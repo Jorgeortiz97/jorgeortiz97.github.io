@@ -146,11 +146,12 @@ class PlayerHUD extends Phaser.GameObjects.Container {
         }).setOrigin(0, 0.5);
         this.add(this.vpText);
 
-        // Treasure leader badge - at right edge (hidden by default)
+        // Treasure leader badge - inline after VP (hidden by default)
         const badgeSize = iconSize;
-        const badgeX = ribbonEndX - badgeSize / 2;
+        const badgeX = vpX + hudWidth * 0.08;
         this.treasureBadge = scene.add.image(badgeX, infoY, 'badge');
         this.fitImageToArea(this.treasureBadge, badgeSize, badgeSize);
+        this.treasureBadge.setOrigin(0, 0.5);
         this.treasureBadge.setVisible(false);
         this.add(this.treasureBadge);
 
@@ -214,8 +215,10 @@ class PlayerHUD extends Phaser.GameObjects.Container {
                 icon.on('pointerdown', () => this.onResourceClick(res.prop));
             }
 
-            // Count text below the resource icon (gold color)
-            const countY = slotCenterY + slotHeight / 2 + 38;
+            // Count text BELOW the HUD (outside the scroll area)
+            // Position relative to HUD bottom edge, not to the slot
+            const countGap = 3;
+            const countY = hudHeight / 2 + countGap;
             const countText = scene.add.text(slotX, countY, '0', {
                 fontFamily: 'Arial, sans-serif',
                 fontSize: L.fontSizeSmall + 'px',
@@ -353,22 +356,8 @@ class PlayerHUD extends Phaser.GameObjects.Container {
     }
 
     repositionResourceCounts(active) {
-        if (!this.resourceTexts || !this.slotCenterY) return;
-
-        // Counts below icons for both states
-        const offset = active ? (this.slotHeight / 2 + 45) : (this.slotHeight / 2 + 38);
-        const targetY = this.slotCenterY + offset;
-
-        Object.values(this.resourceTexts).forEach(text => {
-            if (text && this.scene) {
-                this.scene.tweens.add({
-                    targets: text,
-                    y: targetY,
-                    duration: 200,
-                    ease: 'Power2'
-                });
-            }
-        });
+        // Resource counts stay at fixed position - no repositioning needed
+        // This ensures consistent appearance across all resolutions
     }
 
     hideResourceCounts() {
@@ -572,19 +561,8 @@ class PlayerHUD extends Phaser.GameObjects.Container {
     }
 
     showActionFeedback(resourceProp, success) {
-        const icon = this.resourceIcons[resourceProp];
-        if (!icon) return;
-
-        this.scene.tweens.add({
-            targets: icon,
-            alpha: success ? 0.5 : 0.3,
-            yoyo: true,
-            duration: 100,
-            repeat: success ? 0 : 2,
-            onComplete: () => {
-                icon.setAlpha(1);
-            }
-        });
+        // No visual feedback for human player resource actions
+        // Effects are only shown for AI actions
     }
 
     // === DISABLED STATE WITH OVERLAY ===
@@ -955,8 +933,9 @@ class PlayerHUD extends Phaser.GameObjects.Container {
 
     createModalButton(scene, x, y, text, enabled, onClick) {
         const container = scene.add.container(x, y);
-        const btnWidth = 140;
-        const btnHeight = 38;
+        // Increased sizes for mobile: 180x50
+        const btnWidth = 180;
+        const btnHeight = 50;
 
         const bg = scene.add.rectangle(0, 0, btnWidth, btnHeight,
             enabled ? 0x8b3545 : 0x333333)
@@ -964,7 +943,7 @@ class PlayerHUD extends Phaser.GameObjects.Container {
 
         const label = scene.add.text(0, 0, text, {
             fontFamily: 'Arial, sans-serif',
-            fontSize: this.layout.fontSizeSmall + 'px',
+            fontSize: this.layout.fontSizeMedium + 'px',
             color: enabled ? '#ffffff' : '#666666'
         }).setOrigin(0.5);
 
@@ -1032,7 +1011,7 @@ class PlayerHUD extends Phaser.GameObjects.Container {
         });
         modalContainer.add(overlay);
 
-        // === LEFT SIDE (HUD AREA): Character image and name (large, like AI character modal) ===
+        // === LEFT SIDE (HUD AREA): Character image and name ===
         const charImg = scene.add.image(hudAreaWidth / 2, height * 0.42, player.character.id);
         const charMaxWidth = hudAreaWidth * 0.9;
         const charMaxHeight = height * 0.75;
@@ -1052,8 +1031,8 @@ class PlayerHUD extends Phaser.GameObjects.Container {
 
         // === RIGHT SIDE (BOARD AREA): Two panes ===
         const boardCenterX = hudAreaWidth + (width - hudAreaWidth) / 2;
-        const paneWidth = (width - hudAreaWidth) * 0.42;
-        const paneHeight = height * 0.85;
+        const paneWidth = (width - hudAreaWidth) * 0.44;
+        const paneHeight = height * 0.88;
         const paneGap = 15;
 
         // Sell pane (left)
@@ -1066,7 +1045,7 @@ class PlayerHUD extends Phaser.GameObjects.Container {
 
         // Close button
         const closeBtn = scene.add.text(width - 20, 15, 'X', {
-            fontSize: '24px',
+            fontSize: '28px',
             color: '#888888'
         }).setOrigin(1, 0).setInteractive({ useHandCursor: true });
         closeBtn.on('pointerover', () => closeBtn.setColor('#e6c870'));
@@ -1153,15 +1132,15 @@ class PlayerHUD extends Phaser.GameObjects.Container {
             }).setOrigin(0.5);
             container.add(countText);
 
-            // Sell button
+            // Sell button - increased height for mobile
             const btnY = cellY + cellHeight * 0.45;
-            const btn = scene.add.rectangle(cellX, btnY, cellWidth * 0.8, 30,
+            const btn = scene.add.rectangle(cellX, btnY, cellWidth * 0.85, 45,
                 canSell ? 0x8b3545 : 0x333333)
                 .setStrokeStyle(2, canSell ? 0xe6c870 : 0x555555);
 
             const btnLabel = scene.add.text(cellX, btnY, 'Vender (4)', {
                 fontFamily: 'Arial, sans-serif',
-                fontSize: L.fontSizeSmall + 'px',
+                fontSize: L.fontSizeMedium + 'px',
                 color: canSell ? '#ffffff' : '#666666'
             }).setOrigin(0.5);
 
@@ -1211,17 +1190,17 @@ class PlayerHUD extends Phaser.GameObjects.Container {
         }).setOrigin(0.5);
         container.add(deckText);
 
-        // Buy button
+        // Buy button - increased size for mobile
         const canBuy = player.coins >= 4 && deckCount > 0 && !player.usedArtisanTreasureAbility;
         const btnY = y + paneHeight * 0.3;
 
-        this.buyButton = scene.add.rectangle(x, btnY, paneWidth * 0.7, 40,
+        this.buyButton = scene.add.rectangle(x, btnY, paneWidth * 0.8, 50,
             canBuy ? 0x8b3545 : 0x333333)
             .setStrokeStyle(2, canBuy ? 0xe6c870 : 0x555555);
 
         this.buyButtonLabel = scene.add.text(x, btnY, 'Comprar (4 monedas)', {
             fontFamily: 'Arial, sans-serif',
-            fontSize: L.fontSizeSmall + 'px',
+            fontSize: L.fontSizeMedium + 'px',
             color: canBuy ? '#ffffff' : '#666666'
         }).setOrigin(0.5);
 
