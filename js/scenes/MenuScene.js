@@ -131,6 +131,11 @@ class MenuScene extends Phaser.Scene {
         this.clearScreen();
         this.currentScreen = 'main';
 
+        // Start background music if enabled (and not already playing)
+        if (this.game.musicManager && isMusicEnabled() && !this.game.musicManager.getIsPlaying()) {
+            this.game.musicManager.start();
+        }
+
         const { width, height } = this.cameras.main;
         this.menuContainer = this.add.container(0, 0);
 
@@ -299,23 +304,46 @@ class MenuScene extends Phaser.Scene {
 
         this.menuContainer.add([animLabel, animBtn, animBtnText]);
 
-        // Music toggle (disabled - coming soon)
+        // Music toggle
         const musicY = height * 0.59;
+        const isMusicOn = isMusicEnabled();
 
         const musicLabel = this.add.text(width * 0.25, musicY, 'Música:', {
             fontFamily: 'Georgia, serif',
             fontSize: labelFontSize + 'px',
-            color: '#666666'
+            color: '#b8b0a0'
         }).setOrigin(0, 0.5);
 
-        const musicBtn = this.add.rectangle(width * 0.65, musicY, width * 0.25, optionHeight, 0x1a1a1a)
-            .setStrokeStyle(1, 0x333333);
+        const musicBtn = this.add.rectangle(width * 0.65, musicY, width * 0.25, optionHeight,
+            isMusicOn ? 0x4a6520 : 0x2a2015)
+            .setStrokeStyle(1, isMusicOn ? 0x88cc44 : 0x444444)
+            .setInteractive({ useHandCursor: true });
 
-        const musicBtnText = this.add.text(width * 0.65, musicY, 'Próximamente', {
+        const musicBtnText = this.add.text(width * 0.65, musicY, getMusicLabel(), {
             fontFamily: 'Georgia, serif',
             fontSize: optionFontSize + 'px',
-            color: '#555555'
+            color: isMusicOn ? '#88cc44' : '#888888'
         }).setOrigin(0.5);
+
+        musicBtn.on('pointerdown', () => {
+            const newEnabled = toggleMusic();
+            // Update button visual
+            musicBtn.setFillStyle(newEnabled ? 0x4a6520 : 0x2a2015);
+            musicBtn.setStrokeStyle(1, newEnabled ? 0x88cc44 : 0x444444);
+            musicBtnText.setText(getMusicLabel());
+            musicBtnText.setColor(newEnabled ? '#88cc44' : '#888888');
+
+            // Start or stop music
+            if (this.game.musicManager) {
+                if (newEnabled) {
+                    // Re-enabled: create new playlist and start
+                    this.game.musicManager.restart();
+                } else {
+                    // Disabled: stop music
+                    this.game.musicManager.stop();
+                }
+            }
+        });
 
         this.menuContainer.add([musicLabel, musicBtn, musicBtnText]);
 

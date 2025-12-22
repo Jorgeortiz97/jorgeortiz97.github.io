@@ -291,29 +291,48 @@ class AIPlayer {
         const scored = availableGuilds.map(guild => {
             let score = 0;
 
-            // Prefer guilds where we can become max investor
-            const playerInvestments = guild.investments.filter(inv => inv.playerId === player.id).length;
-            const maxInvestments = Math.max(...game.players.map(p =>
-                guild.investments.filter(inv => inv.playerId === p.id).length
-            ));
+            // Skip full guilds
+            if (guild.investments.length >= 4) {
+                return { guild, score: -100 };
+            }
 
-            if (playerInvestments === maxInvestments) {
-                score += 10; // We're tied or leading
-            } else if (playerInvestments === maxInvestments - 1) {
-                score += 5; // Close to leading
+            const playerInvestments = guild.investments.filter(inv => inv.playerId === player.id).length;
+            const othersMax = Math.max(0, ...game.players
+                .filter(p => p.id !== player.id)
+                .map(p => guild.investments.filter(inv => inv.playerId === p.id).length)
+            );
+
+            // If already max investor with 2+ lead, skip this guild (position is secure)
+            if (guild.maxInvestor === player.id && playerInvestments >= othersMax + 2) {
+                return { guild, score: -50 };
+            }
+
+            // Highest priority: become max investor (tie or overtake)
+            if (guild.maxInvestor !== player.id && playerInvestments >= othersMax) {
+                score += 20; // Can become max investor with this investment
+            } else if (guild.maxInvestor !== player.id && playerInvestments === othersMax - 1) {
+                score += 15; // Can tie for max investor
+            } else if (guild.maxInvestor === player.id && playerInvestments === othersMax + 1) {
+                score += 8; // Secure our position (only 1 ahead)
+            } else if (guild.maxInvestor === player.id) {
+                score += 3; // Already secure, low priority
             }
 
             // Prefer guilds with higher numbers (less likely to roll)
             score += guild.number / 12 * 3;
 
-            // Prefer guilds with fewer total investments
-            score += (10 - guild.investments.length) / 10 * 2;
+            // Prefer guilds with fewer total investments (easier to dominate)
+            score += (4 - guild.investments.length) * 2;
 
             return { guild, score };
         });
 
-        scored.sort((a, b) => b.score - a.score);
-        return scored[0].guild;
+        // Filter out negative scores and sort
+        const validGuilds = scored.filter(s => s.score > 0);
+        if (validGuilds.length === 0) return null;
+
+        validGuilds.sort((a, b) => b.score - a.score);
+        return validGuilds[0].guild;
     }
 
     analyzeGuildOpportunities(game, player) {
@@ -322,31 +341,49 @@ class AIPlayer {
         const scored = availableGuilds.map(guild => {
             let score = 0;
 
-            const playerInvestments = guild.investments.filter(inv => inv.playerId === player.id).length;
-            const maxInvestments = Math.max(0, ...game.players.map(p =>
-                guild.investments.filter(inv => inv.playerId === p.id).length
-            ));
+            // Skip full guilds
+            if (guild.investments.length >= 4) {
+                return { guild, score: -100 };
+            }
 
-            // Heavily favor becoming max investor
-            if (guild.maxInvestor === player.id) {
-                score += 15; // Already max investor
-            } else if (playerInvestments === maxInvestments) {
-                score += 20; // Can become max investor
-            } else if (playerInvestments === maxInvestments - 1) {
-                score += 12; // Close to max investor
+            const playerInvestments = guild.investments.filter(inv => inv.playerId === player.id).length;
+            const othersMax = Math.max(0, ...game.players
+                .filter(p => p.id !== player.id)
+                .map(p => guild.investments.filter(inv => inv.playerId === p.id).length)
+            );
+
+            // If already max investor with 2+ lead, skip (position is secure)
+            if (guild.maxInvestor === player.id && playerInvestments >= othersMax + 2) {
+                return { guild, score: -50 };
+            }
+
+            // Highest priority: become max investor in new guilds
+            if (guild.maxInvestor !== player.id && playerInvestments >= othersMax) {
+                score += 25; // Can become max investor with this investment
+            } else if (guild.maxInvestor !== player.id && playerInvestments === othersMax - 1) {
+                score += 18; // Can tie for max investor
+            } else if (guild.maxInvestor === player.id && playerInvestments === othersMax + 1) {
+                score += 10; // Secure our position (only 1 ahead, vulnerable)
+            } else if (guild.maxInvestor === player.id) {
+                score += 2; // Already secure, very low priority
             }
 
             // Favor guilds with numbers that generate coins often
-            const favorableNumbers = [6, 7, 8]; // Most common rolls
+            const favorableNumbers = [6, 8]; // Common rolls (7 clears events)
             if (favorableNumbers.includes(guild.number)) {
-                score += 5;
+                score += 4;
             }
+
+            // Prefer guilds with fewer total investments (easier to dominate)
+            score += (4 - guild.investments.length) * 2;
 
             return { guild, score };
         });
 
-        scored.sort((a, b) => b.score - a.score);
-        return scored.map(s => s.guild);
+        // Filter out negative scores and sort
+        const validGuilds = scored.filter(s => s.score > 0);
+        validGuilds.sort((a, b) => b.score - a.score);
+        return validGuilds.map(s => s.guild);
     }
 
     countGuildVP(game, player) {
@@ -362,6 +399,7 @@ class AIPlayer {
     findVulnerableMaxInvestorPositions(game, player) {
         return game.activeGuilds.filter(guild => {
             if (guild.maxInvestor !== player.id) return false;
+            if (guild.investments.length >= 4) return false; // Guild full, can't invest more
 
             const playerInvestments = guild.investments.filter(inv => inv.playerId === player.id).length;
             const othersMax = Math.max(0, ...game.players
@@ -369,20 +407,23 @@ class AIPlayer {
                 .map(p => guild.investments.filter(inv => inv.playerId === p.id).length)
             );
 
-            return playerInvestments <= othersMax + 1; // Vulnerable if others are close
+            // Vulnerable if lead is only 1 (others can tie with 1 investment)
+            return playerInvestments === othersMax + 1;
         });
     }
 
     findStealableGuilds(game, player) {
         return game.activeGuilds.filter(guild => {
             if (guild.maxInvestor === player.id) return false;
+            if (guild.investments.length >= 4) return false; // Guild full
 
             const playerInvestments = guild.investments.filter(inv => inv.playerId === player.id).length;
             const currentMaxInvestments = Math.max(0, ...game.players.map(p =>
                 guild.investments.filter(inv => inv.playerId === p.id).length
             ));
 
-            return playerInvestments >= currentMaxInvestments - 1; // Can steal with 1-2 investments
+            // Can steal with 1 investment (tied or 1 behind)
+            return playerInvestments >= currentMaxInvestments - 1;
         });
     }
 

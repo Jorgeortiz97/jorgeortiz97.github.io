@@ -44,6 +44,29 @@ function getAnimationSpeedLabel() {
     return ANIMATION_SPEEDS[getAnimationSpeed()].label;
 }
 
+// Music preference utilities
+const MUSIC_ENABLED_KEY = 'gremios-music-enabled';
+
+function isMusicEnabled() {
+    const saved = localStorage.getItem(MUSIC_ENABLED_KEY);
+    // Default to true (enabled) if not set
+    return saved === null ? true : saved === 'true';
+}
+
+function setMusicEnabled(enabled) {
+    localStorage.setItem(MUSIC_ENABLED_KEY, enabled.toString());
+}
+
+function toggleMusic() {
+    const newValue = !isMusicEnabled();
+    setMusicEnabled(newValue);
+    return newValue;
+}
+
+function getMusicLabel() {
+    return isMusicEnabled() ? 'Activado' : 'Desactivado';
+}
+
 function isFullscreenSupported() {
     return document.fullscreenEnabled || document.webkitFullscreenEnabled;
 }

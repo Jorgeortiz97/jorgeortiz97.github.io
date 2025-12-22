@@ -536,18 +536,14 @@ class PlayerHUD extends Phaser.GameObjects.Container {
         // Check for free repair (Master Builder)
         const isFreeRepair = player.hasFreeRepairPerTurn() && !player.usedFreeRepair;
 
-        if (destroyedIndices.length === 1) {
-            let result;
-            if (isFreeRepair) {
-                result = this.scene.repairInnFree(destroyedIndices[0]);
-            } else {
-                result = this.scene.repairInn(destroyedIndices[0]);
-            }
-            this.showActionFeedback('destroyedInns', result && result.success);
+        // All destroyed inns are identical, just repair the first one
+        let result;
+        if (isFreeRepair) {
+            result = this.scene.repairInnFree(destroyedIndices[0]);
         } else {
-            // Show selection modal for multiple options
-            this.showInnSelectionModal('repairInn', destroyedIndices, isFreeRepair);
+            result = this.scene.repairInn(destroyedIndices[0]);
         }
+        this.showActionFeedback('destroyedInns', result && result.success);
     }
 
     handleSellWealth() {
@@ -678,6 +674,7 @@ class PlayerHUD extends Phaser.GameObjects.Container {
         const scene = this.scene;
         const player = this.player;
         const { width, height } = scene.cameras.main;
+        const L = this.layout;
 
         // Close ability modal if open
         if (this.abilityModal) {
@@ -694,41 +691,72 @@ class PlayerHUD extends Phaser.GameObjects.Container {
         overlay.on('pointerdown', () => modalContainer.destroy());
         modalContainer.add(overlay);
 
-        // Modal box
-        const boxWidth = width * 0.5;
-        const boxHeight = height * 0.4;
+        // Modal box (enlarged)
+        const boxWidth = width * 0.7;
+        const boxHeight = height * 0.55;
         const box = scene.add.rectangle(width / 2, height / 2, boxWidth, boxHeight, 0x2a2015)
             .setStrokeStyle(3, 0xe6c870);
         modalContainer.add(box);
 
         // Title
-        const title = scene.add.text(width / 2, height / 2 - boxHeight / 2 + 30,
+        const title = scene.add.text(width / 2, height / 2 - boxHeight / 2 + height * 0.05,
             'Tesoros (Artesano)', {
             fontFamily: 'Georgia, serif',
-            fontSize: this.layout.fontSizeMedium + 'px',
+            fontSize: L.fontSizeLarge + 'px',
             color: '#e6c870'
         }).setOrigin(0.5);
         modalContainer.add(title);
 
+        // Large button dimensions
+        const btnWidth = boxWidth * 0.4;
+        const btnHeight = height * 0.1;
+        const btnFontSize = L.fontSizeMedium + 2;
+        const btnSpacing = boxWidth * 0.22;
+
         // Buy button
         const treasureDeck = scene.game_instance.treasureDeck || [];
         const canBuy = player.coins >= 4 && treasureDeck.length > 0;
-        const buyBtn = this.createModalButton(scene, width / 2 - 70, height / 2 + 10,
-            'Comprar (4)', canBuy, () => {
+
+        const buyBtnX = width / 2 - btnSpacing;
+        const buyBtnY = height / 2 + height * 0.05;
+        const buyBg = scene.add.rectangle(buyBtnX, buyBtnY, btnWidth, btnHeight,
+            canBuy ? 0x4a6520 : 0x333333)
+            .setStrokeStyle(2, canBuy ? 0x88cc44 : 0x555555);
+        if (canBuy) {
+            buyBg.setInteractive({ useHandCursor: true });
+            buyBg.on('pointerdown', () => {
                 scene.buyTreasure();
                 modalContainer.destroy();
             });
-        modalContainer.add(buyBtn.container);
+        }
+        const buyText = scene.add.text(buyBtnX, buyBtnY, 'Comprar (4)', {
+            fontFamily: 'Georgia, serif',
+            fontSize: btnFontSize + 'px',
+            color: canBuy ? '#ffffff' : '#666666'
+        }).setOrigin(0.5);
+        modalContainer.add([buyBg, buyText]);
 
-        // Sell button (only if has treasures)
+        // Sell button
         const canSell = player.treasures.length > 0;
-        const sellBtn = this.createModalButton(scene, width / 2 + 70, height / 2 + 10,
-            'Vender (4)', canSell, () => {
-                // Sell first treasure
+
+        const sellBtnX = width / 2 + btnSpacing;
+        const sellBtnY = height / 2 + height * 0.05;
+        const sellBg = scene.add.rectangle(sellBtnX, sellBtnY, btnWidth, btnHeight,
+            canSell ? 0x8b3545 : 0x333333)
+            .setStrokeStyle(2, canSell ? 0xe6c870 : 0x555555);
+        if (canSell) {
+            sellBg.setInteractive({ useHandCursor: true });
+            sellBg.on('pointerdown', () => {
                 scene.sellTreasure(0);
                 modalContainer.destroy();
             });
-        modalContainer.add(sellBtn.container);
+        }
+        const sellText = scene.add.text(sellBtnX, sellBtnY, 'Vender (4)', {
+            fontFamily: 'Georgia, serif',
+            fontSize: btnFontSize + 'px',
+            color: canSell ? '#ffffff' : '#666666'
+        }).setOrigin(0.5);
+        modalContainer.add([sellBg, sellText]);
     }
 
     showMutinyModal() {
@@ -924,11 +952,8 @@ class PlayerHUD extends Phaser.GameObjects.Container {
 
         if (destroyedIndices.length === 0) return;
 
-        if (destroyedIndices.length === 1) {
-            this.scene.repairInnFree(destroyedIndices[0]);
-        } else {
-            this.showInnSelectionModal('repairInn', destroyedIndices, true);
-        }
+        // All destroyed inns are identical, just repair the first one
+        this.scene.repairInnFree(destroyedIndices[0]);
     }
 
     createModalButton(scene, x, y, text, enabled, onClick) {

@@ -452,6 +452,7 @@ class GremiosGame extends SimpleEventEmitter {
             player.addCoins(treasure.coinValue || 3);
             this.treasureDeck.unshift(treasure);
             this.log(`${player.name} vende tesoro de riqueza por ${treasure.coinValue || 3} monedas`, 'action');
+            this.updateDiscovererEmblem();
             this.emit('playerUpdated', playerId);
             this.emit('stateChanged');
             return { success: true, coins: treasure.coinValue || 3 };
@@ -557,13 +558,16 @@ class GremiosGame extends SimpleEventEmitter {
             if (callback) {
                 const result = callback(this, player, data);
                 if (result && result.coins > 0) {
-                    player.addCoins(result.coins, result.fromReserve);
+                    // fromReserve in character abilities means "from game's central reserve" (unlimited)
+                    // so we just add coins directly, not from player's personal reserve
+                    player.addCoins(result.coins, false);
                     this.emit('characterAbilityTriggered', {
                         player: player,
                         ability: triggerType,
                         coins: result.coins,
                         fromReserve: result.fromReserve
                     });
+                    this.emit('playerUpdated', player.id);
                     this.log(`${player.name} (${player.character.nameES}) recibe ${result.coins} moneda${result.coins > 1 ? 's' : ''}${result.fromReserve ? ' de reserva' : ''}`, 'ability');
                 }
             }
@@ -690,14 +694,38 @@ class GremiosGame extends SimpleEventEmitter {
     }
 
     updateDiscovererEmblem() {
+        // Find the max treasure count (minimum 2 required)
         let maxTreasures = 1;
-        let discoverer = null;
-
         for (let player of this.players) {
             const count = player.getTreasureCount();
-            if (count >= 2 && count > maxTreasures) {
+            if (count > maxTreasures) {
                 maxTreasures = count;
-                discoverer = player;
+            }
+        }
+
+        // Need at least 2 treasures to have the emblem
+        if (maxTreasures < 2) {
+            for (let player of this.players) {
+                player.hasDiscovererEmblem = false;
+            }
+            return;
+        }
+
+        // Find all players tied for max treasures
+        const candidates = this.players.filter(p => p.getTreasureCount() === maxTreasures);
+
+        // If tie, randomly assign (unless one already has it)
+        let discoverer = null;
+        if (candidates.length === 1) {
+            discoverer = candidates[0];
+        } else {
+            // Check if current holder is still in the tie
+            const currentHolder = candidates.find(p => p.hasDiscovererEmblem);
+            if (currentHolder) {
+                discoverer = currentHolder;
+            } else {
+                // Random assignment among tied players
+                discoverer = candidates[Math.floor(Math.random() * candidates.length)];
             }
         }
 

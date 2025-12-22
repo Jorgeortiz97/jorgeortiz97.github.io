@@ -370,22 +370,43 @@ class ModalManager {
 
                 container.add([animLabel, animBtn, animSpeedText]);
 
-                // Row 3: Music (disabled)
+                // Row 3: Music toggle
                 const musicY = animY + rowSpacing;
+                const isMusicOn = isMusicEnabled();
+
                 const musicLabel = this.scene.add.text(leftX, musicY, 'Música:', {
                     fontFamily: 'Georgia, serif',
                     fontSize: labelFontSize + 'px',
-                    color: '#666666'
+                    color: '#b8b0a0'
                 }).setOrigin(0, 0.5);
 
-                const musicBtn = this.scene.add.rectangle(rightX, musicY, valueBoxWidth, valueBoxHeight, 0x1a1a1a)
-                    .setStrokeStyle(1, 0x333333);
+                const musicBtn = this.scene.add.rectangle(rightX, musicY, valueBoxWidth, valueBoxHeight,
+                    isMusicOn ? 0x4a6520 : 0x2a2015)
+                    .setStrokeStyle(1, isMusicOn ? 0x88cc44 : 0x444444)
+                    .setInteractive({ useHandCursor: true });
 
-                const musicText = this.scene.add.text(rightX, musicY, 'Próximamente', {
+                const musicText = this.scene.add.text(rightX, musicY, getMusicLabel(), {
                     fontFamily: 'Georgia, serif',
                     fontSize: valueFontSize + 'px',
-                    color: '#555555'
+                    color: isMusicOn ? '#88cc44' : '#888888'
                 }).setOrigin(0.5);
+
+                musicBtn.on('pointerdown', () => {
+                    const newEnabled = toggleMusic();
+                    musicBtn.setFillStyle(newEnabled ? 0x4a6520 : 0x2a2015);
+                    musicBtn.setStrokeStyle(1, newEnabled ? 0x88cc44 : 0x444444);
+                    musicText.setText(getMusicLabel());
+                    musicText.setColor(newEnabled ? '#88cc44' : '#888888');
+
+                    // Start or stop music
+                    if (this.scene.game.musicManager) {
+                        if (newEnabled) {
+                            this.scene.game.musicManager.restart();
+                        } else {
+                            this.scene.game.musicManager.stop();
+                        }
+                    }
+                });
 
                 container.add([musicLabel, musicBtn, musicText]);
 

@@ -22,7 +22,26 @@ function createGameConfig(resolution) {
         render: {
             pixelArt: false,
             antialias: true,
-            roundPixels: false
+            roundPixels: false,
+            powerPreference: 'high-performance',
+            failIfMajorPerformanceCaveat: false
+        },
+        callbacks: {
+            postBoot: function(game) {
+                // Handle WebGL context loss (common on mobile when app is backgrounded)
+                game.canvas.addEventListener('webglcontextlost', (e) => {
+                    e.preventDefault();
+                    console.log('WebGL context lost');
+                });
+                game.canvas.addEventListener('webglcontextrestored', () => {
+                    console.log('WebGL context restored');
+                    // Restart the current scene to rebuild all display objects
+                    const activeScene = game.scene.getScenes(true)[0];
+                    if (activeScene) {
+                        activeScene.scene.restart();
+                    }
+                });
+            }
         }
     };
 }

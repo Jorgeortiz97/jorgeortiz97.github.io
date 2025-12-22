@@ -120,6 +120,12 @@ class BootScene extends Phaser.Scene {
             this.load.image(key, path);
         });
 
+        // Load audio (uses full paths, not base path)
+        this.load.setPath('');
+        Object.entries(ASSET_PATHS.audio).forEach(([key, path]) => {
+            this.load.audio(key, path);
+        });
+
         // Track loading progress
         this.load.on('progress', (value) => {
             this.updateProgress(value);
@@ -188,6 +194,10 @@ class BootScene extends Phaser.Scene {
 
     loadingComplete() {
         this.loadingText.setText('Cargando completado!');
+
+        // Initialize music manager (attached to game so it persists across scenes)
+        this.game.musicManager = new MusicManager();
+        this.game.musicManager.init(this);
 
         // Small delay before transitioning to menu
         this.time.delayedCall(500, () => {

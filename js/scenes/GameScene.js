@@ -29,6 +29,17 @@ class GameScene extends Phaser.Scene {
             } else {
                 this.game_instance.resume();
                 this.scene.resume();
+
+                // Force canvas redraw after returning from background
+                // This fixes blank screen on mobile when switching apps
+                if (this.cameras && this.cameras.main) {
+                    this.cameras.main.dirty = true;
+                }
+
+                // Trigger a manual render to ensure display is refreshed
+                if (this.game && this.game.renderer) {
+                    this.game.renderer.snapshot(() => {});
+                }
             }
         };
         document.addEventListener('visibilitychange', this.visibilityHandler);
@@ -744,44 +755,87 @@ class GameScene extends Phaser.Scene {
             return b.getVictoryPoints(game) - a.getVictoryPoints(game);
         });
 
+        // Helper to get player resource breakdown
+        const getPlayerBreakdown = (player) => {
+            const breakdown = [];
+
+            // Guilds as max investor
+            const guildCount = game.activeGuilds.filter(g => g.maxInvestor === player.id).length;
+            if (guildCount > 0) {
+                breakdown.push({ icon: 'event_back', count: guildCount, vp: guildCount });
+            }
+
+            // Uncultivated lands
+            const landCount = player.getUncultivatedLandsCount();
+            if (landCount > 0) {
+                breakdown.push({ icon: 'land', count: landCount, vp: 0 });
+            }
+
+            // Cultivated lands
+            const cultivatedCount = player.getCultivatedLandsCount();
+            if (cultivatedCount > 0) {
+                breakdown.push({ icon: 'cultivated_land', count: cultivatedCount, vp: 0 });
+            }
+
+            // Active inns
+            const innCount = player.getActiveInnsCount();
+            if (innCount > 0) {
+                breakdown.push({ icon: 'inn', count: innCount, vp: innCount });
+            }
+
+            // Destroyed inns
+            const destroyedInnCount = player.getDestroyedInnsCount();
+            if (destroyedInnCount > 0) {
+                breakdown.push({ icon: 'destroyed_inn', count: destroyedInnCount, vp: 0 });
+            }
+
+            // 1 VP treasures (common)
+            const treasure1VP = player.treasures.filter(t => t.type === 'common').length;
+            if (treasure1VP > 0) {
+                breakdown.push({ icon: 'treasure_1vp', count: treasure1VP, vp: treasure1VP });
+            }
+
+            // 2 VP treasures (rare)
+            const treasure2VP = player.treasures.filter(t => t.type === 'rare').length;
+            if (treasure2VP > 0) {
+                breakdown.push({ icon: 'treasure_2vp', count: treasure2VP, vp: treasure2VP * 2 });
+            }
+
+            // 3 coins wealth treasures
+            const wealth3 = player.treasures.filter(t => t.type === 'wealth' && t.coinValue === 3).length;
+            if (wealth3 > 0) {
+                breakdown.push({ icon: 'wealth_3', count: wealth3, vp: 0 });
+            }
+
+            // 4 coins wealth treasures
+            const wealth4 = player.treasures.filter(t => t.type === 'wealth' && t.coinValue === 4).length;
+            if (wealth4 > 0) {
+                breakdown.push({ icon: 'wealth_4', count: wealth4, vp: 0 });
+            }
+
+            // Discoverer's emblem (badge)
+            if (player.hasDiscovererEmblem) {
+                breakdown.push({ icon: 'badge', count: 1, vp: 1, noBadge: true });
+            }
+
+            return breakdown;
+        };
+
         this.modalManager.show({
-            width: width * 0.75,
-            height: height * 0.85,
+            width: width * 0.85,
+            height: height * 0.9,
             showClose: false,
             dismissible: false,
             content: (container, cx, cy, w, h) => {
-                // Winner section at top - adjusted to keep image inside pane
-                const winnerY = cy - h * 0.26;
-
-                // Winner character image (large) - constrained to fit inside modal
-                if (winner.character) {
-                    const charImg = this.make.image({
-                        x: cx, y: winnerY,
-                        key: winner.character.id
-                    });
-                    // Constrain image to stay within modal boundaries
-                    const maxImgHeight = h * 0.32;
-                    const maxImgWidth = w * 0.35;
-                    const imgScale = Math.min(maxImgWidth / charImg.width, maxImgHeight / charImg.height);
-                    charImg.setScale(imgScale);
-                    container.add(charImg);
-
-                    // Golden glow effect behind winner
-                    const glow = this.make.graphics();
-                    glow.fillStyle(0xe6c870, 0.15);
-                    glow.fillCircle(cx, winnerY, charImg.displayWidth * 0.6);
-                    container.addAt(glow, 0);
-                }
-
-                // Victory banner
-                const bannerY = winnerY + h * 0.22;
+                // Victory banner at top
+                const bannerY = cy - h * 0.42;
                 const bannerHeight = h * 0.08;
                 const banner = this.make.graphics();
                 banner.fillStyle(0x8b3545, 1);
-                banner.fillRoundedRect(cx - w * 0.4, bannerY - bannerHeight / 2, w * 0.8, bannerHeight, 8);
+                banner.fillRoundedRect(cx - w * 0.45, bannerY - bannerHeight / 2, w * 0.9, bannerHeight, 8);
                 container.add(banner);
 
-                // Victory text - different message for human player
+                // Victory text
                 const isHumanWinner = winner.id === 0;
                 const victoryMessage = isHumanWinner ? '¡Eres el vencedor!' : `¡${winner.name} es el vencedor!`;
 
@@ -790,127 +844,73 @@ class GameScene extends Phaser.Scene {
                     text: victoryMessage,
                     style: {
                         fontFamily: 'Cinzel, Georgia, serif',
-                        fontSize: (L.fontSizeLarge + 4) + 'px',
+                        fontSize: (L.fontSizeLarge + 2) + 'px',
                         color: '#ffffff',
                         fontStyle: 'bold'
                     }
                 }).setOrigin(0.5);
                 container.add(victoryText);
 
-                // VP Breakdown for winner
-                const breakdownY = bannerY + h * 0.08;
-                const iconSize = L.fontSizeMedium * 1.2;
-                const breakdownSpacing = w * 0.18;
+                // Player rows with breakdown - reduced height to fit 3 players + button
+                const rowStartY = bannerY + h * 0.08;
+                const rowHeight = h * 0.20;
+                const iconSize = L.fontSizeSmall * 1.3;
 
-                // Calculate VP components for winner
-                const guildCount = game.activeGuilds.filter(g => g.maxInvestor === winner.id).length;
-                const innCount = winner.getActiveInnsCount();
-                const treasureVP = winner.treasures.reduce((sum, t) => sum + (t.vp || 0), 0);
-                const hasBadge = winner.hasDiscovererEmblem;
-
-                // Guild icon + count
-                const guildX = cx - breakdownSpacing * 1.5;
-                const guildIcon = this.make.image({ x: guildX - iconSize * 0.6, y: breakdownY, key: 'event_back' });
-                guildIcon.setDisplaySize(iconSize, iconSize);
-                container.add(guildIcon);
-                const guildText = this.make.text({
-                    x: guildX + iconSize * 0.3, y: breakdownY,
-                    text: `${guildCount}`,
-                    style: { fontFamily: 'Arial', fontSize: L.fontSizeMedium + 'px', color: '#e6c870', fontStyle: 'bold' }
-                }).setOrigin(0, 0.5);
-                container.add(guildText);
-
-                // Inn icon + count
-                const innX = cx - breakdownSpacing * 0.5;
-                const innIcon = this.make.image({ x: innX - iconSize * 0.6, y: breakdownY, key: 'inn' });
-                innIcon.setDisplaySize(iconSize, iconSize);
-                container.add(innIcon);
-                const innText = this.make.text({
-                    x: innX + iconSize * 0.3, y: breakdownY,
-                    text: `${innCount}`,
-                    style: { fontFamily: 'Arial', fontSize: L.fontSizeMedium + 'px', color: '#e6c870', fontStyle: 'bold' }
-                }).setOrigin(0, 0.5);
-                container.add(innText);
-
-                // Treasure icon + VP
-                const treasureX = cx + breakdownSpacing * 0.5;
-                const treasureIcon = this.make.image({ x: treasureX - iconSize * 0.6, y: breakdownY, key: 'treasure' });
-                treasureIcon.setDisplaySize(iconSize, iconSize);
-                container.add(treasureIcon);
-                const treasureText = this.make.text({
-                    x: treasureX + iconSize * 0.3, y: breakdownY,
-                    text: `${treasureVP}`,
-                    style: { fontFamily: 'Arial', fontSize: L.fontSizeMedium + 'px', color: '#e6c870', fontStyle: 'bold' }
-                }).setOrigin(0, 0.5);
-                container.add(treasureText);
-
-                // Badge if discoverer
-                if (hasBadge) {
-                    const badgeX = cx + breakdownSpacing * 1.5;
-                    const badgeIcon = this.make.image({ x: badgeX, y: breakdownY, key: 'badge' });
-                    badgeIcon.setDisplaySize(iconSize, iconSize);
-                    container.add(badgeIcon);
-                }
-
-                // Scoreboard section
-                const scoreStartY = breakdownY + h * 0.08;
-                const rowHeight = h * 0.095;
-
-                // Scoreboard header
-                const scoreHeader = this.make.text({
-                    x: cx, y: scoreStartY,
-                    text: 'Puntuación Final',
-                    style: {
-                        fontFamily: 'Georgia, serif',
-                        fontSize: L.fontSizeMedium + 'px',
-                        color: '#b8b0a0'
-                    }
-                }).setOrigin(0.5);
-                container.add(scoreHeader);
-
-                // Player rows
                 sortedPlayers.forEach((player, index) => {
-                    const rowY = scoreStartY + h * 0.06 + index * rowHeight;
+                    const rowY = rowStartY + index * rowHeight;
                     const isWinner = player.id === winner.id;
                     const vp = player.getVictoryPoints(game);
+                    const breakdown = getPlayerBreakdown(player);
 
-                    // Row background for winner
+                    // Row background
+                    const rowBg = this.make.graphics();
                     if (isWinner) {
-                        const rowBg = this.make.graphics();
                         rowBg.fillStyle(0xe6c870, 0.15);
-                        rowBg.fillRoundedRect(cx - w * 0.42, rowY - rowHeight * 0.4, w * 0.84, rowHeight * 0.8, 6);
-                        container.add(rowBg);
+                    } else {
+                        rowBg.fillStyle(0x3a3530, 0.5);
                     }
+                    rowBg.fillRoundedRect(cx - w * 0.45, rowY - rowHeight * 0.35, w * 0.9, rowHeight * 0.9, 8);
+                    container.add(rowBg);
 
-                    // Character portrait (small)
+                    // Rank colors
+                    const rankColors = ['#ffd700', '#c0c0c0', '#cd7f32'];
+                    const rankColor = index < 3 ? rankColors[index] : '#666666';
+
+                    const leftX = cx - w * 0.4;
+
+                    // Character portrait (left side, spanning both rows)
                     if (player.character) {
                         const portrait = this.make.image({
-                            x: cx - w * 0.35, y: rowY,
+                            x: leftX + w * 0.06, y: rowY,
                             key: player.character.id
                         });
-                        const portScale = (rowHeight * 0.7) / portrait.height;
+                        const portScale = (rowHeight * 0.75) / portrait.height;
                         portrait.setScale(portScale);
                         container.add(portrait);
                     }
 
-                    // Rank medal/number
-                    const rankColors = ['#ffd700', '#c0c0c0', '#cd7f32']; // Gold, Silver, Bronze
-                    const rankColor = index < 3 ? rankColors[index] : '#666666';
+                    // Content area starts after portrait
+                    const contentX = leftX + w * 0.14;
+
+                    // Top row: Rank, Name, VP
+                    const topRowY = rowY - rowHeight * 0.15;
+
+                    // Rank
                     const rankText = this.make.text({
-                        x: cx - w * 0.22, y: rowY,
+                        x: contentX, y: topRowY,
                         text: `${index + 1}º`,
                         style: {
                             fontFamily: 'Arial, sans-serif',
-                            fontSize: (L.fontSizeMedium + 2) + 'px',
+                            fontSize: L.fontSizeMedium + 'px',
                             color: rankColor,
                             fontStyle: 'bold'
                         }
-                    }).setOrigin(0.5);
+                    }).setOrigin(0, 0.5);
                     container.add(rankText);
 
                     // Player name
                     const nameText = this.make.text({
-                        x: cx - w * 0.12, y: rowY,
+                        x: contentX + w * 0.06, y: topRowY,
                         text: player.name,
                         style: {
                             fontFamily: 'Georgia, serif',
@@ -921,14 +921,14 @@ class GameScene extends Phaser.Scene {
                     }).setOrigin(0, 0.5);
                     container.add(nameText);
 
-                    // VP icon and score
-                    const vpIcon = this.make.image({ x: cx + w * 0.25, y: rowY, key: 'vp_icon' });
-                    const vpIconScale = (rowHeight * 0.5) / vpIcon.height;
+                    // VP total on right side
+                    const vpIcon = this.make.image({ x: cx + w * 0.32, y: topRowY, key: 'vp_icon' });
+                    const vpIconScale = (iconSize * 1.2) / vpIcon.height;
                     vpIcon.setScale(vpIconScale);
                     container.add(vpIcon);
 
                     const vpText = this.make.text({
-                        x: cx + w * 0.32, y: rowY,
+                        x: cx + w * 0.37, y: topRowY,
                         text: vp.toString(),
                         style: {
                             fontFamily: 'Arial, sans-serif',
@@ -938,6 +938,49 @@ class GameScene extends Phaser.Scene {
                         }
                     }).setOrigin(0, 0.5);
                     container.add(vpText);
+
+                    // Bottom row: Resource breakdown (next to portrait)
+                    const breakdownY = rowY + rowHeight * 0.18;
+                    const itemSpacing = w * 0.08;
+                    const startX = contentX;
+
+                    breakdown.forEach((item, itemIndex) => {
+                        const itemX = startX + itemIndex * itemSpacing;
+
+                        // Icon
+                        const icon = this.make.image({ x: itemX, y: breakdownY, key: item.icon });
+                        icon.setDisplaySize(iconSize, iconSize);
+                        container.add(icon);
+
+                        // Count (skip for badge)
+                        if (!item.noBadge) {
+                            const countText = this.make.text({
+                                x: itemX + iconSize * 0.6, y: breakdownY,
+                                text: `×${item.count}`,
+                                style: {
+                                    fontFamily: 'Arial, sans-serif',
+                                    fontSize: L.fontSizeSmall + 'px',
+                                    color: item.vp > 0 ? '#e6c870' : '#888888'
+                                }
+                            }).setOrigin(0, 0.5);
+                            container.add(countText);
+                        }
+                    });
+
+                    // If no resources, show "Sin recursos" message
+                    if (breakdown.length === 0) {
+                        const noResourcesText = this.make.text({
+                            x: startX, y: breakdownY,
+                            text: 'Sin recursos',
+                            style: {
+                                fontFamily: 'Georgia, serif',
+                                fontSize: L.fontSizeSmall + 'px',
+                                color: '#666666',
+                                fontStyle: 'italic'
+                            }
+                        }).setOrigin(0, 0.5);
+                        container.add(noResourcesText);
+                    }
                 });
             },
             buttons: [
@@ -1194,6 +1237,7 @@ class GameScene extends Phaser.Scene {
             // Return treasure to deck
             game.treasureDeck.unshift(treasure);
 
+            game.updateDiscovererEmblem();
             game.emit('playerUpdated', 0);
             game.emit('stateChanged');
             this.updateAllUI();
@@ -1357,6 +1401,7 @@ class GameScene extends Phaser.Scene {
             player.removeTreasure(treasureIndex);
             player.addCoins(coinValue);
             this.game_instance.treasureDeck.unshift(treasure);
+            this.game_instance.updateDiscovererEmblem();
             this.game_instance.emit('playerUpdated', 0);
             this.game_instance.emit('stateChanged');
             this.updateAllUI();

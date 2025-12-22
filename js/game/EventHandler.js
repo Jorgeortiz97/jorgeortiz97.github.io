@@ -217,7 +217,9 @@ class EventHandler {
             if (player.character && player.character.onInvasion) {
                 const result = player.character.onInvasion(this.game, player);
                 if (result && result.coins > 0) {
-                    player.addCoins(result.coins, result.fromReserve);
+                    // fromReserve means "from game's central reserve" (unlimited), not player's personal reserve
+                    player.addCoins(result.coins, false);
+                    this.game.emit('playerUpdated', player.id);
                     messages.push(`${player.name} (Curandero) recibe ${result.coins} moneda de reserva`);
                 }
             }

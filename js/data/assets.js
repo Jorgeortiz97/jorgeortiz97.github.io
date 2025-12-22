@@ -99,6 +99,14 @@ const ASSET_PATHS = {
     // Video (for intro - disabled during development)
     video: {
         intro: 'ui/Intro.mp4'
+    },
+
+    // Audio (background music)
+    audio: {
+        soundtrack_1: 'assets/audio/soundtrack_1.mp3',
+        soundtrack_2: 'assets/audio/soundtrack_2.mp3',
+        soundtrack_3: 'assets/audio/soundtrack_3.mp3',
+        soundtrack_4: 'assets/audio/soundtrack_4.mp3'
     }
 };
 
