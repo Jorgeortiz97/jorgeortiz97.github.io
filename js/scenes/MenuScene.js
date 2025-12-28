@@ -43,9 +43,29 @@ class MenuScene extends Phaser.Scene {
             } else {
                 this.showFullscreenPrompt();
             }
+        } else if (pref === true) {
+            // User previously chose fullscreen - enter on first interaction
+            this.showMainMenu();
+            this.input.once('pointerdown', () => enterFullscreen(this));
         } else {
             this.showMainMenu();
         }
+
+        // Mobile visibility handling - pause/resume scene when app is minimized
+        // Note: Global handler in game-config.js handles render recovery
+        this.visibilityHandler = () => {
+            if (document.hidden) {
+                this.scene.pause();
+            } else {
+                this.scene.resume();
+            }
+        };
+        document.addEventListener('visibilitychange', this.visibilityHandler);
+
+        // Clean up visibility handler when scene shuts down
+        this.events.on('shutdown', () => {
+            document.removeEventListener('visibilitychange', this.visibilityHandler);
+        });
     }
 
     showFullscreenPrompt() {
@@ -159,7 +179,7 @@ class MenuScene extends Phaser.Scene {
         const buttonY = height * 0.45;
         const buttonSpacing = height * 0.1;
 
-        this.createButton(width / 2, buttonY, 'Jugar', () => this.showDifficultyMenu());
+        this.createButton(width / 2, buttonY, 'Nueva Partida', () => this.showDifficultyMenu());
         this.createButton(width / 2, buttonY + buttonSpacing, 'Configuración', () => this.showSettings());
         this.createButton(width / 2, buttonY + buttonSpacing * 2, 'Créditos', () => this.showCredits());
     }
@@ -199,6 +219,9 @@ class MenuScene extends Phaser.Scene {
     }
 
     startGame() {
+        // Clear any saved game when starting a new game
+        GremiosGame.clearSavedGame();
+
         // Store difficulty in registry for GameScene
         this.registry.set('difficulty', this.selectedDifficulty);
 

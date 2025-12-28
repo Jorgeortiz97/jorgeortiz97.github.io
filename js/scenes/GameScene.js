@@ -19,42 +19,24 @@ class GameScene extends Phaser.Scene {
         // Get scaled layout values
         this.layout = getScaledLayout(width, height);
 
-        // Mobile visibility handling - pause game when app is minimized
-        this.visibilityHandler = () => {
-            if (!this.game_instance) return;
-
-            if (document.hidden) {
-                this.game_instance.pause();
-                this.scene.pause();
-            } else {
-                this.game_instance.resume();
-                this.scene.resume();
-
-                // Force canvas redraw after returning from background
-                // This fixes blank screen on mobile when switching apps
-                if (this.cameras && this.cameras.main) {
-                    this.cameras.main.dirty = true;
-                }
-
-                // Trigger a manual render to ensure display is refreshed
-                if (this.game && this.game.renderer) {
-                    this.game.renderer.snapshot(() => {});
-                }
-            }
-        };
-        document.addEventListener('visibilitychange', this.visibilityHandler);
-
-        // Clean up visibility handler when scene shuts down
-        this.events.on('shutdown', () => {
-            document.removeEventListener('visibilitychange', this.visibilityHandler);
-        });
-
         // Fade in
         this.cameras.main.fadeIn(300);
 
         // Get difficulty from registry
         const difficulty = this.registry.get('difficulty') || 'medium';
 
+        // Create UI
+        this.createBackground();
+        this.createHUDPanel();
+
+        // Create modal manager for dialogs
+        this.modalManager = new ModalManager(this);
+
+        // Start new game
+        this.initNewGame(difficulty);
+    }
+
+    initNewGame(difficulty) {
         // Create the game instance
         this.game_instance = new GremiosGame(3, difficulty);
 
@@ -67,15 +49,10 @@ class GameScene extends Phaser.Scene {
         }
         this.usedCharacterIds = usedCharacterIds;
 
-        // Create UI in correct order (back to front)
-        this.createBackground();
-        this.createHUDPanel();
+        // Create remaining UI
         this.createBoardElements();
         this.createHUDs();
         this.createEndTurnButton();
-
-        // Create modal manager for dialogs
-        this.modalManager = new ModalManager(this);
 
         // Show initial guilds
         this.updateGuildDisplay();
@@ -740,6 +717,9 @@ class GameScene extends Phaser.Scene {
     }
 
     onGameOver(winner) {
+        // Clear saved game since game is over
+        GremiosGame.clearSavedGame();
+
         this.time.delayedCall(500, () => {
             this.showGameOverModal(winner);
         });
@@ -821,40 +801,45 @@ class GameScene extends Phaser.Scene {
             return breakdown;
         };
 
+        // Improved sizes for better visibility
+        const titleFontSize = Math.floor(height * 0.06);
+        const nameFontSize = Math.floor(height * 0.045);
+        const textFontSize = Math.floor(height * 0.038);
+        const iconSize = Math.floor(height * 0.06);
+
         this.modalManager.show({
-            width: width * 0.85,
-            height: height * 0.9,
+            width: width * 0.92,
+            height: height * 0.95,
             showClose: false,
             dismissible: false,
             content: (container, cx, cy, w, h) => {
-                // Victory banner at top
-                const bannerY = cy - h * 0.42;
-                const bannerHeight = h * 0.08;
+                // Victory banner at top - moved higher
+                const bannerY = cy - h * 0.44;
+                const bannerHeight = h * 0.07;
                 const banner = this.make.graphics();
                 banner.fillStyle(0x8b3545, 1);
                 banner.fillRoundedRect(cx - w * 0.45, bannerY - bannerHeight / 2, w * 0.9, bannerHeight, 8);
                 container.add(banner);
 
-                // Victory text
+                // Victory text - improved size
                 const isHumanWinner = winner.id === 0;
-                const victoryMessage = isHumanWinner ? '¡Eres el vencedor!' : `¡${winner.name} es el vencedor!`;
+                const victoryMessage = isHumanWinner ? 'ERES EL VENCEDOR' : `${winner.name} ES EL VENCEDOR`;
 
                 const victoryText = this.make.text({
                     x: cx, y: bannerY,
                     text: victoryMessage,
                     style: {
                         fontFamily: 'Cinzel, Georgia, serif',
-                        fontSize: (L.fontSizeLarge + 2) + 'px',
+                        fontSize: titleFontSize + 'px',
                         color: '#ffffff',
                         fontStyle: 'bold'
                     }
                 }).setOrigin(0.5);
                 container.add(victoryText);
 
-                // Player rows with breakdown - reduced height to fit 3 players + button
-                const rowStartY = bannerY + h * 0.08;
-                const rowHeight = h * 0.20;
-                const iconSize = L.fontSizeSmall * 1.3;
+                // Player rows - increased spacing from banner to avoid overlap
+                const rowStartY = bannerY + h * 0.15;
+                const rowHeight = h * 0.22;
 
                 sortedPlayers.forEach((player, index) => {
                     const rowY = rowStartY + index * rowHeight;
@@ -862,104 +847,104 @@ class GameScene extends Phaser.Scene {
                     const vp = player.getVictoryPoints(game);
                     const breakdown = getPlayerBreakdown(player);
 
-                    // Row background
+                    // Row background - taller
                     const rowBg = this.make.graphics();
                     if (isWinner) {
                         rowBg.fillStyle(0xe6c870, 0.15);
                     } else {
                         rowBg.fillStyle(0x3a3530, 0.5);
                     }
-                    rowBg.fillRoundedRect(cx - w * 0.45, rowY - rowHeight * 0.35, w * 0.9, rowHeight * 0.9, 8);
+                    rowBg.fillRoundedRect(cx - w * 0.46, rowY - rowHeight * 0.38, w * 0.92, rowHeight * 0.85, 10);
                     container.add(rowBg);
 
                     // Rank colors
                     const rankColors = ['#ffd700', '#c0c0c0', '#cd7f32'];
                     const rankColor = index < 3 ? rankColors[index] : '#666666';
 
-                    const leftX = cx - w * 0.4;
+                    const leftX = cx - w * 0.42;
 
-                    // Character portrait (left side, spanning both rows)
+                    // Character portrait - larger
                     if (player.character) {
                         const portrait = this.make.image({
-                            x: leftX + w * 0.06, y: rowY,
+                            x: leftX + w * 0.08, y: rowY,
                             key: player.character.id
                         });
-                        const portScale = (rowHeight * 0.75) / portrait.height;
+                        const portScale = (rowHeight * 0.72) / portrait.height;
                         portrait.setScale(portScale);
                         container.add(portrait);
                     }
 
                     // Content area starts after portrait
-                    const contentX = leftX + w * 0.14;
+                    const contentX = leftX + w * 0.18;
 
-                    // Top row: Rank, Name, VP
-                    const topRowY = rowY - rowHeight * 0.15;
+                    // Top row: Rank, Name, VP - adjusted vertical position
+                    const topRowY = rowY - rowHeight * 0.18;
 
-                    // Rank
+                    // Rank - larger font
                     const rankText = this.make.text({
                         x: contentX, y: topRowY,
                         text: `${index + 1}º`,
                         style: {
-                            fontFamily: 'Arial, sans-serif',
-                            fontSize: L.fontSizeMedium + 'px',
+                            fontFamily: 'Cinzel, Georgia, serif',
+                            fontSize: nameFontSize + 'px',
                             color: rankColor,
                             fontStyle: 'bold'
                         }
                     }).setOrigin(0, 0.5);
                     container.add(rankText);
 
-                    // Player name
+                    // Player name - larger font
                     const nameText = this.make.text({
                         x: contentX + w * 0.06, y: topRowY,
                         text: player.name,
                         style: {
                             fontFamily: 'Georgia, serif',
-                            fontSize: L.fontSizeMedium + 'px',
+                            fontSize: nameFontSize + 'px',
                             color: isWinner ? '#e6c870' : '#ffffff',
                             fontStyle: isWinner ? 'bold' : 'normal'
                         }
                     }).setOrigin(0, 0.5);
                     container.add(nameText);
 
-                    // VP total on right side
-                    const vpIcon = this.make.image({ x: cx + w * 0.32, y: topRowY, key: 'vp_icon' });
-                    const vpIconScale = (iconSize * 1.2) / vpIcon.height;
+                    // VP total on right side - larger
+                    const vpIcon = this.make.image({ x: cx + w * 0.30, y: topRowY, key: 'vp_icon' });
+                    const vpIconScale = (iconSize * 1.1) / vpIcon.height;
                     vpIcon.setScale(vpIconScale);
                     container.add(vpIcon);
 
                     const vpText = this.make.text({
-                        x: cx + w * 0.37, y: topRowY,
+                        x: cx + w * 0.36, y: topRowY,
                         text: vp.toString(),
                         style: {
                             fontFamily: 'Arial, sans-serif',
-                            fontSize: (L.fontSizeLarge) + 'px',
+                            fontSize: (nameFontSize + 4) + 'px',
                             color: isWinner ? '#e6c870' : '#ffffff',
                             fontStyle: 'bold'
                         }
                     }).setOrigin(0, 0.5);
                     container.add(vpText);
 
-                    // Bottom row: Resource breakdown (next to portrait)
-                    const breakdownY = rowY + rowHeight * 0.18;
-                    const itemSpacing = w * 0.08;
+                    // Bottom row: Resource breakdown - larger icons and more spacing
+                    const breakdownY = rowY + rowHeight * 0.15;
+                    const itemSpacing = w * 0.095;
                     const startX = contentX;
 
                     breakdown.forEach((item, itemIndex) => {
                         const itemX = startX + itemIndex * itemSpacing;
 
-                        // Icon
+                        // Icon - larger
                         const icon = this.make.image({ x: itemX, y: breakdownY, key: item.icon });
                         icon.setDisplaySize(iconSize, iconSize);
                         container.add(icon);
 
-                        // Count (skip for badge)
+                        // Count (skip for badge) - larger font
                         if (!item.noBadge) {
                             const countText = this.make.text({
-                                x: itemX + iconSize * 0.6, y: breakdownY,
+                                x: itemX + iconSize * 0.65, y: breakdownY,
                                 text: `×${item.count}`,
                                 style: {
                                     fontFamily: 'Arial, sans-serif',
-                                    fontSize: L.fontSizeSmall + 'px',
+                                    fontSize: textFontSize + 'px',
                                     color: item.vp > 0 ? '#e6c870' : '#888888'
                                 }
                             }).setOrigin(0, 0.5);
@@ -967,14 +952,14 @@ class GameScene extends Phaser.Scene {
                         }
                     });
 
-                    // If no resources, show "Sin recursos" message
+                    // If no resources, show "Sin recursos" message - larger font
                     if (breakdown.length === 0) {
                         const noResourcesText = this.make.text({
                             x: startX, y: breakdownY,
                             text: 'Sin recursos',
                             style: {
                                 fontFamily: 'Georgia, serif',
-                                fontSize: L.fontSizeSmall + 'px',
+                                fontSize: textFontSize + 'px',
                                 color: '#666666',
                                 fontStyle: 'italic'
                             }
@@ -985,7 +970,7 @@ class GameScene extends Phaser.Scene {
             },
             buttons: [
                 {
-                    text: 'Menú',
+                    text: 'MENÚ',
                     large: true,
                     primary: true,
                     onClick: () => {
@@ -1252,70 +1237,94 @@ class GameScene extends Phaser.Scene {
 
         const { width, height } = this.cameras.main;
         const L = this.layout;
-        const allTreasures = player.treasures.map((t, i) => ({ treasure: t, index: i }));
 
-        const modalHeight = Math.min(120 + allTreasures.length * 65, height * 0.75);
+        const modalWidth = width * 0.95;
+        const modalHeight = height * 0.85;
+
+        const treasureCounts = this.countTreasuresByType(player);
+
+        // Layout: 4 columns in a single row [1VP] [2VP] [3 Monedas] [4 Monedas]
+        const treasureTypes = [
+            { key: 'treasure_1vp', label: '1 VP', type: 'common' },
+            { key: 'treasure_2vp', label: '2 VP', type: 'rare' },
+            { key: 'wealth_3', label: '3 Monedas', type: 'wealth', coinValue: 3 },
+            { key: 'wealth_4', label: '4 Monedas', type: 'wealth', coinValue: 4 }
+        ];
 
         this.modalManager.show({
             title: 'Tesoros',
-            width: Math.min(450, width * 0.9),
+            width: modalWidth,
             height: modalHeight,
             content: (container, cx, cy, w, h) => {
-                const startY = cy - (allTreasures.length * 30);
+                const iconSize = Math.min(h * 0.35, w * 0.18);
+                const colWidth = w / 4;
+                const startX = cx - w * 0.375;
+                const iconY = cy - h * 0.22 + 80;
 
-                allTreasures.forEach((item, i) => {
-                    const yPos = startY + i * 60;
-                    const treasure = item.treasure;
-                    const imageKey = getTreasureImageKey(treasure);
+                treasureTypes.forEach((tType, index) => {
+                    const colX = startX + index * colWidth;
+                    const count = treasureCounts[tType.key] || 0;
+                    const hasItem = count > 0;
 
                     // Treasure image
-                    const img = this.add.image(cx - w / 2 + 45, yPos, imageKey);
-                    img.setDisplaySize(50, 50);
+                    const img = this.add.image(colX, iconY, tType.key);
+                    const imgScale = Math.min(iconSize / img.width, iconSize / img.height);
+                    img.setScale(imgScale);
+                    img.setAlpha(hasItem ? 1 : 0.4);
                     container.add(img);
 
-                    // Treasure description
-                    let description = '';
-                    if (treasure.type === 'wealth') {
-                        description = `Riqueza (${treasure.coinValue || 3} monedas)`;
-                    } else if (treasure.type === 'common') {
-                        description = 'Tesoro Común (1 VP)';
-                    } else if (treasure.type === 'rare') {
-                        description = 'Tesoro Raro (2 VP)';
-                    }
-
-                    const text = this.add.text(cx - w / 2 + 80, yPos, description, {
+                    // Label
+                    const label = this.add.text(colX, iconY + iconSize * 0.6, tType.label, {
                         fontFamily: 'Georgia, serif',
-                        fontSize: L.fontSizeMedium + 'px',
-                        color: '#e6c870'
-                    }).setOrigin(0, 0.5);
-                    container.add(text);
+                        fontSize: L.fontSizeLarge + 'px',
+                        color: hasItem ? '#e6c870' : '#777777'
+                    }).setOrigin(0.5);
+                    container.add(label);
 
-                    // Sell button only for wealth treasures - enlarged
-                    if (treasure.type === 'wealth') {
-                        const btn = this.add.rectangle(cx + w / 2 - 55, yPos, 90, 40, 0x8b3545)
-                            .setStrokeStyle(2, 0xe6c870)
-                            .setInteractive({ useHandCursor: true });
+                    // Count
+                    const countText = this.add.text(colX, iconY + iconSize * 0.9, `x${count}`, {
+                        fontFamily: 'Arial, sans-serif',
+                        fontSize: (L.fontSizeLarge + 2) + 'px',
+                        color: hasItem ? '#ffffff' : '#555555',
+                        fontStyle: 'bold'
+                    }).setOrigin(0.5);
+                    container.add(countText);
 
-                        btn.on('pointerover', () => btn.setFillStyle(0xa04555));
-                        btn.on('pointerout', () => btn.setFillStyle(0x8b3545));
-                        btn.on('pointerdown', () => {
-                            this.sellWealthTreasure(player, item.index);
-                            this.modalManager.close();
-                        });
-                        container.add(btn);
+                    // Sell button only for wealth types
+                    if (tType.type === 'wealth') {
+                        const btnY = iconY + iconSize * 1.25;
+                        const canSell = count > 0;
+                        const btnWidth = colWidth * 0.9;
+                        const btnHeight = 80;
 
-                        const btnText = this.add.text(cx + w / 2 - 55, yPos, 'Vender', {
+                        const btn = this.add.rectangle(colX, btnY, btnWidth, btnHeight,
+                            canSell ? 0x8b3545 : 0x333333)
+                            .setStrokeStyle(3, canSell ? 0xe6c870 : 0x555555);
+
+                        const btnLabel = this.add.text(colX, btnY, 'Vender', {
                             fontFamily: 'Georgia, serif',
-                            fontSize: L.fontSizeMedium + 'px',
-                            color: '#ffffff'
+                            fontSize: L.fontSizeLarge + 'px',
+                            color: canSell ? '#ffffff' : '#666666'
                         }).setOrigin(0.5);
-                        container.add(btnText);
+
+                        container.add([btn, btnLabel]);
+
+                        if (canSell) {
+                            btn.setInteractive({ useHandCursor: true });
+                            btn.on('pointerover', () => btn.setFillStyle(0xa04555));
+                            btn.on('pointerout', () => btn.setFillStyle(0x8b3545));
+                            btn.on('pointerdown', () => {
+                                const treasureIndex = this.findTreasureIndex(player, tType);
+                                if (treasureIndex >= 0) {
+                                    this.sellWealthTreasure(player, treasureIndex);
+                                    this.modalManager.close();
+                                }
+                            });
+                        }
                     }
                 });
             },
-            buttons: [
-                { text: 'Cerrar', primary: true, large: true, onClick: () => {} }
-            ]
+            buttons: []
         });
     }
 
@@ -1394,6 +1403,39 @@ class GameScene extends Phaser.Scene {
         });
     }
 
+    countTreasuresByType(player) {
+        const counts = {
+            'treasure_1vp': 0,
+            'treasure_2vp': 0,
+            'wealth_3': 0,
+            'wealth_4': 0
+        };
+
+        if (!player.treasures) return counts;
+
+        player.treasures.forEach(t => {
+            if (t.type === 'common') counts['treasure_1vp']++;
+            else if (t.type === 'rare') counts['treasure_2vp']++;
+            else if (t.type === 'wealth') {
+                if (t.coinValue === 3) counts['wealth_3']++;
+                else counts['wealth_4']++;
+            }
+        });
+
+        return counts;
+    }
+
+    findTreasureIndex(player, treasureType) {
+        if (!player.treasures) return -1;
+
+        return player.treasures.findIndex(t => {
+            if (treasureType.type === 'common') return t.type === 'common';
+            if (treasureType.type === 'rare') return t.type === 'rare';
+            if (treasureType.type === 'wealth') return t.type === 'wealth' && t.coinValue === treasureType.coinValue;
+            return false;
+        });
+    }
+
     sellWealthTreasure(player, treasureIndex) {
         const treasure = player.treasures[treasureIndex];
         if (treasure && treasure.type === 'wealth') {
@@ -1456,8 +1498,10 @@ class GameScene extends Phaser.Scene {
     // === GAME MENU ===
 
     showGameMenu() {
-        // Pause game
+        // Pause game logic and all animations
         this.game_instance.pause();
+        this.tweens.pauseAll();
+        this.time.paused = true;
 
         this.modalManager.showGameMenu({
             onHelp: () => {
@@ -1474,7 +1518,12 @@ class GameScene extends Phaser.Scene {
                     'Volver al menú',
                     'Se perderá el progreso de la partida. ¿Continuar?',
                     () => {
-                        this.resumeGame();
+                        // Clear saved game when user chooses to leave
+                        GremiosGame.clearSavedGame();
+                        // Clear all timers to prevent them firing after scene change
+                        if (this.game_instance) {
+                            this.game_instance.clearAllTimers();
+                        }
                         this.scene.start('MenuScene');
                     },
                     () => {
@@ -1489,6 +1538,8 @@ class GameScene extends Phaser.Scene {
     }
 
     resumeGame() {
+        this.time.paused = false;
+        this.tweens.resumeAll();
         this.game_instance.resume();
     }
 

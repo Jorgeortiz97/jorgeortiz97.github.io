@@ -89,7 +89,8 @@ class ModalManager {
         // Buttons
         if (config.buttons) {
             const { width: screenWidth, height: screenHeight } = this.scene.cameras.main;
-            const buttonY = cy + boxHeight / 2 - boxHeight * 0.15;
+            const buttonOffset = config.buttonOffset || 0;
+            const buttonY = cy + boxHeight / 2 - boxHeight * 0.15 + buttonOffset;
             const hasLargeButtons = config.buttons.some(b => b.large);
             // Responsive button spacing based on screen width
             const buttonSpacing = hasLargeButtons ? Math.floor(screenWidth * 0.18) : Math.floor(screenWidth * 0.12);

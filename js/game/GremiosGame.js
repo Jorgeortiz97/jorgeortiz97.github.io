@@ -32,6 +32,10 @@ class GremiosGame extends SimpleEventEmitter {
         this.lastDiceRoll = null;
         this.isPaused = false;
 
+        // Timer management for pausable delays
+        this.activeTimers = [];
+        this.pausedTimers = [];
+
         // Event handler
         this.eventHandler = new EventHandler(this);
 
@@ -206,7 +210,7 @@ class GremiosGame extends SimpleEventEmitter {
 
     processCurrentEvent() {
         // Apply event effects after delay (respects animation speed setting)
-        setTimeout(() => {
+        this.scheduleTimer(() => {
             this.eventHandler.handleEvent(this.currentEvent);
 
             // Add event to discard pile (except permanent events like guild foundations)
@@ -217,7 +221,7 @@ class GremiosGame extends SimpleEventEmitter {
             this.emit('stateChanged');
 
             // Move to roll phase
-            setTimeout(() => {
+            this.scheduleTimer(() => {
                 this.phase = 'roll';
                 this.nextPhase();
             }, getAnimationDuration(500));
@@ -269,7 +273,7 @@ class GremiosGame extends SimpleEventEmitter {
         this.emit('diceRolled', this.lastDiceRoll);
 
         // Handle roll effects
-        setTimeout(() => {
+        this.scheduleTimer(() => {
             if (sum === 7) {
                 // Check for Plague before clearing (for Healer ability)
                 const hadPlague = this.activeTemporaryEvents.some(e => e.id === 'plague');
@@ -309,7 +313,7 @@ class GremiosGame extends SimpleEventEmitter {
             this.emit('stateChanged');
 
             this.phase = 'collection';
-            setTimeout(() => this.nextPhase(), getAnimationDuration(GAME_CONSTANTS.PHASE_TRANSITION_DELAY));
+            this.scheduleTimer(() => this.nextPhase(), getAnimationDuration(GAME_CONSTANTS.PHASE_TRANSITION_DELAY));
         }, getAnimationDuration(GAME_CONSTANTS.DICE_ROLL_DURATION));
     }
 
@@ -382,7 +386,7 @@ class GremiosGame extends SimpleEventEmitter {
         this.emit('stateChanged');
 
         this.phase = 'investment';
-        setTimeout(() => this.nextPhase(), getAnimationDuration(GAME_CONSTANTS.PHASE_TRANSITION_DELAY));
+        this.scheduleTimer(() => this.nextPhase(), getAnimationDuration(GAME_CONSTANTS.PHASE_TRANSITION_DELAY));
     }
 
     investmentPhase() {
@@ -392,7 +396,7 @@ class GremiosGame extends SimpleEventEmitter {
         const currentPlayer = this.players[this.currentPlayerIndex];
 
         if (currentPlayer.isAI) {
-            setTimeout(() => this.executeAITurn(), getAnimationDuration(GAME_CONSTANTS.AI_ACTION_BASE_DELAY));
+            this.scheduleTimer(() => this.executeAITurn(), getAnimationDuration(GAME_CONSTANTS.AI_ACTION_BASE_DELAY));
         }
     }
 
@@ -403,13 +407,13 @@ class GremiosGame extends SimpleEventEmitter {
         const stepDelay = getAnimationDuration(GAME_CONSTANTS.AI_ACTION_STEP_DELAY);
         let delay = 0;
         for (let decision of decisions) {
-            setTimeout(() => {
+            this.scheduleTimer(() => {
                 this.executeAction(currentPlayer.id, decision);
             }, delay);
             delay += stepDelay;
         }
 
-        setTimeout(() => this.endTurn(), delay + getAnimationDuration(GAME_CONSTANTS.AI_ACTION_BASE_DELAY));
+        this.scheduleTimer(() => this.endTurn(), delay + getAnimationDuration(GAME_CONSTANTS.AI_ACTION_BASE_DELAY));
     }
 
     executeAction(playerId, action) {
@@ -621,7 +625,7 @@ class GremiosGame extends SimpleEventEmitter {
         // When expedition is full, immediately roll dice and resolve (no guild payments)
         if (this.expedition.investments.length === this.expedition.maxSlots) {
             this.log('La expedición está llena - tirando dados para resolución', 'expedition');
-            setTimeout(() => this.resolveExpedition(false), getAnimationDuration(500));
+            this.scheduleTimer(() => this.resolveExpedition(false), getAnimationDuration(500));
         }
 
         return { success: true, free: isFreeInvestment };
@@ -687,7 +691,7 @@ class GremiosGame extends SimpleEventEmitter {
         // Wait for dice animation plus a small buffer before processing result
         if (needsAnimationWait) {
             const animWait = getAnimationDuration(GAME_CONSTANTS.DICE_ROLL_DURATION) + getAnimationDuration(300);
-            setTimeout(processResult, animWait);
+            this.scheduleTimer(processResult, animWait);
         } else {
             processResult();
         }
@@ -809,7 +813,7 @@ class GremiosGame extends SimpleEventEmitter {
         this.phase = 'event';
         this.emit('turnChanged', this.currentPlayerIndex);
         this.emit('stateChanged');
-        setTimeout(() => this.nextPhase(), getAnimationDuration(GAME_CONSTANTS.PHASE_TRANSITION_DELAY));
+        this.scheduleTimer(() => this.nextPhase(), getAnimationDuration(GAME_CONSTANTS.PHASE_TRANSITION_DELAY));
     }
 
     endGame(winner) {
@@ -817,13 +821,57 @@ class GremiosGame extends SimpleEventEmitter {
         this.emit('gameOver', winner);
     }
 
+    scheduleTimer(callback, delay, id = null) {
+        const timerId = id || `timer_${Date.now()}_${Math.random()}`;
+        const startTime = Date.now();
+
+        const timeoutId = setTimeout(() => {
+            this.activeTimers = this.activeTimers.filter(t => t.id !== timerId);
+            callback();
+        }, delay);
+
+        this.activeTimers.push({
+            id: timerId,
+            timeoutId,
+            callback,
+            delay,
+            startTime
+        });
+
+        return timerId;
+    }
+
+    clearAllTimers() {
+        this.activeTimers.forEach(timer => clearTimeout(timer.timeoutId));
+        this.activeTimers = [];
+    }
+
     pause() {
+        if (this.isPaused) return;
         this.isPaused = true;
+
+        this.pausedTimers = this.activeTimers.map(timer => ({
+            id: timer.id,
+            callback: timer.callback,
+            remainingTime: Math.max(0, timer.delay - (Date.now() - timer.startTime))
+        }));
+
+        this.activeTimers.forEach(timer => clearTimeout(timer.timeoutId));
+        this.activeTimers = [];
+
         this.emit('paused');
     }
 
     resume() {
+        if (!this.isPaused) return;
         this.isPaused = false;
+
+        this.pausedTimers.forEach(timer => {
+            this.scheduleTimer(timer.callback, timer.remainingTime, timer.id);
+        });
+        this.pausedTimers = [];
+
         this.emit('resumed');
     }
+
 }

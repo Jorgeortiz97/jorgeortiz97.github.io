@@ -356,8 +356,17 @@ class PlayerHUD extends Phaser.GameObjects.Container {
     }
 
     repositionResourceCounts(active) {
-        // Resource counts stay at fixed position - no repositioning needed
-        // This ensures consistent appearance across all resolutions
+        // Move resource counts a few pixels higher when player is active
+        const countGap = 3;
+        const baseY = this.hudHeight / 2 + countGap;
+        const activeOffset = active ? -14 : 0;
+        const targetY = baseY + activeOffset;
+
+        Object.values(this.resourceTexts).forEach(text => {
+            if (text) {
+                text.setY(targetY);
+            }
+        });
     }
 
     hideResourceCounts() {
@@ -1546,8 +1555,8 @@ class PlayerHUD extends Phaser.GameObjects.Container {
                 this.mutinyInstructionText.setText('Motín causado!\nHabilidad usada');
             }
 
-            // Disable guild clicks - restore original but without re-enabling interaction
-            this.restoreGuildCardHandlers(false);
+            // Restore guild card handlers so player can still invest after mutiny
+            this.restoreGuildCardHandlers(true);
         }
     }
 

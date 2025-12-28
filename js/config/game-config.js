@@ -28,17 +28,22 @@ function createGameConfig(resolution) {
         },
         callbacks: {
             postBoot: function(game) {
-                // Handle WebGL context loss (common on mobile when app is backgrounded)
-                game.canvas.addEventListener('webglcontextlost', (e) => {
-                    e.preventDefault();
-                    console.log('WebGL context lost');
+                // Simple visibility handling - reload page when returning from background
+                let wasHidden = false;
+
+                document.addEventListener('visibilitychange', () => {
+                    if (document.hidden) {
+                        wasHidden = true;
+                    } else if (wasHidden) {
+                        // Page was hidden and is now visible - reload to recover
+                        window.location.reload();
+                    }
                 });
-                game.canvas.addEventListener('webglcontextrestored', () => {
-                    console.log('WebGL context restored');
-                    // Restart the current scene to rebuild all display objects
-                    const activeScene = game.scene.getScenes(true)[0];
-                    if (activeScene) {
-                        activeScene.scene.restart();
+
+                // Backup for iOS Safari
+                window.addEventListener('pageshow', (event) => {
+                    if (event.persisted) {
+                        window.location.reload();
                     }
                 });
             }
